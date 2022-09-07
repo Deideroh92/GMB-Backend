@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMS.Sdk.Core", "GMS.Sdk.Core\GMS.Sdk.Core.csproj", "{6D1168DA-59DF-41AF-A126-AC578F297256}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GMS.UrlFinder.Agent", "GMS.UrlFinder.Agent\GMS.UrlFinder.Agent.csproj", "{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6D1168DA-59DF-41AF-A126-AC578F297256}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D1168DA-59DF-41AF-A126-AC578F297256}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D1168DA-59DF-41AF-A126-AC578F297256}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D1168DA-59DF-41AF-A126-AC578F297256}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {33BC7437-7ADD-4634-91A7-7A1230BE33BB}
+	EndGlobalSection
+EndGlobal
