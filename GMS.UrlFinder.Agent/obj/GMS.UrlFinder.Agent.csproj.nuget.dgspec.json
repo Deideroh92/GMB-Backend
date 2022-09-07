@@ -4,14 +4,14 @@
     "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\GMS.UrlFinder.Agent.csproj": {}
   },
   "projects": {
-    "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\GMS.UrlFinder.Agent.csproj": {
+    "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.Sdk.Core\\GMS.Sdk.Core.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\GMS.UrlFinder.Agent.csproj",
-        "projectName": "GMS.UrlFinder.Agent",
-        "projectPath": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\GMS.UrlFinder.Agent.csproj",
+        "projectUniqueName": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.Sdk.Core\\GMS.Sdk.Core.csproj",
+        "projectName": "GMS.Sdk.Core",
+        "projectPath": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.Sdk.Core\\GMS.Sdk.Core.csproj",
         "packagesPath": "C:\\Users\\maxim\\.nuget\\packages\\",
-        "outputPath": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\obj\\",
+        "outputPath": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.Sdk.Core\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
@@ -42,6 +42,16 @@
       "frameworks": {
         "net6.0": {
           "targetAlias": "net6.0",
+          "dependencies": {
+            "Selenium.WebDriver": {
+              "target": "Package",
+              "version": "[4.4.0, )"
+            },
+            "WebDriverManager": {
+              "target": "Package",
+              "version": "[2.15.0, )"
+            }
+          },
           "imports": [
             "net461",
             "net462",
@@ -54,9 +64,68 @@
           "assetTargetFallback": true,
           "warn": true,
           "frameworkReferences": {
-            "Microsoft.AspNetCore.App": {
-              "privateAssets": "none"
-            },
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\6.0.400\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\GMS.UrlFinder.Agent.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\GMS.UrlFinder.Agent.csproj",
+        "projectName": "GMS.UrlFinder.Agent",
+        "projectPath": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\GMS.UrlFinder.Agent.csproj",
+        "packagesPath": "C:\\Users\\maxim\\.nuget\\packages\\",
+        "outputPath": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.UrlFinder.Agent\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\maxim\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0": {
+            "targetAlias": "net6.0",
+            "projectReferences": {
+              "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.Sdk.Core\\GMS.Sdk.Core.csproj": {
+                "projectPath": "D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.Sdk.Core\\GMS.Sdk.Core.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net6.0": {
+          "targetAlias": "net6.0",
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
             "Microsoft.NETCore.App": {
               "privateAssets": "all"
             }

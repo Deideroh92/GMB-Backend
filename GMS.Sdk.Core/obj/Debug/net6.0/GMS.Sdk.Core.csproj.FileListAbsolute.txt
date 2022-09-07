@@ -1,0 +1,12 @@
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\bin\Debug\net6.0\GMS.Sdk.Core.deps.json
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\bin\Debug\net6.0\GMS.Sdk.Core.dll
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\bin\Debug\net6.0\GMS.Sdk.Core.pdb
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\GMS.Sdk.Core.csproj.AssemblyReference.cache
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\GMS.Sdk.Core.GeneratedMSBuildEditorConfig.editorconfig
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\GMS.Sdk.Core.AssemblyInfoInputs.cache
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\GMS.Sdk.Core.AssemblyInfo.cs
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\GMS.Sdk.Core.csproj.CoreCompileInputs.cache
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\GMS.Sdk.Core.dll
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\refint\GMS.Sdk.Core.dll
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\GMS.Sdk.Core.pdb
+D:\Projects\VASANO\C#\GMS-Backend\GMS.Sdk.Core\obj\Debug\net6.0\ref\GMS.Sdk.Core.dll

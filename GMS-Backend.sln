@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMS.Sdk.Core", "GMS.Sdk.Core\GMS.Sdk.Core.csproj", "{6D1168DA-59DF-41AF-A126-AC578F297256}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GMS.UrlFinder.Agent", "GMS.UrlFinder.Agent\GMS.UrlFinder.Agent.csproj", "{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GMS.UrlFinder.Agent", "GMS.UrlFinder.Agent\GMS.UrlFinder.Agent.csproj", "{55262794-07E8-420D-BAE9-52B44157A505}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{6D1168DA-59DF-41AF-A126-AC578F297256}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D1168DA-59DF-41AF-A126-AC578F297256}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D1168DA-59DF-41AF-A126-AC578F297256}.Release|Any CPU.Build.0 = Release|Any CPU
-		{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{7B54C8FB-2F16-4A68-BA20-2306EF8C5C59}.Release|Any CPU.Build.0 = Release|Any CPU
+		{55262794-07E8-420D-BAE9-52B44157A505}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{55262794-07E8-420D-BAE9-52B44157A505}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{55262794-07E8-420D-BAE9-52B44157A505}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{55262794-07E8-420D-BAE9-52B44157A505}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
