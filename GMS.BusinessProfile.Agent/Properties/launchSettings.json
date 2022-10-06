@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "GMS.BusinessProfile.Agent": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:54641;http://localhost:54642"
+    }
+  }
+}

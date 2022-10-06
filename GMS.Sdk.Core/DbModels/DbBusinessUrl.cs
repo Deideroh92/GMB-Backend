@@ -1,20 +1,18 @@
-﻿using System.Xml.Linq;
-
-namespace GMS.Sdk.Core.Database
-{
+﻿namespace GMS.Sdk.Core.Database {
     #region Enums
-    public enum UrlState
-    {
+    public enum UrlState {
         NEW,
         PROCESSING,
-        UPDATED
+        UPDATED,
+        TEST,
+        NO_CATEGORY,
+        DELETED
     }
     #endregion
 
-    public class DbBusinessUrl : IEquatable<DbBusinessUrl?>
-    {
+    public class DbBusinessUrl : IEquatable<DbBusinessUrl?> {
         public long Id { get; set; }
-        public Guid Guid { get; set; }
+        public string Guid { get; set; }
         public string Url { get; set; }
         public DateTime? DateInsert { get; set; }
         public UrlState State { get; set; }
@@ -24,20 +22,13 @@ namespace GMS.Sdk.Core.Database
 
         #region Equality
 
-        /// <summary>
-        /// Check equality.
-        /// </summary>
-        /// <param name="obj"></param>
-        /// <returns>bool</returns>
-        public override bool Equals(object? obj)
-        {
+        public override bool Equals(object? obj) {
             return Equals(obj as DbBusinessUrl);
         }
 
-        public bool Equals(DbBusinessUrl? other)
-        {
+        public bool Equals(DbBusinessUrl? other) {
             return other is not null &&
-                   Guid.Equals(other.Guid) &&
+                   Guid == other.Guid &&
                    Url == other.Url &&
                    DateInsert == other.DateInsert &&
                    State == other.State &&
@@ -46,12 +37,7 @@ namespace GMS.Sdk.Core.Database
                    UrlEncoded == other.UrlEncoded;
         }
 
-        /// <summary>
-        /// Get Hash Code.
-        /// </summary>
-        /// <returns>int</returns>
-        public override int GetHashCode()
-        {
+        public override int GetHashCode() {
             return HashCode.Combine(Guid, Url, DateInsert, State, TextSearch, DateUpdate, UrlEncoded);
         }
         #endregion
@@ -59,7 +45,7 @@ namespace GMS.Sdk.Core.Database
         #region Local
 
         /// <summary>
-        /// Create new instance of Business Url
+        /// Constructor.
         /// </summary>
         /// <param name="guid"></param>
         /// <param name="url"></param>
@@ -68,8 +54,7 @@ namespace GMS.Sdk.Core.Database
         /// <param name="textSearch"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="urlEncoded"></param>
-        public DbBusinessUrl(Guid guid, string url, DateTime? dateInsert, UrlState state, string? textSearch, DateTime? dateUpdate, string urlEncoded)
-        {
+        public DbBusinessUrl(string guid, string url, DateTime? dateInsert, UrlState state, string? textSearch, DateTime? dateUpdate, string urlEncoded) {
             Guid = guid;
             Url = url;
             DateInsert = dateInsert;
@@ -77,14 +62,6 @@ namespace GMS.Sdk.Core.Database
             TextSearch = textSearch;
             DateUpdate = dateUpdate;
             UrlEncoded = urlEncoded;
-        }
-
-        /// <summary>
-        /// Save object in DB.
-        /// </summary>
-        public void Save()
-        {
-
         }
         #endregion
     }
