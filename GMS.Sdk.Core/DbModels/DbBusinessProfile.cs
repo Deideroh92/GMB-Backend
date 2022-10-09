@@ -111,11 +111,7 @@
             if (FirstGuid == null)
                 throw new NullReferenceException("No Guid for this business");
             if (Name == null)
-                throw new NullReferenceException("No name for this business");
-            if (Adress == null && Status == BusinessStatus.OPEN)
-                throw new NullReferenceException("No adress for this business");
-            if (Category == null && Status == BusinessStatus.OPEN)
-                throw new NullReferenceException("No category for this business");
+                Status = BusinessStatus.DELETED;
         }
         #endregion
     }

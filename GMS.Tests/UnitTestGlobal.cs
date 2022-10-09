@@ -23,7 +23,7 @@ namespace GMS.Tests {
             foreach (string search in textSearch) {
                 foreach (string location in locations) {
                     string searchString = search.Replace(' ', '+') + location.Replace(' ', '+');
-                    UrlAgentRequest request = new(searchString, DriverType.CHROME, true);
+                    UrlAgentRequest request = new(searchString, DriverType.CHROME);
                     UrlService.Start(request);
                 }
             }
@@ -54,7 +54,7 @@ namespace GMS.Tests {
 
         [TestMethod]
         public void HashToMd5() {
-            string messageEncoded = ToolBox.ComputeMd5Hash("https://www.google.com/maps/place/Le+Pont+Prieur,+Chambres+d'h%C3%B4tes+et+table+d'h%C3%B4tes/data=!4m9!3m8!1s0x47fd178246ec11b3:0x69b1c58b1fb52f4e!5m2!4m1!1i2!8m2!3d47.0979922!4d0.477783!16s%2Fg%2F1hhhtp45z");
+            string messageEncoded = ToolBox.ComputeMd5Hash("https://www.google.com/maps/search/EMILIE+ALBINET+conseilli%C3%A8re+immobili%C3%A8re+SAFTI+VARENNES,+VILLEBRUMIER,+SAINT+NAUPHARY,+NOHIC,+ORGUEIL");
             System.Diagnostics.Debug.WriteLine(messageEncoded);
         }
 
@@ -68,7 +68,7 @@ namespace GMS.Tests {
         [TestMethod]
         public void Temp() {
 
-            string file = @"C:\Users\maxim\Desktop\url.txt";
+            string file = @"C:\Users\maxim\Desktop\url1.txt";
             string[] urls = File.ReadAllLines(file);
 
             BusinessAgentRequest request = new(false, null, new List<string>(urls));
@@ -80,103 +80,31 @@ namespace GMS.Tests {
         public void Temp2() {
 
             string file = @"C:\Users\maxim\Desktop\url2.txt";
-            string log = @"C:\Users\maxim\Desktop\log2.txt";
             string[] urls = File.ReadAllLines(file);
-            int count = 0;
 
-            SeleniumDriver driver = new(DriverType.CHROME);
-            DbLib dbLib = new();
+            BusinessAgentRequest request = new(false, null, new List<string>(urls));
 
-            foreach (string url in urls) {
-                string url_encoded = ToolBox.ComputeMd5Hash(url);
-
-                try {
-                    DbBusinessAgent business = dbLib.SelectBusinessByUrlEncoded(url_encoded);
-
-                    (DbBusinessProfile profile, DbBusinessScore score) = BusinessService.GetBusinessProfileFromGooglePage(driver, url, business.Guid);
-
-                    profile.IdEtab = business.IdEtab;
-
-                    dbLib.UpdateBusinessProfile(profile);
-
-                    count++;
-                } catch (Exception e) {
-                    using StreamWriter sw = File.AppendText(log);
-                    sw.WriteLine(url);
-                }
-            }
-            using StreamWriter sw2 = File.AppendText(log);
-            sw2.WriteLine(count);
-            driver.WebDriver.Quit();
-            dbLib.DisconnectFromDB();
+            BusinessService.Start(request);
         }
         [TestMethod]
         public void Temp3() {
 
             string file = @"C:\Users\maxim\Desktop\url3.txt";
-            string log = @"C:\Users\maxim\Desktop\log3.txt";
             string[] urls = File.ReadAllLines(file);
-            int count = 0;
 
-            SeleniumDriver driver = new(DriverType.CHROME);
-            DbLib dbLib = new();
+            BusinessAgentRequest request = new(false, null, new List<string>(urls));
 
-            foreach (string url in urls) {
-                string url_encoded = ToolBox.ComputeMd5Hash(url);
-
-                try {
-                    DbBusinessAgent business = dbLib.SelectBusinessByUrlEncoded(url_encoded);
-
-                    (DbBusinessProfile profile, DbBusinessScore score) = BusinessService.GetBusinessProfileFromGooglePage(driver, url, business.Guid);
-
-                    profile.IdEtab = business.IdEtab;
-
-                    dbLib.UpdateBusinessProfile(profile);
-
-                    count++;
-                } catch (Exception e) {
-                    using StreamWriter sw = File.AppendText(log);
-                    sw.WriteLine(url);
-                }
-            }
-            using StreamWriter sw2 = File.AppendText(log);
-            sw2.WriteLine(count);
-            driver.WebDriver.Quit();
-            dbLib.DisconnectFromDB();
+            BusinessService.Start(request);
         }
         [TestMethod]
         public void Temp4() {
 
             string file = @"C:\Users\maxim\Desktop\url4.txt";
-            string log = @"C:\Users\maxim\Desktop\log4.txt";
             string[] urls = File.ReadAllLines(file);
-            int count = 0;
 
-            SeleniumDriver driver = new(DriverType.CHROME);
-            DbLib dbLib = new();
+            BusinessAgentRequest request = new(false, null, new List<string>(urls));
 
-            foreach (string url in urls) {
-                string url_encoded = ToolBox.ComputeMd5Hash(url);
-
-                try {
-                    DbBusinessAgent business = dbLib.SelectBusinessByUrlEncoded(url_encoded);
-
-                    (DbBusinessProfile profile, DbBusinessScore score) = BusinessService.GetBusinessProfileFromGooglePage(driver, url, business.Guid);
-
-                    profile.IdEtab = business.IdEtab;
-
-                    dbLib.UpdateBusinessProfile(profile);
-
-                    count++;
-                } catch (Exception e) {
-                    using StreamWriter sw = File.AppendText(log);
-                    sw.WriteLine(url);
-                }
-            }
-            using StreamWriter sw2 = File.AppendText(log);
-            sw2.WriteLine(count);
-            driver.WebDriver.Quit();
-            dbLib.DisconnectFromDB();
+            BusinessService.Start(request);
         }
 
         [TestMethod]

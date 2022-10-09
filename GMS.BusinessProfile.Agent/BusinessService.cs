@@ -17,8 +17,6 @@ namespace GMS.Business.Agent {
     /// Business Service.
     /// </summary>
     public class BusinessService {
-        public static readonly DbLib dbLib = new();
-        public static readonly SeleniumDriver driver = new(DriverType.CHROME);
 
         #region Local
 
@@ -32,9 +30,11 @@ namespace GMS.Business.Agent {
             int count = 0;
             string log = @"D:\Projects\VASANO\C#\Logs\log.txt";
 
-            List<DbBusinessAgent>? businessList = GetBusinessListFromRequest(request);
+            DbLib dbLib = new();
 
-            driver.Start();
+            List<DbBusinessAgent>? businessList = GetBusinessListFromRequest(request, dbLib);
+
+            SeleniumDriver driver = new(DriverType.CHROME);
 
             foreach (DbBusinessAgent business in businessList) {
                 try {
@@ -42,26 +42,23 @@ namespace GMS.Business.Agent {
                     // Get business profile infos from Google.
                     (DbBusinessProfile businessProfile, DbBusinessScore businessScore) = GetBusinessProfileFromGooglePage(driver, business.Url, business.Guid, business.IdEtab);
 
-                    if (request.Category != null) {
+                    // Update or insert Business Profile if exist or not.
+                    if (request.Category != null || dbLib.CheckBusinessProfileExist(businessProfile.IdEtab))
                         dbLib.UpdateBusinessProfile(businessProfile);
-                    } else {
-                        // Check if business profile exist (update) or not (insert).
-                        if (dbLib.CheckBusinessProfileExist(businessProfile.IdEtab))
-                            dbLib.UpdateBusinessProfile(businessProfile);
-                        else
-                            dbLib.InsertBusinessProfile(businessProfile);
-                        if (request.UrlState != null)
-                            dbLib.UpdateBusinessUrlState(business.Guid, UrlState.UPDATED);
-                    }
+                    else 
+                        dbLib.InsertBusinessProfile(businessProfile);
+
+                    // Update Url state to updated when finished.
+                    if (request.UrlState != null)
+                        dbLib.UpdateBusinessUrlState(business.Guid, UrlState.UPDATED);
 
                     // Insert Business Score if have one.
                     if (businessScore.Score != null)
                         dbLib.InsertBusinessScore(businessScore);
 
                     // Getting reviews if option checked.
-                    if (request.GetReviews && request.DateLimit != null) {
-                        GetReviews(businessProfile, request.DateLimit);
-                    }
+                    if (request.GetReviews && request.DateLimit != null)
+                        GetReviews(businessProfile, request.DateLimit, dbLib, driver);
 
                 } catch (Exception) {
                     using StreamWriter sw = File.AppendText(log);
@@ -272,7 +269,7 @@ namespace GMS.Business.Agent {
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
-        public static List<DbBusinessAgent>? GetBusinessListFromRequest(BusinessAgentRequest request) {
+        public static List<DbBusinessAgent>? GetBusinessListFromRequest(BusinessAgentRequest request, DbLib dbLib) {
             List<DbBusinessAgent> businessList = new();
             try {
                 // Getting business list.
@@ -313,7 +310,7 @@ namespace GMS.Business.Agent {
         /// <param name="businessProfile"></param>
         /// <param name="dateLimit"></param>
         /// <exception cref="Exception"></exception>
-        public static void GetReviews(DbBusinessProfile businessProfile, DateTime? dateLimit) {
+        public static void GetReviews(DbBusinessProfile businessProfile, DateTime? dateLimit, DbLib dbLib, SeleniumDriver driver) {
             if (!ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage)))
                 throw new Exception("Failed to get to review page!");
 

@@ -16,12 +16,10 @@ namespace GMS.Sdk.Core.SeleniumDriver {
     #endregion
 
     public class SeleniumDriver {
-        public IWebDriver? WebDriver { get; set; }
+        public IWebDriver WebDriver { get; set; }
         public DriverType DriverType { get; set; }
 
         #region Local
-
-
 
         /// <summary>
         /// Create an instance of Selenium Driver.
@@ -29,7 +27,7 @@ namespace GMS.Sdk.Core.SeleniumDriver {
         /// <param name="driverType"></param>
         /// <param name="url"></param>
         /// <exception cref="Exception"></exception>
-        public void Start(DriverType driverType = DriverType.CHROME, string urlBase = "https://www.google.fr/maps") {
+        public SeleniumDriver(DriverType driverType = DriverType.CHROME) {
             try {
                 switch (driverType) {
                     case DriverType.FIREFOX:
@@ -44,6 +42,7 @@ namespace GMS.Sdk.Core.SeleniumDriver {
                     default:
                         ChromeOptions chromeOptions = new();
                         //chromeOptions.AddArguments("-headless");
+                        chromeOptions.AddArguments("--lang=fr");
                         new DriverManager().SetUpDriver(new ChromeConfig());
                         WebDriver = new ChromeDriver(chromeOptions);
                         break;
@@ -51,13 +50,7 @@ namespace GMS.Sdk.Core.SeleniumDriver {
             } catch (Exception) {
                 throw new Exception("Failed initializing driver");
             }
-
             DriverType = driverType;
-        }
-
-        public SeleniumDriver(DriverType driverType, IWebDriver? webDriver = null) {
-            DriverType = driverType;
-            WebDriver = webDriver;
         }
 
         /// <summary>

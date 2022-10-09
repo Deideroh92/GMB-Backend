@@ -12,8 +12,6 @@ namespace GMS.Url.Agent {
     /// Url Service.
     /// </summary>
     public class UrlService {
-        public static readonly DbLib dbLib = new();
-        public static readonly SeleniumDriver driver = new(DriverType.CHROME);
 
         #region Local
 
@@ -22,10 +20,11 @@ namespace GMS.Url.Agent {
         /// </summary>
         /// <param name="request"></param>
         public static void Start(UrlAgentRequest request) {
-            driver.Start();
+            DbLib dbLib = new();
+            SeleniumDriver driver = new(DriverType.CHROME);
             try {
                 driver.GetToPage(request.TextSearch);
-                GetUrls(driver.WebDriver, request.TextSearch, request.IsTest);
+                GetUrls(driver.WebDriver, request.TextSearch, dbLib);
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
@@ -42,15 +41,11 @@ namespace GMS.Url.Agent {
         /// <param name="driver"></param>
         /// <param name="textSearch"></param>
         /// <param name="isTest"></param>
-        public static void GetUrls(IWebDriver driver, string textSearch, bool isTest = false) {
+        public static void GetUrls(IWebDriver driver, string textSearch, DbLib dbLib) {
             // Variables initialization.
             UrlState urlState = UrlState.NEW;
             string name;
             string url;
-
-            // If Test mode.
-            if (isTest)
-                urlState = UrlState.TEST;
 
             // Scrolling to the end of the page to get all businesses loaded.
             ScrollIntoBusinessUrls(driver);

@@ -47,10 +47,10 @@
         /// </summary>
         public void CheckValidity() {
             if (Score != null && NbReviews == null)
-                throw new Exception("Score not null but no reviews exist!");
+                Score = null;
 
             if (NbReviews != null && Score == null)
-                throw new Exception("Reviews exists but no score!");
+                Score = null;
         }
         #endregion
     }

@@ -335,8 +335,8 @@ namespace GMS.Sdk.Core.ToolBox {
             try {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @Adress, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
-                cmd.Parameters.AddWithValue("@Adress", businessProfile.Adress);
+                cmd.Parameters.AddWithValue("@Name", (object)businessProfile.Name ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Adress", (object)businessProfile.Adress ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Category", (object)businessProfile.Category ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Tel", (object)businessProfile.Tel ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Website", (object)businessProfile.Website ?? DBNull.Value);
