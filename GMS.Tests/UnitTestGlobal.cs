@@ -114,7 +114,6 @@ namespace GMS.Tests {
             Task newThread3 = new(Temp3);
             Task newThread4 = new(Temp4);
 
-            System.Diagnostics.Debug.WriteLine("Starting code ! ");
             newThread.Start();
             newThread2.Start();
             newThread3.Start();
