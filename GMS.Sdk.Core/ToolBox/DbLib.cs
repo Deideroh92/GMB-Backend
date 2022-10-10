@@ -199,6 +199,20 @@ namespace GMS.Sdk.Core.ToolBox {
                 throw new Exception("Failed getting guid from url encoded :  " + urlEncoded);
             }
         }
+
+        public void DeleteUrlByGuid(string guid) {
+            try {
+                string deleteCommand = "DELETE FROM BUSINESS_URL WHERE GUID = @Guid";
+                using SqlCommand cmd = new(deleteCommand, Connection);
+                cmd.Parameters.AddWithValue("@Guid", guid);
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                throw new Exception("Couldn't delete business url with guid: " + guid);
+            }
+        }
         #endregion
 
         #region Business Profile

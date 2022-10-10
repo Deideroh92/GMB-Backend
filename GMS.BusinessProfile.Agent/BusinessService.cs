@@ -34,13 +34,35 @@ namespace GMS.Business.Agent {
 
             List<DbBusinessAgent>? businessList = GetBusinessListFromRequest(request, dbLib);
 
+
+            /*
+            if (request.UrlState != null) {
+                foreach (DbBusinessAgent business in businessList)
+                    dbLib.UpdateBusinessUrlState(business.Guid, UrlState.PROCESSING);
+            }*/
+
+            /*
+            if (request.Category != null) {
+                foreach (DbBusinessAgent business in businessList)
+                    dbLib.UpdateBusinessProfileProcessingState(business.IdEtab, false);
+            }*/
+
             SeleniumDriver driver = new(DriverType.CHROME);
 
             foreach (DbBusinessAgent business in businessList) {
                 try {
 
                     // Get business profile infos from Google.
-                    (DbBusinessProfile businessProfile, DbBusinessScore businessScore) = GetBusinessProfileFromGooglePage(driver, business.Url, business.Guid, business.IdEtab);
+                    (DbBusinessProfile? businessProfile, DbBusinessScore? businessScore) = GetBusinessProfileFromGooglePage(driver, business.Url, business.Guid, business.IdEtab);
+
+                    // No business found at this url.
+                    if (businessProfile == null) {
+                        if (business.IdEtab != null)
+                            dbLib.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
+                        else
+                            dbLib.DeleteUrlByGuid(business.Guid);
+                        continue;
+                    }
 
                     // Update or insert Business Profile if exist or not.
                     if (request.Category != null || dbLib.CheckBusinessProfileExist(businessProfile.IdEtab))
@@ -67,10 +89,11 @@ namespace GMS.Business.Agent {
                 count++; 
             }
 
+            /*
             if (request.Category != null) {
                 foreach (DbBusinessAgent business in businessList)
                     dbLib.UpdateBusinessProfileProcessingState(business.IdEtab, false);
-            }
+            }*/
 
             driver.WebDriver.Quit();
             dbLib.DisconnectFromDB();
@@ -83,7 +106,7 @@ namespace GMS.Business.Agent {
         /// <param name="guid"></param>
         /// <returns>Business Profile and a Business Score if any</returns>
         /// <exception cref="Exception"></exception>
-        public static (DbBusinessProfile, DbBusinessScore) GetBusinessProfileFromGooglePage(SeleniumDriver driver, string url, string guid, string? idEtab = null) {
+        public static (DbBusinessProfile?, DbBusinessScore?) GetBusinessProfileFromGooglePage(SeleniumDriver driver, string url, string guid, string? idEtab = null) {
             // Initialization of all variables
             string? name = null;
             string? category = null;
@@ -97,8 +120,11 @@ namespace GMS.Business.Agent {
 
             driver.GetToPage(url);
 
-            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)))
+            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name))) {
                 name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name).GetAttribute("aria-label").Trim();
+                Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),-]+", "");
+                Regex.Replace(name, @"\s{2,}", " ");
+            }
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status))) {
                 string status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status).Text.Trim();
@@ -132,8 +158,11 @@ namespace GMS.Business.Agent {
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website2, XPathProfile.website)))
                 website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website2, XPathProfile.website).GetAttribute("href").Trim();
 
-            idEtab ??= ToolBox.ComputeMd5Hash(name + adress);
+            if (name == null) {
+                return (null, null);
+            }
 
+            idEtab ??= ToolBox.ComputeMd5Hash(name + adress);
             DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, adress, tel, website, geoloc, DateTime.UtcNow, DateTime.UtcNow, status);
             DbBusinessScore dbBusinessScore = new(idEtab, score, reviews, DateTime.UtcNow);
             return (dbBusinessProfile, dbBusinessScore);
