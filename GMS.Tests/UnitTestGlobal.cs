@@ -71,7 +71,7 @@ namespace GMS.Tests {
             string file = @"C:\Users\maxim\Desktop\url1.txt";
             string[] urls = File.ReadAllLines(file);
 
-            BusinessAgentRequest request = new(false, null, new List<string>(urls));
+            BusinessAgentRequest request = new(true, null, new List<string>(urls), DateTime.UtcNow.AddYears(-1));
 
             BusinessService.Start(request);
         }
@@ -86,6 +86,7 @@ namespace GMS.Tests {
 
             BusinessService.Start(request);
         }
+
         [TestMethod]
         public void Temp3() {
 
@@ -96,6 +97,7 @@ namespace GMS.Tests {
 
             BusinessService.Start(request);
         }
+
         [TestMethod]
         public void Temp4() {
 

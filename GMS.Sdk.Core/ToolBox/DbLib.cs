@@ -4,7 +4,7 @@ using System.Data.SqlClient;
 
 namespace GMS.Sdk.Core.ToolBox {
     public class DbLib {
-        private const string connectionString = @"Data Source=vasano.database.windows.net;Initial Catalog=GMS_TEST;User ID=vs-sa;Password=Eu6pkR2J4";
+        private const string connectionString = @"Data Source=vasano.database.windows.net;Initial Catalog=GMS;User ID=vs-sa;Password=Eu6pkR2J4";
         private readonly SqlConnection Connection;
 
         #region Local
@@ -396,7 +396,7 @@ namespace GMS.Sdk.Core.ToolBox {
             try {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET STATUS = @Status, DATE_UPDATE = @DateUpdate WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@Status", businessStatus);
+                cmd.Parameters.AddWithValue("@Status", businessStatus.ToString());
                 cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.ExecuteNonQuery();
@@ -469,20 +469,17 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <exception cref="Exception"></exception>
         public bool CheckBusinessReviewExist(string idEtab, string idReview) {
             try {
-                string selectCommand = "SELECT 1 FROM BUSINESS_REVIEW WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
+                string selectCommand = "SELECT 1 FROM BUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.Parameters.AddWithValue("@IdReview", idReview);
                 using SqlDataReader reader = cmd.ExecuteReader();
                 cmd.Dispose();
 
-                if (reader.Read()) {
-                    reader.Close();
+                if (reader.Read())
                     return true;
-                } else {
-                    reader.Close();
+                else
                     return false;
-                }
             } catch (Exception) {
                 throw new Exception("Failed checking if business review with id: " + idReview + " exist on business profile with IdEtab: " + idEtab + " in DB");
             }

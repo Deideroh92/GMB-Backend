@@ -9,6 +9,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.DevTools.V102.Runtime;
 using System;
 using System.Collections.ObjectModel;
+using System.Drawing;
 using System.Globalization;
 using System.Text.RegularExpressions;
 
@@ -82,7 +83,7 @@ namespace GMS.Business.Agent {
                     if (request.GetReviews && request.DateLimit != null)
                         GetReviews(businessProfile, request.DateLimit, dbLib, driver);
 
-                } catch (Exception) {
+                } catch (Exception e) {
                     using StreamWriter sw = File.AppendText(log);
                     sw.WriteLine(business.Url);
                 }
@@ -199,7 +200,7 @@ namespace GMS.Business.Agent {
 
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate))) {
-                reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate).GetAttribute("aria-label").Trim();
+                reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate).Text.Trim();
                 reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
                 if (reviewDate < dateLimit)
                     throw new Exception("Review too old.");
@@ -251,28 +252,39 @@ namespace GMS.Business.Agent {
         /// <param name="driver"></param>
         /// <param name="dateLimit"></param>
         /// <returns>Review list</returns>
-        public static ReadOnlyCollection<IWebElement> GetReviewsFromGooglePage(IWebDriver driver, DateTime? dateLimit) {
+        public static ReadOnlyCollection<IWebElement>? GetReviewsFromGooglePage(IWebDriver driver, DateTime? dateLimit) {
             ReadOnlyCollection<IWebElement>? reviewList;
-            int reviewListLength;
             string reviewGoogleDate;
+            int reviewListLength = 0;
 
             if (!ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathReview.reviewList)))
                 throw new Exception("Failed to get review list.");
 
             reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
-            do {
-                reviewListLength = reviewList.Count;
-                reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
-                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", reviewList.Last());
-                Thread.Sleep(1000);
 
+            if (reviewList == null)
+                return null;
+
+            driver.Manage().Window.Size = new Size(1920, 10000);
+            while (reviewListLength != reviewList.Count) {
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", reviewList.Last());
+                Thread.Sleep(2000);
+                reviewListLength = reviewList.Count;
+                reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList, XPathReview.reviewList2);
                 if (ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathReview.googleDate))) {
-                    reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate).GetAttribute("aria-label").Trim();
+                    reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate).Text.Trim();
                     if (ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate) < dateLimit)
                         break;
                 }
-            }
-            while (reviewListLength != reviewList.Count);
+
+                if(reviewListLength == reviewList.Count) {
+                    IWebElement? tmp = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.replyText);
+                    if (tmp != null) {
+                        ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(false);", tmp);
+                        reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList, XPathReview.reviewList2);
+                    }
+                }
+            };
 
             return reviewList;
         }
@@ -350,14 +362,19 @@ namespace GMS.Business.Agent {
             SortReviews(driver.WebDriver);
 
             // Getting reviews.
-            ReadOnlyCollection<IWebElement> reviews = GetReviewsFromGooglePage(driver.WebDriver, dateLimit);
+            ReadOnlyCollection<IWebElement>? reviews = GetReviewsFromGooglePage(driver.WebDriver, dateLimit);
+
+            if (reviews == null)
+                return;
+
             foreach (IWebElement review in reviews) {
                 try {
                     DbBusinessReview businessReview = GetBusinessReviewsInfos(review, businessProfile.IdEtab, dateLimit);
                     if (!dbLib.CheckBusinessReviewExist(businessProfile.IdEtab, businessReview.IdReview))
                         dbLib.InsertBusinessReview(businessReview);
-                } catch (Exception) {
-                    throw;
+                } catch (Exception e) {
+                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    System.Diagnostics.Debug.WriteLine(e.StackTrace);
                 }
             }
         }
