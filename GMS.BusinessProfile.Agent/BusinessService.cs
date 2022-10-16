@@ -1,13 +1,10 @@
-﻿using AngleSharp.Dom;
-using AngleSharp.Io;
-using GMS.BusinessProfile.Agent.Model;
+﻿using GMS.BusinessProfile.Agent.Model;
 using GMS.Sdk.Core.Database;
 using GMS.Sdk.Core.SeleniumDriver;
 using GMS.Sdk.Core.ToolBox;
 using GMS.Sdk.Core.XPath;
 using OpenQA.Selenium;
-using OpenQA.Selenium.DevTools.V102.Runtime;
-using System;
+using OpenQA.Selenium.DevTools;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Globalization;
@@ -28,25 +25,21 @@ namespace GMS.Business.Agent {
         /// <exception cref="Exception"></exception>
         public static void Start(BusinessAgentRequest request) {
 
-            int count = 0;
             string log = @"D:\Projects\VASANO\C#\Logs\log.txt";
 
             DbLib dbLib = new();
 
-            List<DbBusinessAgent>? businessList = GetBusinessListFromRequest(request, dbLib);
+            List<DbBusinessAgent>? businessList = request.BusinessList;
 
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
-            /*
             if (request.UrlState != null) {
                 foreach (DbBusinessAgent business in businessList)
                     dbLib.UpdateBusinessUrlState(business.Guid, UrlState.PROCESSING);
-            }*/
+            }
 
-            /*
-            if (request.Category != null) {
-                foreach (DbBusinessAgent business in businessList)
-                    dbLib.UpdateBusinessProfileProcessingState(business.IdEtab, false);
-            }*/
+            foreach (DbBusinessAgent business in businessList)
+                dbLib.UpdateBusinessProfileProcessingState(business.IdEtab, true);
 
             SeleniumDriver driver = new(DriverType.CHROME);
 
@@ -86,15 +79,16 @@ namespace GMS.Business.Agent {
                 } catch (Exception e) {
                     using StreamWriter sw = File.AppendText(log);
                     sw.WriteLine(business.Url);
+                    sw.WriteLine(e.Message);
+                    sw.WriteLine(e.StackTrace);
+                    sw.WriteLine("\n\n");
                 }
-                count++; 
             }
 
-            /*
             if (request.Category != null) {
                 foreach (DbBusinessAgent business in businessList)
                     dbLib.UpdateBusinessProfileProcessingState(business.IdEtab, false);
-            }*/
+            }
 
             driver.WebDriver.Quit();
             dbLib.DisconnectFromDB();
@@ -265,9 +259,12 @@ namespace GMS.Business.Agent {
             if (reviewList == null)
                 return null;
 
-            driver.Manage().Window.Size = new Size(1920, 10000);
+            IWebElement scrollingPanel = ToolBox.FindElementSafe(driver, XPathReview.scrollingPanel);
+
+            IWebElement parent = (IWebElement)((IJavaScriptExecutor)driver).ExecuteScript("return arguments[0].parentNode;", scrollingPanel);
+
             while (reviewListLength != reviewList.Count) {
-                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(true);", reviewList.Last());
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
                 Thread.Sleep(2000);
                 reviewListLength = reviewList.Count;
                 reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList, XPathReview.reviewList2);
@@ -275,14 +272,6 @@ namespace GMS.Business.Agent {
                     reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate).Text.Trim();
                     if (ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate) < dateLimit)
                         break;
-                }
-
-                if(reviewListLength == reviewList.Count) {
-                    IWebElement? tmp = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.replyText);
-                    if (tmp != null) {
-                        ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollIntoView(false);", tmp);
-                        reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList, XPathReview.reviewList2);
-                    }
                 }
             };
 
@@ -330,12 +319,12 @@ namespace GMS.Business.Agent {
                 }
 
                 // With url list.
-                if (request.UrlList != null) {
+                /*if (request.UrlList != null) {
                     businessList = dbLib.GetBusinessList(request.UrlList);
                     foreach (DbBusinessAgent business in businessList)
                         if (business.IdEtab != null)
                             dbLib.UpdateBusinessProfileProcessingState(business.IdEtab, true);
-                }
+                }*/
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);

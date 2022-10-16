@@ -263,11 +263,12 @@ namespace GMS.Sdk.Core.ToolBox {
                     "SELECT TOP (@Entries) BP.ID, BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
                     " JOIN BUSINESS_URL as BU ON BP.FIRST_GUID = BU.GUID" +
                     " JOIN CATEGORIES as CAT on BP.CATEGORY = CAT.CATEGORY" +
-                    " WHERE CAT.SECTOR = @Category";
+                    " WHERE CAT.SECTOR = @Category AND BP.PROCESSING = 0";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
                 cmd.Parameters.AddWithValue("@Category", category);
+                cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
                 cmd.Dispose();
 
@@ -277,7 +278,9 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
 
                 return businessUrlList;
-            } catch (Exception) {
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
                 throw new Exception("Failed fetching " + entries.ToString() +  " business url with category: " + category + " from DB");
             }
         }
@@ -405,6 +408,29 @@ namespace GMS.Sdk.Core.ToolBox {
                 throw new Exception("Failed updating business profile state for IdEtab: " + idEtab + " in DB");
             }
         }
+
+        public int CountBusinessProfileByCategory(string category) {
+            try {
+                string selectCommand =
+                    "SELECT COUNT(*) FROM BUSINESS_PROFILE as BP" +
+                    " JOIN CATEGORIES as CAT on BP.CATEGORY = CAT.CATEGORY" +
+                    " WHERE CAT.SECTOR = @Category";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Category", category);
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+
+                if (reader.Read()) {
+                    return (int)reader.GetValue(0);
+                } else
+                    return 0;
+
+            } catch (Exception) {
+                throw new Exception("Failed counting businesses with category : " + category + " from DB");
+            }
+        }
+
         #endregion
 
         #region Business Score

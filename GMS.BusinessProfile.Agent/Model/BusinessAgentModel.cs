@@ -5,7 +5,7 @@ namespace GMS.BusinessProfile.Agent.Model {
     #region Requests
 
     public class BusinessAgentRequest {
-        public List<string>? UrlList { get; set; }
+        public List<DbBusinessAgent>? BusinessList { get; set; }
         public string? Category { get; set; }
         public UrlState? UrlState { get; set; }
         public bool GetReviews { get; set; }
@@ -24,14 +24,14 @@ namespace GMS.BusinessProfile.Agent.Model {
         /// <param name="category"></param>
         /// <param name="urlState"></param>
         /// <param name="driverType"></param>
-        public BusinessAgentRequest(bool getReviews, int? entries, List<string>? urlList,  DateTime? dateLimit = null, string? category = null, UrlState? urlState = null, DriverType driverType = DriverType.CHROME) {
-            UrlList = urlList;
+        public BusinessAgentRequest(bool getReviews, int? entries, List<DbBusinessAgent>? businessList, DateTime? dateLimit = null, string? category = null, UrlState? urlState = null, DriverType driverType = DriverType.CHROME) {
             GetReviews = getReviews;
             Entries = entries;
             Category = category;
             UrlState = urlState;
             DriverType = driverType;
             DateLimit = dateLimit;
+            BusinessList = businessList;
         }
         #endregion
     }
