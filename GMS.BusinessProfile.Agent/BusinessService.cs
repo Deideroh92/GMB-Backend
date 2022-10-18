@@ -342,7 +342,7 @@ namespace GMS.Business.Agent {
         /// <exception cref="Exception"></exception>
         public static void GetReviews(DbBusinessProfile businessProfile, DateTime? dateLimit, DbLib dbLib, SeleniumDriver driver) {
             if (!ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage)))
-                throw new Exception("Failed to get to review page!");
+                return;
 
             driver.WebDriver.FindElement(XPathReview.toReviewsPage).Click();
             Thread.Sleep(2500);

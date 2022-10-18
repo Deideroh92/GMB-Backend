@@ -72,9 +72,10 @@ namespace GMS.Tests {
         }
 
         [TestMethod]
-        public int CountBusinessesByCategory(string category) {
+        public int CountBusinessesByCategory(string category = "AGENCE IMMOBILIERE") {
             DbLib dbLib = new();
-            return dbLib.CountBusinessProfileByCategory(category);
+            int count = dbLib.CountBusinessProfileByCategory(category);
+            return count;
         }
 
         [TestMethod]
@@ -93,8 +94,9 @@ namespace GMS.Tests {
         public void Start4Threads() {
 
             string category = "AGENCE IMMOBILIERE";
+            int nb2 = CountBusinessesByCategory(category);
             List<Task> tasks = new();
-            int nb = 38056;
+            int nb = 38021;
             List<DbBusinessAgent> list = GetBusinessListFromCategory(category, nb);
             foreach (var chunk in list.Chunk(nb/4)) {
                 Task newThread = Task.Run(delegate { GetReviewsFromBusinessList(new List<DbBusinessAgent>(chunk)); });
