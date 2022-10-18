@@ -91,6 +91,15 @@ namespace GMS.Tests {
         }
 
         [TestMethod]
+        public void Start1Thread() {
+
+            string category = "ENTRETIEN AUTOMOBILE";
+            List<DbBusinessAgent> list = GetBusinessListFromCategory(category, 100);
+            GetReviewsFromBusinessList(new List<DbBusinessAgent>(list));
+            return;
+        }
+
+        [TestMethod]
         public void Start4Threads() {
 
             string category = "AGENCE IMMOBILIERE";

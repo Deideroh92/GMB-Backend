@@ -261,7 +261,7 @@ namespace GMS.Business.Agent {
 
             IWebElement scrollingPanel = ToolBox.FindElementSafe(driver, XPathReview.scrollingPanel);
 
-            IWebElement parent = (IWebElement)((IJavaScriptExecutor)driver).ExecuteScript("return arguments[0].parentNode;", scrollingPanel);
+            IWebElement parent = (IWebElement)((IJavaScriptExecutor)driver).ExecuteScript("return arguments[0].parentNode.parentNode.parentNode;", scrollingPanel);
 
             while (reviewListLength != reviewList.Count) {
                 ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
