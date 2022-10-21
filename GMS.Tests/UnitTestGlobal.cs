@@ -12,12 +12,13 @@ namespace GMS.Tests {
 
         public static readonly string pathUrlFile = @"";
         public static readonly string pathLogFile = @"";
-        public static readonly string category = "";
+        public static readonly string category = "AGENCE IMMOBILIERE";
 
         #region All
         [TestMethod]
         public void SandBox() {
-            string test = Path.Combine(Environment.CurrentDirectory, @"test");
+            DbLib dbLib = new();
+            List<string> sector = dbLib.GetSector();
             return;
         }
         #endregion

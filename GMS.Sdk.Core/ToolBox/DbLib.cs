@@ -1,6 +1,7 @@
 ﻿using GMS.BusinessProfile.Agent.Model;
 using GMS.Sdk.Core.Database;
 using System.Data.SqlClient;
+using System.Text.Encodings.Web;
 
 namespace GMS.Sdk.Core.ToolBox {
     public class DbLib {
@@ -44,6 +45,25 @@ namespace GMS.Sdk.Core.ToolBox {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
                 throw new Exception("Disconnection from DB failed!");
+            }
+        }
+
+        public List<string> GetSector(string sector="Club de sport") {
+            try {
+                string selectCommand = "SELECT VALEUR FROM vCATEGORIES WHERE SECTEUR = @Sector";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Sector", sector);
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+
+                List<string> categories = new();
+
+                while (reader.Read())
+                    categories.Add(reader.GetValue(0).ToString());
+
+                return categories;
+            } catch (Exception) {
+                throw new Exception("Failed getting guid from url encoded :  " + sector);
             }
         }
 
@@ -262,8 +282,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 string selectCommand =
                     "SELECT TOP (@Entries) BP.ID, BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
                     " JOIN BUSINESS_URL as BU ON BP.FIRST_GUID = BU.GUID" +
-                    " JOIN CATEGORIES as CAT on BP.CATEGORY = CAT.CATEGORY" +
-                    " WHERE CAT.SECTOR = @Category AND BP.PROCESSING = 0";
+                    " JOIN vCATEGORIES as CAT on BP.CATEGORY = CAT.VALEUR" +
+                    " WHERE CAT.SECTEUR = @Category AND BP.PROCESSING = 0";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
@@ -413,8 +433,8 @@ namespace GMS.Sdk.Core.ToolBox {
             try {
                 string selectCommand =
                     "SELECT COUNT(*) FROM BUSINESS_PROFILE as BP" +
-                    " JOIN CATEGORIES as CAT on BP.CATEGORY = CAT.CATEGORY" +
-                    " WHERE CAT.SECTOR = @Category";
+                    " JOIN vCATEGORIES as CAT on BP.CATEGORY = CAT.VALEUR" +
+                    " WHERE CAT.SECTEUR = @Category";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Category", category);
