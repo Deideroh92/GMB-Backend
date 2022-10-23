@@ -18,7 +18,9 @@ namespace GMS.Tests {
         [TestMethod]
         public void SandBox() {
             DbLib dbLib = new();
-            List<string> sector = dbLib.GetSector();
+            string work = Directory.GetCurrentDirectory();
+            string test = Directory.GetParent(work).Parent.Parent.FullName;
+            
             return;
         }
         #endregion
@@ -71,33 +73,33 @@ namespace GMS.Tests {
         [TestMethod]
         public void StartAgent(List<DbBusinessAgent> urlList, Operation operation) {
             BusinessAgentRequest request = new(operation, true, null, urlList, DateTime.UtcNow.AddYears(-1));
-            BusinessService.Start(request, pathLogFile);
+            BusinessService.Start(request);
         }
 
-        public List<DbBusinessAgent> GetBusinessListFromCategory(string category, int entries) {
+        public List<DbBusinessAgent> GetBusinessAgentListFromCategory(string category, int entries) {
             DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessList(category, entries);
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListByCategory(category, entries);
             db.DisconnectFromDB();
             return businessList;
         }
 
-        public List<DbBusinessAgent> GetBusinessListFromUrlState(UrlState urlState, int entries) {
+        public List<DbBusinessAgent> GetBusinessAgentListFromUrlState(UrlState urlState, int entries) {
             DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessList(urlState, entries);
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListByUrlState(urlState, entries);
             db.DisconnectFromDB();
             return businessList;
         }
 
-        public (List<DbBusinessAgent>, List<string>) GetBusinessListFromUrlFile(string[] urlList) {
+        public (List<DbBusinessAgent>, List<string>) GetBusinessAgentListFromUrlFile(string[] urlList) {
             DbLib db = new();
             List<DbBusinessAgent> businessList = new();
             List<string> urlNotFound = new();
 
             foreach (string url in urlList) {
                 string urlEncoded = ToolBox.ComputeMd5Hash(url);
-                DbBusinessAgent? business = db.GetBusinessByUrlEncoded(urlEncoded);
+                DbBusinessAgent? business = db.GetBusinessAgentByUrlEncoded(urlEncoded);
                 if (business != null)
-                    businessList.Add(db.GetBusinessByUrlEncoded(urlEncoded));
+                    businessList.Add(business);
                 else {
                     urlNotFound.Add(url);
                 }
@@ -107,10 +109,11 @@ namespace GMS.Tests {
             return (businessList, urlNotFound);
         }
 
+        #region THREAD
         [TestMethod]
         public void OneThreadCategory() {
 
-            List<DbBusinessAgent> list = GetBusinessListFromCategory(category, 100);
+            List<DbBusinessAgent> list = GetBusinessAgentListFromCategory(category, 100);
             StartAgent(new List<DbBusinessAgent>(list), Operation.CATEGORY);
             return;
         }
@@ -119,7 +122,7 @@ namespace GMS.Tests {
         public void OneThreadUrlList() {
 
             string[] urlList = File.ReadAllLines(pathUrlFile);
-            (List<DbBusinessAgent> bussinessList, List<string> urlNotFound) = GetBusinessListFromUrlFile(urlList);
+            (List<DbBusinessAgent> bussinessList, List<string> urlNotFound) = GetBusinessAgentListFromUrlFile(urlList);
             StartAgent(new List<DbBusinessAgent>(bussinessList), Operation.FILE);
             return;
         }
@@ -127,11 +130,11 @@ namespace GMS.Tests {
         [TestMethod]
         public void OneThreadUrlState() {
 
-            List<DbBusinessAgent> list = GetBusinessListFromUrlState(UrlState.NEW, 100);
+            List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, 100);
             StartAgent(new List<DbBusinessAgent>(list), Operation.URL_STATE);
             return;
         }
-
+        #endregion
         #region THREADS
         /// <summary>
         /// STARTING APP
@@ -140,7 +143,7 @@ namespace GMS.Tests {
         public void FourThreadsCategory() {
             List<Task> tasks = new();
             int nb = 38021;
-            List<DbBusinessAgent> list = GetBusinessListFromCategory(category, nb);
+            List<DbBusinessAgent> list = GetBusinessAgentListFromCategory(category, nb);
             foreach (var chunk in list.Chunk(nb/4)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.CATEGORY); });
                 tasks.Add(newThread);
@@ -154,7 +157,7 @@ namespace GMS.Tests {
             string[] urlList = File.ReadAllLines(pathUrlFile);
             List<Task> tasks = new();
 
-            (List<DbBusinessAgent> bussinessList, List<string> urlNotFound) = GetBusinessListFromUrlFile(urlList);
+            (List<DbBusinessAgent> bussinessList, List<string> urlNotFound) = GetBusinessAgentListFromUrlFile(urlList);
             foreach (string url in urlNotFound) {
                 using StreamWriter sw = File.AppendText(pathLogFile);
                 sw.WriteLine(url + "\n");
@@ -174,7 +177,7 @@ namespace GMS.Tests {
         [TestMethod]
         public void FourThreadsUrlState() {
             List<Task> tasks = new();
-            List<DbBusinessAgent> list = GetBusinessListFromUrlState(UrlState.NEW, 100);
+            List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, 100);
             foreach (var chunk in list.Chunk(list.Count / 4)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.URL_STATE); });
                 tasks.Add(newThread);

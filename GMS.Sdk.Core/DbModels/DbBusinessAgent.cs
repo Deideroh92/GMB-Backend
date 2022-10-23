@@ -1,6 +1,5 @@
 ﻿namespace GMS.BusinessProfile.Agent.Model {
     public class DbBusinessAgent {
-        public long Id { get; set; }
         public string? IdEtab { get; set; }
         public string Guid { get; set; }
         public string Url { get; set; }
@@ -14,8 +13,7 @@
         /// <param name="guid"></param>
         /// <param name="url"></param>
         /// <param name="idEtab"></param>
-        public DbBusinessAgent(long id, string guid, string url, string? idEtab = null) {
-            Id = id;
+        public DbBusinessAgent(string guid, string url, string? idEtab = null) {
             IdEtab = idEtab;
             Guid = guid;
             Url = url;

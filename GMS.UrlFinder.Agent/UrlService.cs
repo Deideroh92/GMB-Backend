@@ -64,7 +64,7 @@ namespace GMS.Url.Agent {
 
                 try {
                     if (!dbLib.CheckBusinessUrlExist(businessUrl.UrlEncoded)) {
-                        dbLib.InsertBusinessUrl(businessUrl);
+                        dbLib.CreateBusinessUrl(businessUrl);
                         System.Diagnostics.Debug.WriteLine("New url added in DB.");
                     } else
                         System.Diagnostics.Debug.WriteLine("Url exists in DB.");

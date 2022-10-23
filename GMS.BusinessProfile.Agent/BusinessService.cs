@@ -23,7 +23,8 @@ namespace GMS.Business.Agent {
         /// </summary>
         /// <param name="request"></param>
         /// <exception cref="Exception"></exception>
-        public static void Start(BusinessAgentRequest request, string pathLogFile) {
+        public static void Start(BusinessAgentRequest request) {
+            string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log" + DateTime.Today.ToString() + ".txt";
             DbLib db = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
@@ -41,9 +42,10 @@ namespace GMS.Business.Agent {
                     // No business found at this url.
                     if (businessProfile == null) {
                         if (request.Operation == Operation.URL_STATE)
-                            db.DeleteUrlByGuid(business.Guid);
+                            db.DeleteBusinessUrlByGuid(business.Guid);
                         else
-                            db.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
+                            if (business.IdEtab != null)
+                                db.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
                         continue;
                     }
 
@@ -51,11 +53,11 @@ namespace GMS.Business.Agent {
                     if (request.Operation == Operation.CATEGORY || request.Operation == Operation.FILE || db.CheckBusinessProfileExist(businessProfile.IdEtab))
                         db.UpdateBusinessProfile(businessProfile);
                     else
-                        db.InsertBusinessProfile(businessProfile);
+                        db.CreateBusinessProfile(businessProfile);
 
                     // Insert Business Score if have one.
                     if (businessScore.Score != null)
-                        db.InsertBusinessScore(businessScore);
+                        db.CreateBusinessScore(businessScore);
 
                     // Getting reviews if option checked.
                     if (request.GetReviews && request.DateLimit != null)
@@ -77,6 +79,7 @@ namespace GMS.Business.Agent {
             try {
                 if (request.Operation == Operation.CATEGORY) {
                     foreach (DbBusinessAgent business in request.BusinessList)
+                        if(business.IdEtab != null)
                         db.UpdateBusinessProfileProcessingState(business.IdEtab, false);
                 }
             } catch (Exception e) {
@@ -99,7 +102,8 @@ namespace GMS.Business.Agent {
                 case Operation.CATEGORY:
                 case Operation.FILE:
                     foreach (DbBusinessAgent business in request.BusinessList)
-                        db.UpdateBusinessProfileProcessingState(business.IdEtab, true);
+                        if(business.IdEtab != null)
+                            db.UpdateBusinessProfileProcessingState(business.IdEtab, true);
                     break;
             }
         }
@@ -274,8 +278,7 @@ namespace GMS.Business.Agent {
             if (reviewList == null)
                 return null;
 
-            IWebElement scrollingPanel = ToolBox.FindElementSafe(driver, XPathReview.scrollingPanel);
-
+            IWebElement? scrollingPanel = ToolBox.FindElementSafe(driver, XPathReview.scrollingPanel);
             IWebElement parent = (IWebElement)((IJavaScriptExecutor)driver).ExecuteScript("return arguments[0].parentNode.parentNode.parentNode;", scrollingPanel);
 
             while (reviewListLength != reviewList.Count) {
@@ -335,7 +338,7 @@ namespace GMS.Business.Agent {
                 try {
                     DbBusinessReview businessReview = GetBusinessReviewsInfosFromReviews(review, businessProfile.IdEtab, dateLimit);
                     if (!db.CheckBusinessReviewExist(businessProfile.IdEtab, businessReview.IdReview))
-                        db.InsertBusinessReview(businessReview);
+                        db.CreateBusinessReview(businessReview);
                 } catch (Exception e) {
                     System.Diagnostics.Debug.WriteLine(e.Message);
                     System.Diagnostics.Debug.WriteLine(e.StackTrace);

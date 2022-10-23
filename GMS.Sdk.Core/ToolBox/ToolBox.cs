@@ -37,7 +37,8 @@ namespace GMS.Sdk.Core.ToolBox {
             int jsonValue = 0;
 
             // Getting value from key googleDate in our Json file.
-            using StreamReader r = new("D:\\Projects\\VASANO\\C#\\GMS-Backend\\GMS.Sdk.Core\\ToolBox\\GoogleDate.json");
+            string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            using StreamReader r = new(path + @"\GMS.Sdk.Core\ToolBox\GoogleDate.json");
             string json = r.ReadToEnd();
 
             try {

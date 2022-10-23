@@ -48,7 +48,13 @@ namespace GMS.Sdk.Core.ToolBox {
             }
         }
 
-        public List<string> GetSector(string sector="Club de sport") {
+        /// <summary>
+        /// Get Categories by given Sector
+        /// </summary>
+        /// <param name="sector"></param>
+        /// <returns>List of Google categories</returns>
+        /// <exception cref="Exception"></exception>
+        public List<string> GetCategoriesBySector(string sector) {
             try {
                 string selectCommand = "SELECT VALEUR FROM vCATEGORIES WHERE SECTEUR = @Sector";
                 using SqlCommand cmd = new(selectCommand, Connection);
@@ -70,11 +76,11 @@ namespace GMS.Sdk.Core.ToolBox {
         #region Business Url
 
         /// <summary>
-        /// Insert a Business Url into DB.
+        /// Create Business Url in DB.
         /// </summary>
         /// <param name="businessUrl"></param>
         /// <exception cref="Exception"></exception>
-        public void InsertBusinessUrl(DbBusinessUrl businessUrl) {
+        public void CreateBusinessUrl(DbBusinessUrl businessUrl) {
             try {
                 string insertCommand = "INSERT INTO BUSINESS_URL VALUES (@Guid, @Url, @DateInsert, @State, @TextSearch, @DateUpdate, @UrlEncoded)";
                 using SqlCommand cmd = new(insertCommand, Connection);
@@ -119,16 +125,16 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Select Business Url (Guid & Url) from DB (used in case of a search by url state).
+        /// Get Business Agent list by url state
         /// </summary>
         /// <param name="urlState"></param>
         /// <param name="entries"></param>
         /// <returns>List of Guid & Url</returns>
         /// <exception cref="Exception"></exception>
-        public List<DbBusinessAgent> GetBusinessList(UrlState urlState, int entries) {
+        public List<DbBusinessAgent> GetBusinessAgentListByUrlState(UrlState urlState, int entries) {
             List<DbBusinessAgent> businessUrlList = new();
             try {
-                string selectCommand = "SELECT TOP (@Entries) ID, GUID, URL FROM BUSINESS_URL WHERE STATE = @UrlState";
+                string selectCommand = "SELECT TOP (@Entries) GUID, URL FROM BUSINESS_URL WHERE STATE = @UrlState";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
                 cmd.Parameters.AddWithValue("@UrlState", urlState.ToString());
@@ -136,10 +142,9 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Dispose();
 
                 while (reader.Read()) {
-                    DbBusinessAgent businessUrl = new((long)reader.GetValue(0), reader.GetValue(1).ToString(), reader.GetValue(2).ToString());
+                    DbBusinessAgent businessUrl = new(reader.GetValue(1).ToString(), reader.GetValue(2).ToString());
                     businessUrlList.Add(businessUrl);
                 }
-
                 return businessUrlList;
             } catch (Exception) {
                 throw new Exception("Failed selecting " + entries.ToString() + " business url for profile agent with state: " + urlState + " from DB");
@@ -147,30 +152,30 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Select Business Url (Guid & Url) from DB (used in case of a search by url state).
+        /// Get Business Agent list by url list
         /// </summary>
         /// <param name="urlState"></param>
         /// <param name="entries"></param>
         /// <returns>List of Guid & Url</returns>
         /// <exception cref="Exception"></exception>
-        public List<DbBusinessAgent> GetBusinessList(List<string> urlList) {
+        public List<DbBusinessAgent> GetBusinessAgentListByUrlList(List<string> urlList) {
             List<DbBusinessAgent> businessUrlList = new();
             string urlEncoded;
 
             foreach (string url in urlList) {
                 try {
                     urlEncoded = ToolBox.ComputeMd5Hash(url);
-                    string selectCommand = "SELECT BU.ID, BU.GUID, BU.URL, BP.ID_ETAB FROM BUSINESS_URL as BU JOIN BUSINESS_PROFILE as BP on BU.GUID = BP.FIRST_GUID WHERE BU.URL_MD5 = @UrlEncoded";
+                    string selectCommand = "SELECT BU.GUID, BU.URL, BP.ID_ETAB FROM BUSINESS_URL as BU JOIN BUSINESS_PROFILE as BP on BU.GUID = BP.FIRST_GUID WHERE BU.URL_MD5 = @UrlEncoded";
                     using SqlCommand cmd = new(selectCommand, Connection);
                     cmd.Parameters.AddWithValue("@UrlEncoded", urlEncoded);
                     using SqlDataReader reader = cmd.ExecuteReader();
                     cmd.Dispose();
 
                     if (reader.Read()) {
-                        DbBusinessAgent businessUrl = new((long)reader.GetValue(0), reader.GetValue(1).ToString(), reader.GetValue(2).ToString(), reader.GetValue(3).ToString());
+                        DbBusinessAgent businessUrl = new(reader.GetValue(1).ToString(), reader.GetValue(2).ToString(), reader.GetValue(3).ToString());
                         businessUrlList.Add(businessUrl);
                     }  
-                } catch (Exception e) {
+                } catch (Exception) {
                     throw new Exception("Failed selecting urls encoded from DB");
                 }
             }
@@ -178,7 +183,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Update Business Url state.
+        /// Update Business Url state in DB
         /// </summary>
         /// <param name="guid"></param>
         /// <param name="state"></param>
@@ -198,12 +203,12 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Get Guid by Url Encoded
+        /// Get Business Url Guid by Url Encoded
         /// </summary>
         /// <param name="urlEncoded"></param>
         /// <returns>Guid</returns>
         /// <exception cref="Exception"></exception>
-        public string? SelectGuidByUrlEncoded(string urlEncoded) {
+        public string? GetBusinessUrlGuidByUrlEncoded(string urlEncoded) {
             try {
                 string selectCommand = "SELECT GUID FROM BUSINESS_URL WHERE URL_MD5 = @UrlEncoded";
                 using SqlCommand cmd = new(selectCommand, Connection);
@@ -220,7 +225,12 @@ namespace GMS.Sdk.Core.ToolBox {
             }
         }
 
-        public void DeleteUrlByGuid(string guid) {
+        /// <summary>
+        /// Delete Business Url by Guid in DB
+        /// </summary>
+        /// <param name="guid"></param>
+        /// <exception cref="Exception"></exception>
+        public void DeleteBusinessUrlByGuid(string guid) {
             try {
                 string deleteCommand = "DELETE FROM BUSINESS_URL WHERE GUID = @Guid";
                 using SqlCommand cmd = new(deleteCommand, Connection);
@@ -238,22 +248,22 @@ namespace GMS.Sdk.Core.ToolBox {
         #region Business Profile
 
         /// <summary>
-        /// Insert a Business Profile into DB.
+        /// Create new Business Profile in DB
         /// </summary>
         /// <param name="businessProfile"></param>
         /// <exception cref="Exception"></exception>
-        public void InsertBusinessProfile(DbBusinessProfile businessProfile) {
+        public void CreateBusinessProfile(DbBusinessProfile businessProfile) {
             try {
                 string insertCommand = "INSERT INTO BUSINESS_PROFILE VALUES (@IdEtab, @FirstGuid, @Name, @Category, @Adress, @Tel, @Website, @Geoloc, @DateInsert, @UpdateCount, @DateUpdate, @Status, @Processing)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@FirstGuid", businessProfile.FirstGuid);
                 cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
-                cmd.Parameters.AddWithValue("@Category", (object)businessProfile.Category ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Adress", (object)businessProfile.Adress ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Tel", (object)businessProfile.Tel ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Website", (object)businessProfile.Website ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Geoloc", (object)businessProfile.Geoloc ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Category", businessProfile.Category as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Adress", businessProfile.Adress as object  ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Tel", businessProfile.Tel as object  ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Website", businessProfile.Website as object  ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Geoloc", businessProfile.Geoloc as object  ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@DateInsert", businessProfile.DateInsert);
                 cmd.Parameters.AddWithValue("@UpdateCount", 0);
                 cmd.Parameters.AddWithValue("@DateUpdate", businessProfile.DateUpdate);
@@ -269,21 +279,19 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Select Business Profile (Guid & Url & IdEtab) from DB.
+        /// Get Business Agent list (only networks) by category
         /// </summary>
         /// <param name="category"></param>
         /// <param name="entries"></param>
-        /// <returns>List of Guid & Url & IdEtab</returns>
+        /// <returns>Business Agent list</returns>
         /// <exception cref="Exception"></exception>
-        public List<DbBusinessAgent> GetBusinessList(string category, int entries) {
+        public List<DbBusinessAgent> GetBusinessAgentListNewtorkByCategory(string category, int entries) {
             List<DbBusinessAgent> businessUrlList = new();
 
             try {
                 string selectCommand =
-                    "SELECT TOP (@Entries) BP.ID, BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
-                    " JOIN BUSINESS_URL as BU ON BP.FIRST_GUID = BU.GUID" +
-                    " JOIN vCATEGORIES as CAT on BP.CATEGORY = CAT.VALEUR" +
-                    " WHERE CAT.SECTEUR = @Category AND BP.PROCESSING = 0";
+                    "SELECT TOP (@Entries) ID_ETAB, URL FROM vBUSINESS_PROFILE_RESEAU" +
+                    "WHERE SECTEUR = @Category";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
@@ -293,7 +301,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Dispose();
 
                 while (reader.Read()) {
-                    DbBusinessAgent businessProfile = new((long)reader.GetValue(0), reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
+                    DbBusinessAgent businessProfile = new(reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
                     businessUrlList.Add(businessProfile);
                 }
 
@@ -306,13 +314,49 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Select Business Profile by Url Encoded.
+        /// Get Business Agent list by category
         /// </summary>
         /// <param name="category"></param>
         /// <param name="entries"></param>
-        /// <returns>List of Guid & Url & IdEtab</returns>
+        /// <returns>Business Agent list</returns>
         /// <exception cref="Exception"></exception>
-        public DbBusinessAgent? GetBusinessByUrlEncoded(string urlEncoded) {
+        public List<DbBusinessAgent> GetBusinessAgentListByCategory(string category, int entries) {
+            List<DbBusinessAgent> businessUrlList = new();
+
+            try {
+                string selectCommand =
+                    "SELECT TOP (@Entries) BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
+                    " JOIN BUSINESS_URL as BU ON BP.FIRST_GUID = BU.GUID" +
+                    " JOIN vCATEGORIES as CAT on BP.CATEGORY = CAT.VALEUR" +
+                    " WHERE CAT.SECTEUR = @Category AND BP.PROCESSING = 0";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Entries", entries);
+                cmd.Parameters.AddWithValue("@Category", category);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+
+                while (reader.Read()) {
+                    DbBusinessAgent businessProfile = new(reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
+                    businessUrlList.Add(businessProfile);
+                }
+
+                return businessUrlList;
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                throw new Exception("Failed fetching " + entries.ToString() + " business url with category: " + category + " from DB");
+            }
+        }
+
+        /// <summary>
+        /// Get Business Agent by Url Encoded
+        /// </summary>
+        /// <param name="urlEncoded"></param>
+        /// <returns>Business Agent or Null if not found</returns>
+        /// <exception cref="Exception"></exception>
+        public DbBusinessAgent? GetBusinessAgentByUrlEncoded(string urlEncoded) {
             try {
                 string selectCommand =
                     "SELECT BP.ID, BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
@@ -325,7 +369,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Dispose();
 
                 while (reader.Read()) {
-                    DbBusinessAgent businessProfile = new((long)reader.GetValue(0), reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
+                    DbBusinessAgent businessProfile = new(reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
                     return businessProfile;
                 }
 
@@ -338,7 +382,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Check if business profile exist in DB.
+        /// Check if business profile exist in DB
         /// </summary>
         /// <param name="idEtab"></param>
         /// <returns>True (exist) or False (doesn't exist)</returns>
@@ -364,7 +408,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Update a Business Profile.
+        /// Update Business Profile in DB
         /// </summary>
         /// <param name="businessProfile"></param>
         /// <exception cref="Exception"></exception>
@@ -372,11 +416,11 @@ namespace GMS.Sdk.Core.ToolBox {
             try {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @Adress, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@Name", (object)businessProfile.Name ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Adress", (object)businessProfile.Adress ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Category", (object)businessProfile.Category ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Tel", (object)businessProfile.Tel ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@Website", (object)businessProfile.Website ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Name", businessProfile.Name as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Adress", businessProfile.Adress as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Category", businessProfile.Category as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Tel", businessProfile.Tel as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Website", businessProfile.Website as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@DateUpdate", businessProfile.DateUpdate);
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
@@ -390,7 +434,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Update Business Profile state.
+        /// Update Business Profile state in DB
         /// </summary>
         /// <param name="idEtab"></param>
         /// <param name="processing"></param>
@@ -410,10 +454,10 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Update Business Profile state.
+        /// Update Business Profile state
         /// </summary>
         /// <param name="idEtab"></param>
-        /// <param name="processing"></param>
+        /// <param name="businessStatus"></param>
         /// <exception cref="Exception"></exception>
         public void UpdateBusinessProfileStatus(string idEtab, BusinessStatus businessStatus) {
             try {
@@ -429,6 +473,12 @@ namespace GMS.Sdk.Core.ToolBox {
             }
         }
 
+        /// <summary>
+        /// Count how many Business Profile exist by category
+        /// </summary>
+        /// <param name="category"></param>
+        /// <returns>Number of Business Profile in DB</returns>
+        /// <exception cref="Exception"></exception>
         public int CountBusinessProfileByCategory(string category) {
             try {
                 string selectCommand =
@@ -455,11 +505,11 @@ namespace GMS.Sdk.Core.ToolBox {
 
         #region Business Score
         /// <summary>
-        /// Insert a Business Score into DB.
+        /// Create Business Score in DB
         /// </summary>
         /// <param name="businessScore"></param>
         /// <exception cref="Exception"></exception>
-        public void InsertBusinessScore(DbBusinessScore businessScore) {
+        public void CreateBusinessScore(DbBusinessScore businessScore) {
             try {
                 string insertCommand = "INSERT INTO BUSINESS_SCORE VALUES (@IdEtab, @Score, @NbReviews, @DateInsert)";
                 using SqlCommand cmd = new(insertCommand, Connection);
@@ -479,11 +529,11 @@ namespace GMS.Sdk.Core.ToolBox {
         #region Business Review
 
         /// <summary>
-        /// Insert a Business Review into DB.
+        /// Create Business Review in DB
         /// </summary>
         /// <param name="businessReview"></param>
         /// <exception cref="Exception"></exception>
-        public void InsertBusinessReview(DbBusinessReview businessReview) {
+        public void CreateBusinessReview(DbBusinessReview businessReview) {
             try {
                 string insertCommand = "INSERT INTO BUSINESS_REVIEWS VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateInsert, @DateUpdate)";
                 using SqlCommand cmd = new(insertCommand, Connection);
@@ -507,7 +557,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Check if a review exist on a Business Profile.
+        /// Check if a review exist on a Business Profile
         /// </summary>
         /// <param name="idEtab"></param>
         /// <param name="idReview"></param>
