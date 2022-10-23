@@ -41,7 +41,7 @@ namespace GMS.Sdk.Core.SeleniumDriver {
                     case DriverType.CHROME:
                     default:
                         ChromeOptions chromeOptions = new();
-                        chromeOptions.AddArguments("-headless");
+                        //chromeOptions.AddArguments("-headless");
                         chromeOptions.AddArguments("--lang=fr");
                         new DriverManager().SetUpDriver(new ChromeConfig());
                         WebDriver = new ChromeDriver(chromeOptions);
@@ -67,6 +67,7 @@ namespace GMS.Sdk.Core.SeleniumDriver {
 
             // Clicking on accept cookies button.
             acceptButton.Click();
+            Thread.Sleep(5000);
         }
 
         /// <summary>

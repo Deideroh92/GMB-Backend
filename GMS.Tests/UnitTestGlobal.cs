@@ -70,7 +70,21 @@ namespace GMS.Tests {
         #endregion
 
         #region BusinessAgent
+
+        /// <summary>
+        /// Getting google infos of Mairie du 1er arrondissement
+        /// </summary>
         [TestMethod]
+        public void TestBusinessProfile() {
+            DbBusinessProfile MairieDu1er = new("123", "123", "Mairie du 1ᵉʳ arrondissement", "Hôtel de ville", "4 Pl. du Louvre, 75001 Paris", "01 44 50 75 01", "https://mairiepariscentre.paris.fr/", null ,null, null, null);
+
+            SeleniumDriver driver = new();
+            
+            (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, "https://www.google.com/maps/place/Mairie+du+1%E1%B5%89%CA%B3+arrondissement/@48.8566099,2.3195451,14z/data=!4m9!1m2!2m1!1smairie+de+paris!3m5!1s0x47e66e216da9fe39:0xd083ed96cb779914!8m2!3d48.860046!4d2.341252!15sCg9tYWlyaWUgZGUgcGFyaXOSAQljaXR5X2hhbGzgAQA", "123");
+
+            Assert.IsTrue(MairieDu1er.Equals(business));
+        }
+
         public void StartAgent(List<DbBusinessAgent> urlList, Operation operation) {
             BusinessAgentRequest request = new(operation, true, null, urlList, DateTime.UtcNow.AddYears(-1));
             BusinessService.Start(request);

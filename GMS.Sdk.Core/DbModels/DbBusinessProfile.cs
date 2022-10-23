@@ -13,7 +13,7 @@
     public class DbBusinessProfile : IEquatable<DbBusinessProfile?> {
         public long Id { get; set; }
         public string IdEtab { get; set; }
-        public string? FirstGuid { get; set; }
+        public string FirstGuid { get; set; }
         public string? Name { get; set; }
         public string? Category { get; set; }
         public string? Adress { get; set; }
@@ -33,18 +33,11 @@
 
         public bool Equals(DbBusinessProfile? other) {
             return other is not null &&
-                   IdEtab == other.IdEtab &&
-                   FirstGuid == other.FirstGuid &&
                    Name == other.Name &&
                    Category == other.Category &&
                    Adress == other.Adress &&
                    Tel == other.Tel &&
-                   Website == other.Website &&
-                   Geoloc == other.Geoloc &&
-                   DateInsert == other.DateInsert &&
-                   DateUpdate == other.DateUpdate &&
-                   Status == other.Status &&
-                   Processing == other.Processing;
+                   Website == other.Website;
         }
 
         public override int GetHashCode() {
@@ -82,7 +75,7 @@
         /// <param name="dateUpdate"></param>
         /// <param name="status"></param>
         /// <param name="processing"></param>
-        public DbBusinessProfile(string idEtab, string? firstGuid, string? name, string? category, string? adress, string? tel, string? website, string? geoloc, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus? status, bool processing = false) {
+        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? adress, string? tel, string? website, string? geoloc, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus? status, bool processing = false) {
             IdEtab = idEtab;
             FirstGuid = firstGuid;
             Name = name;
