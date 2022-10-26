@@ -143,7 +143,7 @@ namespace GMS.Tests {
 
         [TestMethod]
         public void ThreadsUrlList() {
-            int nbThreads = 8
+            int nbThreads = 8;
             string[] urlList = File.ReadAllLines(pathUrlFile);
             List<Task> tasks = new();
 
