@@ -282,19 +282,26 @@ namespace GMS.Business.Agent {
                 return null;
 
             IWebElement? scrollingPanel = ToolBox.FindElementSafe(driver, XPathReview.scrollingPanel);
-            IWebElement parent = (IWebElement)((IJavaScriptExecutor)driver).ExecuteScript("return arguments[0].parentNode.parentNode.parentNode;", scrollingPanel);
 
-            while (reviewListLength != reviewList.Count) {
-                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
-                Thread.Sleep(2000);
-                reviewListLength = reviewList.Count;
-                reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList, XPathReview.reviewList2);
-                if (ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathReview.googleDate))) {
-                    reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate).Text.Trim();
-                    if (ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate) < dateLimit)
-                        break;
-                }
-            };
+            try {
+                IWebElement parent = (IWebElement)((IJavaScriptExecutor)driver).ExecuteScript("return arguments[0].parentNode.parentNode.parentNode;", scrollingPanel);
+                while (reviewListLength != reviewList.Count) {
+                    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
+                    Thread.Sleep(2000);
+                    reviewListLength = reviewList.Count;
+                    reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList, XPathReview.reviewList2);
+                    if (ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathReview.googleDate))) {
+                        reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate).Text.Trim();
+                        if (ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate) < dateLimit)
+                            break;
+                    }
+                };
+            } catch (Exception e) {
+                if (e.Message.Contains("javascript error: Cannot read properties of null (reading 'parentNode')"))
+                    return null;
+                else
+                    throw new Exception();
+            }
 
             return reviewList;
         }

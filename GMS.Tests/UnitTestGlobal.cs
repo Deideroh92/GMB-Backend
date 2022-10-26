@@ -10,9 +10,8 @@ namespace GMS.Tests {
     [TestClass]
     public class UnitTestGlobal {
 
-        public static readonly string pathUrlFile = @"";
-        public static readonly string pathLogFile = @"";
-        public static readonly string category = "AGENCE IMMOBILIERE";
+        public static readonly string pathUrlFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url" + DateTime.Today.ToString() + ".txt";
+        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log" + DateTime.Today.ToString() + ".txt";
 
         #region All
         [TestMethod]
@@ -123,42 +122,15 @@ namespace GMS.Tests {
             return (businessList, urlNotFound);
         }
 
-        #region THREAD
-        [TestMethod]
-        public void OneThreadCategory() {
-
-            List<DbBusinessAgent> list = GetBusinessAgentListFromCategory(category, 100);
-            StartAgent(new List<DbBusinessAgent>(list), Operation.CATEGORY);
-            return;
-        }
-
-        [TestMethod]
-        public void OneThreadUrlList() {
-
-            string[] urlList = File.ReadAllLines(pathUrlFile);
-            (List<DbBusinessAgent> bussinessList, List<string> urlNotFound) = GetBusinessAgentListFromUrlFile(urlList);
-            StartAgent(new List<DbBusinessAgent>(bussinessList), Operation.FILE);
-            return;
-        }
-
-        [TestMethod]
-        public void OneThreadUrlState() {
-
-            List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, 100);
-            StartAgent(new List<DbBusinessAgent>(list), Operation.URL_STATE);
-            return;
-        }
-        #endregion
         #region THREADS
         /// <summary>
         /// STARTING APP
         /// </summary>
         [TestMethod]
-        public void FourThreadsCategory() {
+        public void ThreadsCategory(int nbThreads = 8, int nbEntries = 38021, string category = "AGENCE IMMOBILIERE") {
             List<Task> tasks = new();
-            int nb = 38021;
-            List<DbBusinessAgent> list = GetBusinessAgentListFromCategory(category, nb);
-            foreach (var chunk in list.Chunk(nb/4)) {
+            List<DbBusinessAgent> list = GetBusinessAgentListFromCategory(category, nbEntries);
+            foreach (var chunk in list.Chunk(nbEntries / nbThreads)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.CATEGORY); });
                 tasks.Add(newThread);
             }
@@ -167,7 +139,7 @@ namespace GMS.Tests {
         }
 
         [TestMethod]
-        public void FourThreadsUrlList() {
+        public void ThreadsUrlList(int nbThreads = 8) {
             string[] urlList = File.ReadAllLines(pathUrlFile);
             List<Task> tasks = new();
 
@@ -180,7 +152,7 @@ namespace GMS.Tests {
             using StreamWriter sw2 = File.AppendText(pathLogFile);
             sw2.WriteLine("\n\nStarting selenium process !\n\n");
 
-            foreach (var chunk in bussinessList.Chunk(bussinessList.Count / 4)) {
+            foreach (var chunk in bussinessList.Chunk(bussinessList.Count / nbThreads)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.FILE); });
                 tasks.Add(newThread);
             }
@@ -189,10 +161,10 @@ namespace GMS.Tests {
         }
 
         [TestMethod]
-        public void FourThreadsUrlState() {
+        public void ThreadsUrlState(int nbThreads = 8, UrlState state = UrlState.NEW, int nbEntries = 100) {
             List<Task> tasks = new();
-            List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, 100);
-            foreach (var chunk in list.Chunk(list.Count / 4)) {
+            List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, nbEntries);
+            foreach (var chunk in list.Chunk(list.Count / nbThreads)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.URL_STATE); });
                 tasks.Add(newThread);
             }
