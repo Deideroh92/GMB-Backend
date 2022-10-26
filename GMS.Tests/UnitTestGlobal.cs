@@ -127,7 +127,10 @@ namespace GMS.Tests {
         /// STARTING APP
         /// </summary>
         [TestMethod]
-        public void ThreadsCategory(int nbThreads = 8, int nbEntries = 38021, string category = "AGENCE IMMOBILIERE") {
+        public void ThreadsCategory() {
+            int nbThreads = 8;
+            int nbEntries = 38021;
+            string category = "AGENCE IMMOBILIERE";
             List<Task> tasks = new();
             List<DbBusinessAgent> list = GetBusinessAgentListFromCategory(category, nbEntries);
             foreach (var chunk in list.Chunk(nbEntries / nbThreads)) {
@@ -139,7 +142,8 @@ namespace GMS.Tests {
         }
 
         [TestMethod]
-        public void ThreadsUrlList(int nbThreads = 8) {
+        public void ThreadsUrlList() {
+            int nbThreads = 8
             string[] urlList = File.ReadAllLines(pathUrlFile);
             List<Task> tasks = new();
 
@@ -161,7 +165,10 @@ namespace GMS.Tests {
         }
 
         [TestMethod]
-        public void ThreadsUrlState(int nbThreads = 8, UrlState state = UrlState.NEW, int nbEntries = 100) {
+        public void ThreadsUrlState() {
+            int nbThreads = 8;
+            UrlState state = UrlState.NEW;
+            int nbEntries = 100;
             List<Task> tasks = new();
             List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, nbEntries);
             foreach (var chunk in list.Chunk(list.Count / nbThreads)) {
