@@ -10,7 +10,7 @@ namespace GMS.Tests {
     [TestClass]
     public class UnitTestGlobal {
 
-        public static readonly string pathUrlFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url" + DateTime.Today.ToString() + ".txt";
+        public static readonly string pathUrlFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
         public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log" + DateTime.Today.ToString() + ".txt";
 
         #region All
