@@ -338,7 +338,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Dispose();
 
                 while (reader.Read()) {
-                    DbBusinessAgent businessProfile = new(reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
+                    DbBusinessAgent businessProfile = new(reader.GetValue(1).ToString(), reader.GetValue(2).ToString(), reader.GetValue(0).ToString());
                     businessUrlList.Add(businessProfile);
                 }
 

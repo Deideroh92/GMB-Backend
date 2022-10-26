@@ -40,7 +40,6 @@ namespace GMS.Sdk.Core.XPath {
         public static readonly By googleDate = By.XPath(".//span[contains(text(), 'il y a')]");
         public static readonly By userName = By.XPath(".//a[contains(@aria-label, 'Photo de')]");
         public static readonly By score = By.XPath(".//span[contains(@role, 'img')]");
-        public static readonly By localGuide = By.XPath("//button[contains(@jsaction, 'pane.rating.moreReviews')]");
         public static readonly By userNbReviews = By.XPath(".//span[contains(text(), 'Guide')]" + "/following::span");
         public static readonly By text = By.XPath(".//div[contains(@class, 'MyEned')]");
 

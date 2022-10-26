@@ -8,6 +8,7 @@ using OpenQA.Selenium.DevTools;
 using System.Collections.ObjectModel;
 using System.Drawing;
 using System.Globalization;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace GMS.Business.Agent {
@@ -77,7 +78,7 @@ namespace GMS.Business.Agent {
             }
 
             try {
-                if (request.Operation == Operation.CATEGORY) {
+                if (request.Operation == Operation.CATEGORY || request.Operation == Operation.FILE) {
                     foreach (DbBusinessAgent business in request.BusinessList)
                         if(business.IdEtab != null)
                         db.UpdateBusinessProfileProcessingState(business.IdEtab, false);
@@ -194,7 +195,9 @@ namespace GMS.Business.Agent {
 
             // User
             string? userName = null;
-            bool localGuide = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.localGuide));
+            bool localGuide = false;
+            if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)))
+                localGuide = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Contains('·');
             int userNbReviews;
 
             // Review
