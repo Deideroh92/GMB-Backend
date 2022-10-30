@@ -11,7 +11,7 @@ namespace GMS.Tests {
     public class UnitTestGlobal {
 
         public static readonly string pathUrlFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
-        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log" + DateTime.Today.ToString() + ".txt";
+        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy") + ".txt";
 
         #region All
         [TestMethod]
@@ -136,6 +136,7 @@ namespace GMS.Tests {
             foreach (var chunk in list.Chunk(nbEntries / nbThreads)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.CATEGORY); });
                 tasks.Add(newThread);
+                Thread.Sleep(2000);
             }
             Task.WaitAll(tasks.ToArray());
             return;
@@ -159,6 +160,7 @@ namespace GMS.Tests {
             foreach (var chunk in bussinessList.Chunk(bussinessList.Count / nbThreads)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.FILE); });
                 tasks.Add(newThread);
+                Thread.Sleep(2000);
             }
             Task.WaitAll(tasks.ToArray());
             return;
@@ -174,6 +176,7 @@ namespace GMS.Tests {
             foreach (var chunk in list.Chunk(list.Count / nbThreads)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.URL_STATE); });
                 tasks.Add(newThread);
+                Thread.Sleep(2000);
             }
             Task.WaitAll(tasks.ToArray());
             return;

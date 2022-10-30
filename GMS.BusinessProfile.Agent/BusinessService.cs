@@ -25,7 +25,7 @@ namespace GMS.Business.Agent {
         /// <param name="request"></param>
         /// <exception cref="Exception"></exception>
         public static void Start(BusinessAgentRequest request) {
-            string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log" + DateTime.Today.ToString() + ".txt";
+            string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
             DbLib db = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
