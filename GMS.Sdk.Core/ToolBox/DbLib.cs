@@ -285,7 +285,7 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <param name="entries"></param>
         /// <returns>Business Agent list</returns>
         /// <exception cref="Exception"></exception>
-        public List<DbBusinessAgent> GetBusinessAgentListNewtorkByCategory(string category, int entries) {
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkByCategory(string category, int entries) {
             List<DbBusinessAgent> businessUrlList = new();
 
             try {
@@ -310,6 +310,37 @@ namespace GMS.Sdk.Core.ToolBox {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
                 throw new Exception("Failed fetching " + entries.ToString() +  " business url with category: " + category + " from DB");
+            }
+        }
+
+        /// <summary>
+        /// Get Business Agent list (only networks)
+        /// </summary>
+        /// <param name="entries"></param>
+        /// <returns>Business Agent list</returns>
+        /// <exception cref="Exception"></exception>
+        public List<DbBusinessAgent> GetBusinessAgentListNetwork(int entries) {
+            List<DbBusinessAgent> businessUrlList = new();
+
+            try {
+                string selectCommand = "SELECT TOP (@Entries) ID_ETAB, URL FROM vBUSINESS_PROFILE_RESEAU";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Entries", entries);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+
+                while (reader.Read()) {
+                    DbBusinessAgent businessProfile = new(reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
+                    businessUrlList.Add(businessProfile);
+                }
+
+                return businessUrlList;
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                throw new Exception("Failed fetching " + entries.ToString() + " business url from DB");
             }
         }
 

@@ -89,9 +89,16 @@ namespace GMS.Tests {
             BusinessService.Start(request);
         }
 
-        public List<DbBusinessAgent> GetBusinessAgentListFromCategory(string category, int entries) {
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkFromCategory(string category, int entries) {
             DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessAgentListByCategory(category, entries);
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkByCategory(category, entries);
+            db.DisconnectFromDB();
+            return businessList;
+        }
+
+        public List<DbBusinessAgent> GetBusinessAgentListNetwork(int entries) {
+            DbLib db = new();
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetwork(entries);
             db.DisconnectFromDB();
             return businessList;
         }
@@ -129,10 +136,13 @@ namespace GMS.Tests {
         [TestMethod]
         public void ThreadsCategory() {
             int nbThreads = 8;
-            int nbEntries = 38021;
-            string category = "AGENCE IMMOBILIERE";
+            int nbEntries = 137303;
             List<Task> tasks = new();
-            List<DbBusinessAgent> list = GetBusinessAgentListFromCategory(category, nbEntries);
+
+            //string category = "AGENCE IMMOBILIERE";
+            //List<DbBusinessAgent> list = GetBusinessAgentListNetworkFromCategory(category, nbEntries);
+
+            List<DbBusinessAgent> list = GetBusinessAgentListNetwork(nbEntries);
             foreach (var chunk in list.Chunk(nbEntries / nbThreads)) {
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.CATEGORY); });
                 tasks.Add(newThread);
@@ -144,7 +154,7 @@ namespace GMS.Tests {
 
         [TestMethod]
         public void ThreadsUrlList() {
-            int nbThreads = 8;
+            int nbThreads = 1;
             string[] urlList = File.ReadAllLines(pathUrlFile);
             List<Task> tasks = new();
 
