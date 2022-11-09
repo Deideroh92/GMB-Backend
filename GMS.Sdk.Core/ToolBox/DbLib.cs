@@ -69,7 +69,7 @@ namespace GMS.Sdk.Core.ToolBox {
 
                 return categories;
             } catch (Exception) {
-                throw new Exception("Failed getting guid from url encoded :  " + sector);
+                throw new Exception("Failed getting categories from sector :  " + sector);
             }
         }
 
@@ -132,7 +132,7 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <returns>List of Guid & Url</returns>
         /// <exception cref="Exception"></exception>
         public List<DbBusinessAgent> GetBusinessAgentListByUrlState(UrlState urlState, int entries) {
-            List<DbBusinessAgent> businessUrlList = new();
+            List<DbBusinessAgent> businessAgentList = new();
             try {
                 string selectCommand = "SELECT TOP (@Entries) GUID, URL FROM BUSINESS_URL WHERE STATE = @UrlState";
                 using SqlCommand cmd = new(selectCommand, Connection);
@@ -142,10 +142,10 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Dispose();
 
                 while (reader.Read()) {
-                    DbBusinessAgent businessUrl = new(reader.GetValue(1).ToString(), reader.GetValue(2).ToString());
-                    businessUrlList.Add(businessUrl);
+                    DbBusinessAgent business = new(reader.GetValue(0).ToString(), reader.GetValue(1).ToString());
+                    businessAgentList.Add(business);
                 }
-                return businessUrlList;
+                return businessAgentList;
             } catch (Exception) {
                 throw new Exception("Failed selecting " + entries.ToString() + " business url for profile agent with state: " + urlState + " from DB");
             }
@@ -154,8 +154,6 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <summary>
         /// Get Business Agent list by url list
         /// </summary>
-        /// <param name="urlState"></param>
-        /// <param name="entries"></param>
         /// <returns>List of Guid & Url</returns>
         /// <exception cref="Exception"></exception>
         public List<DbBusinessAgent> GetBusinessAgentListByUrlList(List<string> urlList) {
@@ -290,7 +288,7 @@ namespace GMS.Sdk.Core.ToolBox {
 
             try {
                 string selectCommand =
-                    "SELECT TOP (@Entries) ID_ETAB, URL FROM vBUSINESS_PROFILE_RESEAU" +
+                    "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU" +
                     "WHERE SECTEUR = @Category";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
@@ -301,7 +299,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Dispose();
 
                 while (reader.Read()) {
-                    DbBusinessAgent businessProfile = new(reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
+                    DbBusinessAgent businessProfile = new(null, reader.GetValue(0).ToString(), reader.GetValue(1).ToString());
                     businessUrlList.Add(businessProfile);
                 }
 
@@ -323,7 +321,7 @@ namespace GMS.Sdk.Core.ToolBox {
             List<DbBusinessAgent> businessUrlList = new();
 
             try {
-                string selectCommand = "SELECT TOP (@Entries) ID_ETAB, URL FROM vBUSINESS_PROFILE_RESEAU";
+                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
@@ -332,7 +330,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Dispose();
 
                 while (reader.Read()) {
-                    DbBusinessAgent businessProfile = new(reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
+                    DbBusinessAgent businessProfile = new(null, reader.GetValue(0).ToString(), reader.GetValue(1).ToString());
                     businessUrlList.Add(businessProfile);
                 }
 
