@@ -51,17 +51,17 @@ namespace GMS.Tests {
         public void TestUrlFinderService() {
             List<string> textSearch = new()
             {
-                "bred", "credit agricole", "lcl"
+                "Agences Immobilières", "Agent immobilier", "Agents immobiliers", "Fournisseur d'équipements médicaux", "Magasin de matériel médical", "Parapharmacie", "Pharmacie\r\n"
             };
 
             List<string> locations = new()
             {
-                "Paris", "53000"
+                "97600", "97200", "97300", "97500", "97100", "97600", "98600", "98700"
             };
             foreach (string search in textSearch) {
                 foreach (string location in locations) {
-                    string searchString = search.Replace(' ', '+') + location.Replace(' ', '+');
-                    UrlAgentRequest request = new(searchString, DriverType.CHROME);
+                    string searchString = search.Replace(' ', '+') + '+' + location.Replace(' ', '+');
+                    UrlAgentRequest request = new(searchString);
                     UrlService.Start(request);
                 }
             }

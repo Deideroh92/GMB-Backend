@@ -22,8 +22,9 @@ namespace GMS.Url.Agent {
         public static void Start(UrlAgentRequest request) {
             DbLib dbLib = new();
             SeleniumDriver driver = new(DriverType.CHROME);
+            string url = "https://www.google.com/maps/search/" + request.TextSearch;
             try {
-                driver.GetToPage(request.TextSearch);
+                driver.GetToPage(url);
                 GetUrls(driver.WebDriver, request.TextSearch, dbLib);
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.Message);
@@ -48,22 +49,16 @@ namespace GMS.Url.Agent {
             string url;
 
             // Scrolling to the end of the page to get all businesses loaded.
-            ScrollIntoBusinessUrls(driver);
-
-            // Getting url of every businesses.
-            if (!ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathUrl.businessList)))
-                return;
-            
-            ReadOnlyCollection<IWebElement>? businessList = ToolBox.FindElementsSafe(driver, XPathUrl.businessList);
+            ReadOnlyCollection<IWebElement>? businessList = ScrollIntoBusinessUrls(driver);
             foreach (IWebElement business in businessList) {
                 name = business.Text.Split('\n')[0].Replace("\r", "");
                 if (!ToolBox.Exists(ToolBox.FindElementSafe(business, By.XPath(".//a[contains(@aria-label, '" + name + "')]"))))
-                    break;
+                    continue;
                 url = ToolBox.FindElementSafe(business, By.XPath(".//a[contains(@aria-label, '" + name + "')]")).GetAttribute("href").Replace("?authuser=0&hl=fr&rclk=1", "");
-                DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, DateTime.UtcNow, urlState, textSearch, DateTime.UtcNow, ToolBox.ComputeMd5Hash(url));
 
                 try {
-                    if (!dbLib.CheckBusinessUrlExist(businessUrl.UrlEncoded)) {
+                    if (!dbLib.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(url))) {
+                        DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, DateTime.UtcNow, urlState, textSearch, DateTime.UtcNow, ToolBox.ComputeMd5Hash(url));
                         dbLib.CreateBusinessUrl(businessUrl);
                         System.Diagnostics.Debug.WriteLine("New url added in DB.");
                     } else
@@ -79,16 +74,29 @@ namespace GMS.Url.Agent {
         /// Scroll into business list.
         /// </summary>
         /// <param name="driver"></param>
-        public static void ScrollIntoBusinessUrls(IWebDriver driver) {
+        public static ReadOnlyCollection<IWebElement>? ScrollIntoBusinessUrls(IWebDriver driver) {
             if (!ToolBox.Exists(ToolBox.FindElementSafe(driver, XPathUrl.body)))
-                return;
+                return null;
+
+            if (!ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathUrl.businessList)))
+                return null;
 
             IWebElement? body = ToolBox.FindElementSafe(driver, XPathUrl.body);
+            ReadOnlyCollection<IWebElement>? businessList = ToolBox.FindElementsSafe(driver, XPathUrl.businessList);
+            int? length;
             do {
+                length = businessList?.Count();
                 ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
                 Thread.Sleep(1000);
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
+                Thread.Sleep(1000);
+                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
+                Thread.Sleep(1000);
+                //businessList = ToolBox.FindElementsSafe(driver, XPathUrl.businessList);
             }
-            while (!ToolBox.Exists(ToolBox.FindElementSafe(driver, XPathUrl.endOfList)));
+            while (length != businessList?.Count());
+
+            return businessList;
         }
         #endregion
     }
