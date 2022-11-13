@@ -315,7 +315,7 @@ namespace GMS.Business.Agent {
             try {
                 ToolBox.FindElementSafe(driver, XPathReview.sortReviews).Click();
                 Thread.Sleep(1000);
-                ToolBox.FindElementSafe(driver, XPathReview.sortReviews2).Click();
+                ToolBox.FindElementSafe(driver, XPathReview.sortReviews2, XPathReview.sortReviews2bis).Click();
                 Thread.Sleep(1000);
             } catch(Exception) {
                 throw new Exception("Couldn't sort");

@@ -32,6 +32,7 @@ namespace GMS.Sdk.Core.XPath {
         public static readonly By toReviewsPage = By.XPath("//div[@jsaction=\'pane.rating.moreReviews\']");
         public static readonly By sortReviews = By.XPath("//button[@data-value='Trier']");
         public static readonly By sortReviews2 = By.XPath("//li[@data-index='1']");
+        public static readonly By sortReviews2bis = By.XPath("//div[@data-index='1']");
         public static readonly By reviewList = By.XPath("//div[@jsaction=\'mouseover:pane.review.in;mouseout:pane.review.out\']");
         public static readonly By reviewList2 = By.XPath("//div[@tabindex='-1']");
         public static readonly By scrollingPanel = By.XPath("//button[@aria-label='Rédiger un avis']");
