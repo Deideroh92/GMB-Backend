@@ -49,16 +49,16 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Get Categories by given Sector
+        /// Get Categories by given Activity.
         /// </summary>
-        /// <param name="sector"></param>
+        /// <param name="activity"></param>
         /// <returns>List of Google categories</returns>
         /// <exception cref="Exception"></exception>
-        public List<string> GetCategoriesBySector(string sector) {
+        public List<string> GetCategoriesByActivity(string activity) {
             try {
-                string selectCommand = "SELECT VALEUR FROM vCATEGORIES WHERE SECTEUR = @Sector";
+                string selectCommand = "SELECT VALEUR FROM vCATEGORIES WHERE ACTIVITE = @Activity";
                 using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@Sector", sector);
+                cmd.Parameters.AddWithValue("@Activity", activity);
                 using SqlDataReader reader = cmd.ExecuteReader();
                 cmd.Dispose();
 
@@ -69,14 +69,14 @@ namespace GMS.Sdk.Core.ToolBox {
 
                 return categories;
             } catch (Exception) {
-                throw new Exception("Failed getting categories from sector :  " + sector);
+                throw new Exception("Failed getting categories with activity : " + activity);
             }
         }
 
         #region Business Url
 
         /// <summary>
-        /// Create Business Url in DB.
+        /// Create Business Url.
         /// </summary>
         /// <param name="businessUrl"></param>
         /// <exception cref="Exception"></exception>
@@ -99,7 +99,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Check if url exist in DB.
+        /// Check if url exist.
         /// </summary>
         /// <param name="urlEncoded"></param>
         /// <returns>True (exist) or False (doesn't exist)</returns>
@@ -125,11 +125,11 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Get Business Agent list by url state
+        /// Get Business Agent list by url state.
         /// </summary>
         /// <param name="urlState"></param>
         /// <param name="entries"></param>
-        /// <returns>List of Guid & Url</returns>
+        /// <returns>List of Bussiness Agent</returns>
         /// <exception cref="Exception"></exception>
         public List<DbBusinessAgent> GetBusinessAgentListByUrlState(UrlState urlState, int entries) {
             List<DbBusinessAgent> businessAgentList = new();
@@ -152,36 +152,67 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Get Business Agent list by url list
+        /// Get Business Agent list by url list (Networks only).
         /// </summary>
-        /// <returns>List of Guid & Url</returns>
+        /// <param name="urlList"></param>
+        /// <returns>List of Business Agentl</returns>
         /// <exception cref="Exception"></exception>
-        public List<DbBusinessAgent> GetBusinessAgentListByUrlList(List<string> urlList) {
-            List<DbBusinessAgent> businessUrlList = new();
+        public List<DbBusinessAgent> GetBusinessAgentNetworkListByUrlList(List<string> urlList) {
+            List<DbBusinessAgent> businessAgentList = new();
             string urlEncoded;
 
             foreach (string url in urlList) {
                 try {
                     urlEncoded = ToolBox.ComputeMd5Hash(url);
-                    string selectCommand = "SELECT BU.GUID, BU.URL, BP.ID_ETAB FROM BUSINESS_URL as BU JOIN BUSINESS_PROFILE as BP on BU.GUID = BP.FIRST_GUID WHERE BU.URL_MD5 = @UrlEncoded";
+                    string selectCommand = "SELECT GUID, URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU WHERE URL_MD5 = @UrlEncoded";
                     using SqlCommand cmd = new(selectCommand, Connection);
                     cmd.Parameters.AddWithValue("@UrlEncoded", urlEncoded);
                     using SqlDataReader reader = cmd.ExecuteReader();
                     cmd.Dispose();
 
                     if (reader.Read()) {
-                        DbBusinessAgent businessUrl = new(reader.GetValue(1).ToString(), reader.GetValue(2).ToString(), reader.GetValue(3).ToString());
-                        businessUrlList.Add(businessUrl);
+                        DbBusinessAgent business = new(reader.GetValue(0).ToString(), reader.GetValue(1).ToString(), reader.GetValue(2).ToString());
+                        businessAgentList.Add(business);
                     }  
                 } catch (Exception) {
                     throw new Exception("Failed selecting urls encoded from DB");
                 }
             }
-            return businessUrlList;
+            return businessAgentList;
         }
 
         /// <summary>
-        /// Update Business Url state in DB
+        /// Get Business Agent list by url list (Excluding networks).
+        /// </summary>
+        /// <param name="urlList"></param>
+        /// <returns>List of Business Agent</returns>
+        /// <exception cref="Exception"></exception>
+        public List<DbBusinessAgent> GetBusinessAgentIndependantListByUrlList(List<string> urlList) {
+            List<DbBusinessAgent> businessAgentList = new();
+            string urlEncoded;
+
+            foreach (string url in urlList) {
+                try {
+                    urlEncoded = ToolBox.ComputeMd5Hash(url);
+                    string selectCommand = "SELECT GUID, URL, ID_ETAB FROM vBUSINESS_PROFILE_HORS_RESEAU WHERE URL_MD5 = @UrlEncoded";
+                    using SqlCommand cmd = new(selectCommand, Connection);
+                    cmd.Parameters.AddWithValue("@UrlEncoded", urlEncoded);
+                    using SqlDataReader reader = cmd.ExecuteReader();
+                    cmd.Dispose();
+
+                    if (reader.Read()) {
+                        DbBusinessAgent business = new(reader.GetValue(0).ToString(), reader.GetValue(1).ToString(), reader.GetValue(2).ToString());
+                        businessAgentList.Add(business);
+                    }
+                } catch (Exception) {
+                    throw new Exception("Failed selecting urls encoded from DB");
+                }
+            }
+            return businessAgentList;
+        }
+
+        /// <summary>
+        /// Update Business Url state.
         /// </summary>
         /// <param name="guid"></param>
         /// <param name="state"></param>
@@ -201,7 +232,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Get Business Url Guid by Url Encoded
+        /// Get Business Url Guid by Url Encoded.
         /// </summary>
         /// <param name="urlEncoded"></param>
         /// <returns>Guid</returns>
@@ -224,7 +255,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Delete Business Url by Guid in DB
+        /// Delete Business Url by Guid.
         /// </summary>
         /// <param name="guid"></param>
         /// <exception cref="Exception"></exception>
@@ -246,7 +277,7 @@ namespace GMS.Sdk.Core.ToolBox {
         #region Business Profile
 
         /// <summary>
-        /// Create new Business Profile in DB
+        /// Create new Business Profile.
         /// </summary>
         /// <param name="businessProfile"></param>
         /// <exception cref="Exception"></exception>
@@ -272,16 +303,16 @@ namespace GMS.Sdk.Core.ToolBox {
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Couldn't insert business profile with guid: " + businessProfile.FirstGuid + " and with IdEtab: " + businessProfile.IdEtab + " in DB");
+                throw new Exception("Couldn't create business profile with guid: " + businessProfile.FirstGuid + " and with IdEtab: " + businessProfile.IdEtab + " in DB");
             }
         }
 
         /// <summary>
-        /// Get Business Agent list (only networks) by category
+        /// Get Business Agent list by Category (Networks only).
         /// </summary>
         /// <param name="category"></param>
         /// <param name="entries"></param>
-        /// <returns>Business Agent list</returns>
+        /// <returns>List of Business Agent</returns>
         /// <exception cref="Exception"></exception>
         public List<DbBusinessAgent> GetBusinessAgentListNetworkByCategory(string category, int entries) {
             List<DbBusinessAgent> businessUrlList = new();
@@ -289,7 +320,7 @@ namespace GMS.Sdk.Core.ToolBox {
             try {
                 string selectCommand =
                     "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU" +
-                    "WHERE SECTEUR = @Category";
+                    "WHERE CATEGORY = @Category";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
@@ -307,15 +338,155 @@ namespace GMS.Sdk.Core.ToolBox {
             } catch (Exception e) {
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching " + entries.ToString() +  " business url with category: " + category + " from DB");
+                throw new Exception("Failed fetching " + entries.ToString() +  " business agent with category: " + category + " from DB");
             }
         }
 
         /// <summary>
-        /// Get Business Agent list (only networks)
+        /// Get Business Agent list by Activity (Networks only).
+        /// </summary>
+        /// <param name="activity"></param>
+        /// <param name="entries"></param>
+        /// <returns>List of Business Agent</returns>
+        /// <exception cref="Exception"></exception>
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkByActivity(string activity, int entries) {
+            List<DbBusinessAgent> businessUrlList = new();
+
+            try {
+                string selectCommand =
+                    "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU" +
+                    "WHERE ACTIVITE = @Activity";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Entries", entries);
+                cmd.Parameters.AddWithValue("@Activity", activity);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+
+                while (reader.Read()) {
+                    DbBusinessAgent businessProfile = new(null, reader.GetValue(0).ToString(), reader.GetValue(1).ToString());
+                    businessUrlList.Add(businessProfile);
+                }
+
+                return businessUrlList;
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                throw new Exception("Failed fetching " + entries.ToString() + " business url with category: " + activity + " from DB");
+            }
+        }
+
+        /// <summary>
+        /// Get Business Agent list by Sector (Networks only).
+        /// </summary>
+        /// <param name="sector"></param>
+        /// <param name="entries"></param>
+        /// <returns>List of Business Agent</returns>
+        /// <exception cref="Exception"></exception>
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkBySector(string sector, int entries) {
+            List<DbBusinessAgent> businessUrlList = new();
+
+            try {
+                string selectCommand =
+                    "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU" +
+                    "WHERE SECTEUR = @Sector";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Entries", entries);
+                cmd.Parameters.AddWithValue("@Sector", sector);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+
+                while (reader.Read()) {
+                    DbBusinessAgent businessProfile = new(null, reader.GetValue(0).ToString(), reader.GetValue(1).ToString());
+                    businessUrlList.Add(businessProfile);
+                }
+
+                return businessUrlList;
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                throw new Exception("Failed fetching " + entries.ToString() + " business url with category: " + sector + " from DB");
+            }
+        }
+
+        /// <summary>
+        /// Get Business Agent list by Univers (Networks only).
+        /// </summary>
+        /// <param name="univers"></param>
+        /// <param name="entries"></param>
+        /// <returns>List of Business Agent</returns>
+        /// <exception cref="Exception"></exception>
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkByUnivers(string univers, int entries) {
+            List<DbBusinessAgent> businessUrlList = new();
+
+            try {
+                string selectCommand =
+                    "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU" +
+                    "WHERE UNIVERS = @Univers";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Entries", entries);
+                cmd.Parameters.AddWithValue("@Univers", univers);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+
+                while (reader.Read()) {
+                    DbBusinessAgent businessProfile = new(null, reader.GetValue(0).ToString(), reader.GetValue(1).ToString());
+                    businessUrlList.Add(businessProfile);
+                }
+
+                return businessUrlList;
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                throw new Exception("Failed fetching " + entries.ToString() + " business url with univers: " + univers + " from DB");
+            }
+        }
+
+        /// <summary>
+        /// Get Business Agent list by Brand (Networks only).
+        /// </summary>
+        /// <param name="brand"></param>
+        /// <param name="entries"></param>
+        /// <returns>List of Business Agent</returns>
+        /// <exception cref="Exception"></exception>
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkByBrand(string brand, int entries) {
+            List<DbBusinessAgent> businessUrlList = new();
+
+            try {
+                string selectCommand =
+                    "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU" +
+                    "WHERE MARQUE = @Brand";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Entries", entries);
+                cmd.Parameters.AddWithValue("@Brand", brand);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+
+                while (reader.Read()) {
+                    DbBusinessAgent businessProfile = new(null, reader.GetValue(0).ToString(), reader.GetValue(1).ToString());
+                    businessUrlList.Add(businessProfile);
+                }
+
+                return businessUrlList;
+            } catch (Exception e) {
+                System.Diagnostics.Debug.WriteLine(e.Message);
+                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                throw new Exception("Failed fetching " + entries.ToString() + " business url with brand: " + brand + " from DB");
+            }
+        }
+
+        /// <summary>
+        /// Get Business Agent list (Networks only).
         /// </summary>
         /// <param name="entries"></param>
-        /// <returns>Business Agent list</returns>
+        /// <returns>List of Business Agent</returns>
         /// <exception cref="Exception"></exception>
         public List<DbBusinessAgent> GetBusinessAgentListNetwork(int entries) {
             List<DbBusinessAgent> businessUrlList = new();
@@ -343,44 +514,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Get Business Agent list by category
-        /// </summary>
-        /// <param name="category"></param>
-        /// <param name="entries"></param>
-        /// <returns>Business Agent list</returns>
-        /// <exception cref="Exception"></exception>
-        public List<DbBusinessAgent> GetBusinessAgentListByCategory(string category, int entries) {
-            List<DbBusinessAgent> businessUrlList = new();
-
-            try {
-                string selectCommand =
-                    "SELECT TOP (@Entries) BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
-                    " JOIN BUSINESS_URL as BU ON BP.FIRST_GUID = BU.GUID" +
-                    " JOIN vCATEGORIES as CAT on BP.CATEGORY = CAT.VALEUR" +
-                    " WHERE CAT.SECTEUR = @Category AND BP.PROCESSING = 0";
-
-                using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@Entries", entries);
-                cmd.Parameters.AddWithValue("@Category", category);
-                cmd.CommandTimeout = 10000;
-                using SqlDataReader reader = cmd.ExecuteReader();
-                cmd.Dispose();
-
-                while (reader.Read()) {
-                    DbBusinessAgent businessProfile = new(reader.GetValue(1).ToString(), reader.GetValue(2).ToString(), reader.GetValue(0).ToString());
-                    businessUrlList.Add(businessProfile);
-                }
-
-                return businessUrlList;
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching " + entries.ToString() + " business url with category: " + category + " from DB");
-            }
-        }
-
-        /// <summary>
-        /// Get Business Agent by Url Encoded
+        /// Get Business Agent by Url Encoded.
         /// </summary>
         /// <param name="urlEncoded"></param>
         /// <returns>Business Agent or Null if not found</returns>
@@ -388,7 +522,7 @@ namespace GMS.Sdk.Core.ToolBox {
         public DbBusinessAgent? GetBusinessAgentByUrlEncoded(string urlEncoded) {
             try {
                 string selectCommand =
-                    "SELECT BP.ID, BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
+                    "SELECT BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
                     " JOIN BUSINESS_URL as BU ON BP.FIRST_GUID = BU.GUID" +
                     " WHERE BU.URL_MD5 = @UrlEncoded";
 
@@ -398,7 +532,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Dispose();
 
                 while (reader.Read()) {
-                    DbBusinessAgent businessProfile = new(reader.GetValue(2).ToString(), reader.GetValue(3).ToString(), reader.GetValue(1).ToString());
+                    DbBusinessAgent businessProfile = new(reader.GetValue(1).ToString(), reader.GetValue(2).ToString(), reader.GetValue(0).ToString());
                     return businessProfile;
                 }
 
@@ -411,7 +545,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Check if business profile exist in DB
+        /// Check if business profile exist.
         /// </summary>
         /// <param name="idEtab"></param>
         /// <returns>True (exist) or False (doesn't exist)</returns>
@@ -437,7 +571,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Update Business Profile in DB
+        /// Update Business Profile.
         /// </summary>
         /// <param name="businessProfile"></param>
         /// <exception cref="Exception"></exception>
@@ -463,7 +597,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Update Business Profile state in DB
+        /// Update Business Profile state.
         /// </summary>
         /// <param name="idEtab"></param>
         /// <param name="processing"></param>
@@ -483,7 +617,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Update Business Profile state
+        /// Update Business Profile state.
         /// </summary>
         /// <param name="idEtab"></param>
         /// <param name="businessStatus"></param>
@@ -502,39 +636,11 @@ namespace GMS.Sdk.Core.ToolBox {
             }
         }
 
-        /// <summary>
-        /// Count how many Business Profile exist by category
-        /// </summary>
-        /// <param name="category"></param>
-        /// <returns>Number of Business Profile in DB</returns>
-        /// <exception cref="Exception"></exception>
-        public int CountBusinessProfileByCategory(string category) {
-            try {
-                string selectCommand =
-                    "SELECT COUNT(*) FROM BUSINESS_PROFILE as BP" +
-                    " JOIN vCATEGORIES as CAT on BP.CATEGORY = CAT.VALEUR" +
-                    " WHERE CAT.SECTEUR = @Category";
-
-                using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@Category", category);
-                using SqlDataReader reader = cmd.ExecuteReader();
-                cmd.Dispose();
-
-                if (reader.Read()) {
-                    return (int)reader.GetValue(0);
-                } else
-                    return 0;
-
-            } catch (Exception) {
-                throw new Exception("Failed counting businesses with category : " + category + " from DB");
-            }
-        }
-
         #endregion
 
         #region Business Score
         /// <summary>
-        /// Create Business Score in DB
+        /// Create Business Score.
         /// </summary>
         /// <param name="businessScore"></param>
         /// <exception cref="Exception"></exception>
@@ -558,7 +664,7 @@ namespace GMS.Sdk.Core.ToolBox {
         #region Business Review
 
         /// <summary>
-        /// Create Business Review in DB
+        /// Create Business Review.
         /// </summary>
         /// <param name="businessReview"></param>
         /// <exception cref="Exception"></exception>
@@ -586,7 +692,7 @@ namespace GMS.Sdk.Core.ToolBox {
         }
 
         /// <summary>
-        /// Check if a review exist on a Business Profile
+        /// Check if a review exist on a Business Profile.
         /// </summary>
         /// <param name="idEtab"></param>
         /// <param name="idReview"></param>

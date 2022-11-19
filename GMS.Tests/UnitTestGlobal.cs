@@ -37,13 +37,6 @@ namespace GMS.Tests {
             DateTime date = ToolBox.ComputeDateFromGoogleDate(googleDate);
             return;
         }
-
-        [TestMethod]
-        public int CountBusinessesByCategory(string category = "AGENCE IMMOBILIERE") {
-            DbLib dbLib = new();
-            int count = dbLib.CountBusinessProfileByCategory(category);
-            return count;
-        }
         #endregion
 
         #region UrlFinder
@@ -89,9 +82,30 @@ namespace GMS.Tests {
             BusinessService.Start(request);
         }
 
-        public List<DbBusinessAgent> GetBusinessAgentListNetworkFromCategory(string category, int entries) {
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkByActivity(string activity, int entries) {
+            DbLib db = new();
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkByActivity(activity, entries);
+            db.DisconnectFromDB();
+            return businessList;
+        }
+
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkByCategory(string category, int entries) {
             DbLib db = new();
             List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkByCategory(category, entries);
+            db.DisconnectFromDB();
+            return businessList;
+        }
+
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkByBrand(string brand, int entries) {
+            DbLib db = new();
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkByBrand(brand, entries);
+            db.DisconnectFromDB();
+            return businessList;
+        }
+
+        public List<DbBusinessAgent> GetBusinessAgentListNetworkBySectory(string sector, int entries) {
+            DbLib db = new();
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkBySector(sector, entries);
             db.DisconnectFromDB();
             return businessList;
         }
@@ -178,9 +192,9 @@ namespace GMS.Tests {
 
         [TestMethod]
         public void ThreadsUrlState() {
-            int nbThreads = 8;
+            int nbThreads = 1;
             UrlState state = UrlState.NEW;
-            int nbEntries = 100;
+            int nbEntries = 111;
             List<Task> tasks = new();
             List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, nbEntries);
             foreach (var chunk in list.Chunk(list.Count / nbThreads)) {
