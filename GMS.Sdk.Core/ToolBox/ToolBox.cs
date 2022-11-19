@@ -41,13 +41,6 @@ namespace GMS.Sdk.Core.ToolBox {
             using StreamReader r = new(path + @"\GMS.Sdk.Core\ToolBox\GoogleDate.json");
             string json = r.ReadToEnd();
 
-            try {
-                JObject? googleDates = (JObject?)JsonConvert.DeserializeObject(json);
-                jsonValue = googleDates[googleDate].Value<int>();
-            } catch (Exception) {
-                System.Diagnostics.Debug.WriteLine("Couldn't find value for this google date");
-            }
-
             if (jsonValue == 0)
                 return DateTime.UtcNow;
 

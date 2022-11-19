@@ -5,6 +5,9 @@ using GMS.Sdk.Core.SeleniumDriver;
 using GMS.Sdk.Core.ToolBox;
 using GMS.Url.Agent;
 using GMS.Url.Agent.Model;
+using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Text.Json.Nodes;
 
 namespace GMS.Tests {
     [TestClass]
@@ -44,13 +47,19 @@ namespace GMS.Tests {
         public void TestUrlFinderService() {
             List<string> textSearch = new()
             {
-                "Agences Immobilières", "Agent immobilier", "Agents immobiliers", "Fournisseur d'équipements médicaux", "Magasin de matériel médical", "Parapharmacie", "Pharmacie\r\n"
+                "hotel", "camping", "résidence", "station de ski", "hebergement","\r\n"
             };
 
+            string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
+            string[] urlList = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\CpList.txt");
+            List<string> locations = new(urlList);
+
+            /*
             List<string> locations = new()
             {
                 "97600", "97200", "97300", "97500", "97100", "97600", "98600", "98700"
-            };
+            };*/
+
             foreach (string search in textSearch) {
                 foreach (string location in locations) {
                     string searchString = search.Replace(' ', '+') + '+' + location.Replace(' ', '+');
@@ -72,7 +81,7 @@ namespace GMS.Tests {
 
             SeleniumDriver driver = new();
             
-            (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, "https://www.google.com/maps/place/Mairie+du+1%E1%B5%89%CA%B3+arrondissement/@48.8566099,2.3195451,14z/data=!4m9!1m2!2m1!1smairie+de+paris!3m5!1s0x47e66e216da9fe39:0xd083ed96cb779914!8m2!3d48.860046!4d2.341252!15sCg9tYWlyaWUgZGUgcGFyaXOSAQljaXR5X2hhbGzgAQA", "123");
+            (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, "https://www.google.com/maps/place/H%C3%B4tel+Novotel+Paris+Pont-de-S%C3%A8vres/@48.830891,2.2163365,15z/data=!4m13!1m2!2m1!1shotel!3m9!1s0x47e67b04e1991d45:0xc614fbd8fc4f2280!5m2!4m1!1i2!8m2!3d48.826851!4d2.2212687!15sCgVob3RlbJIBBWhvdGVs4AEA!16s%2Fg%2F1v0lk2hl", "123");
 
             Assert.IsTrue(MairieDu1er.Equals(business));
         }
