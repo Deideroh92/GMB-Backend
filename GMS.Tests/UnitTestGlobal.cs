@@ -84,16 +84,19 @@ namespace GMS.Tests {
             List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, 23918);
             SeleniumDriver driver = new();
             using StreamWriter sw2 = File.AppendText(@"C:\Users\maxim\Desktop\hotel.txt");
+            sw2.WriteLine("NAME$$CATEGORY$$ADRESS$$TEL$$SCORE$$NB_REVIEWS$$OPTIONS");
             foreach (DbBusinessAgent elem in list) {
-                (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, elem.Url, "123");
-                if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.optionsButton)))
-                    ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.optionsButton).Click();
-                ReadOnlyCollection<IWebElement?> optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
-                List<string> optionsOnList = new();
-                foreach (IWebElement element in optionsOn) {
-                    optionsOnList.Add(element.GetAttribute("aria-label").Replace("L'option ", "").Replace(" est disponible", ""));
-                }
-                sw2.WriteLine(business.Name + "$$" + business.Category + "$$" + business.Tel + "$$" + businessScore.Score + "$$" + businessScore.NbReviews + "$$" + string.Join(",", optionsOnList));
+                try {
+                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, elem.Url, "123");
+                    if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.optionsButton)))
+                        ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.optionsButton).Click();
+                    ReadOnlyCollection<IWebElement?> optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
+                    List<string> optionsOnList = new();
+                    foreach (IWebElement element in optionsOn) {
+                        optionsOnList.Add(element.GetAttribute("aria-label").Replace("L'option ", "").Replace(" est disponible", ""));
+                    }
+                    sw2.WriteLine(business.Name + "$$" + business.Category + "$$" + business.Adress + "$$" + business.Tel + "$$" + businessScore.Score + "$$" + businessScore.NbReviews + "$$" + string.Join(",", optionsOnList));
+                } catch (Exception) { }
             }
         }
 
