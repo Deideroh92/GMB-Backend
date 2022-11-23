@@ -10,12 +10,15 @@ using System.Drawing;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GMS.Business.Agent {
     /// <summary>
     /// Business Service.
     /// </summary>
     public class BusinessService {
+
+        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
 
         #region Local
 
@@ -24,8 +27,7 @@ namespace GMS.Business.Agent {
         /// </summary>
         /// <param name="request"></param>
         /// <exception cref="Exception"></exception>
-        public static void Start(BusinessAgentRequest request) {
-            string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
+        public static void Start(BusinessAgentRequest request, int? threadNumber = 0) {
             DbLib db = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
@@ -34,9 +36,14 @@ namespace GMS.Business.Agent {
 
             SeleniumDriver driver = new(DriverType.CHROME);
 
+            int count = 0;
+
+            DateTime time = DateTime.UtcNow;
+
             foreach (DbBusinessAgent business in request.BusinessList) {
                 try {
-
+                    count++;
+                    float percentage = (count / request.BusinessList.Count) * 100;
                     // Get business profile infos from Google.
                     (DbBusinessProfile? businessProfile, DbBusinessScore? businessScore) = GetBusinessProfileAndScoreFromGooglePage(driver, business.Url, business.Guid, business.IdEtab);
 
@@ -70,10 +77,10 @@ namespace GMS.Business.Agent {
 
                 } catch (Exception e) {
                     using StreamWriter sw = File.AppendText(pathLogFile);
-                    sw.WriteLine(business.Url);
-                    sw.WriteLine(e.Message);
-                    sw.WriteLine(e.StackTrace);
-                    sw.WriteLine("\n\n");
+                    sw.WriteLine(DateTime.UtcNow.ToString("G") + " - " + business.Url);
+                    sw.WriteLine("Message : " + e.Message);
+                    sw.WriteLine("Stack : " + e.StackTrace);
+                    sw.WriteLine("\n");
                 }
             }
 
@@ -85,15 +92,21 @@ namespace GMS.Business.Agent {
                 }
             } catch (Exception e) {
                 using StreamWriter sw = File.AppendText(pathLogFile);
-                sw.WriteLine("FAILED WHEN PROCESS FINISHED : UPDATING BUSINESS PROCESSING TO 0\n");
-                sw.WriteLine(e.Message);
-                sw.WriteLine(e.StackTrace);
-                sw.WriteLine("\n\n");
+                sw.WriteLine(DateTime.UtcNow.ToString("g"));
+                sw.WriteLine("FAILED WHEN PROCESS FINISHED : UPDATING BUSINESS PROCESSING TO 0.");
+                sw.WriteLine("Message : " + e.Message);
+                sw.WriteLine("Stack : " + e.StackTrace);
+                sw.WriteLine("\n");
             }
 
             driver.WebDriver.Quit();
             db.DisconnectFromDB();
+
+            using StreamWriter sw2 = File.AppendText(pathLogFile);
+            sw2.WriteLine(DateTime.UtcNow.ToString("G") + " - Thread number " + threadNumber + " finished.");
+            sw2.WriteLine("Treated " + count + " businesses in " + (DateTime.UtcNow - time).ToString("g") + ".\n");
         }
+
         public static void UpdateBusinessRequestState(BusinessAgentRequest request, DbLib db) {
             switch (request.Operation) {
                 case Operation.URL_STATE:
@@ -129,6 +142,7 @@ namespace GMS.Business.Agent {
             float? score = null;
             BusinessStatus status = BusinessStatus.OPEN;
             string? geoloc = null;
+            bool hotel = true;
 
             driver.GetToPage(url);
 
@@ -158,17 +172,33 @@ namespace GMS.Business.Agent {
                 adress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress).GetAttribute("aria-label").Replace("Adresse:", "").Trim();
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.globalScore))) {
-                if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score)) && float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label").Replace("étoiles", "").Trim(), out _))
+                if (float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label").Replace("étoiles", "").Trim(), out _))
                    score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label").Replace("étoiles", "").Trim());
 
-                if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews, XPathProfile.nbReviews2)) && int.TryParse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews, XPathProfile.nbReviews2).GetAttribute("aria-label").Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""), out _))
-                    reviews = int.Parse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews, XPathProfile.nbReviews2).GetAttribute("aria-label").Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
+                if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews))) {
+                    try {
+                        if (int.TryParse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).GetAttribute("aria-label").Replace(" avis", "").Trim(), @"\s", ""), out _))
+                            reviews = int.Parse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).GetAttribute("aria-label").Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
+                    } catch (Exception) { }
+                    try {
+                        if (int.TryParse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).Text.Replace(" avis", "").Trim(), @"\s", ""), out _))
+                            reviews = int.Parse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).Text.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
+                    } catch (Exception) { }
+                }
+                    
             }
+
+            //HOTEL
+            if (category == null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)))
+                category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory).Text.Replace("·", "");
+
+            if (score == null && reviews != null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)))
+                score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore).Text);
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)))
                 tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel).GetAttribute("aria-label").Replace("Numéro de téléphone:", "").Trim();
-            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website2, XPathProfile.website)))
-                website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website2, XPathProfile.website).GetAttribute("href").Trim();
+            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website)))
+                website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website).GetAttribute("href").Trim();
 
             if (name == null) {
                 return (null, null);
@@ -228,7 +258,7 @@ namespace GMS.Business.Agent {
                 userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName).GetAttribute("aria-label").Replace("Photo de", "").Trim();
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score)))
-                reviewScore = int.Parse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score).GetAttribute("aria-label").Replace("étoiles", "").Trim());
+                reviewScore = int.Parse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score).GetAttribute("aria-label").Replace("étoile", "").Replace("s", "").Trim());
             else
                 throw new Exception("No score for this review");
 
@@ -289,7 +319,7 @@ namespace GMS.Business.Agent {
                     ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
                     Thread.Sleep(2000);
                     reviewListLength = reviewList.Count;
-                    reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList, XPathReview.reviewList2);
+                    reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
                     if (ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathReview.googleDate))) {
                         reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate).Text.Trim();
                         if (ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate) < dateLimit)
@@ -315,7 +345,7 @@ namespace GMS.Business.Agent {
             try {
                 ToolBox.FindElementSafe(driver, XPathReview.sortReviews).Click();
                 Thread.Sleep(1000);
-                ToolBox.FindElementSafe(driver, XPathReview.sortReviews2, XPathReview.sortReviews2bis).Click();
+                ToolBox.FindElementSafe(driver, XPathReview.sortReviews2).Click();
                 Thread.Sleep(1000);
             } catch(Exception) {
                 throw new Exception("Couldn't sort");
@@ -332,7 +362,7 @@ namespace GMS.Business.Agent {
             if (!ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage)))
                 return;
 
-            driver.WebDriver.FindElement(XPathReview.toReviewsPage).Click();
+            ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage).Click();
             Thread.Sleep(2500);
 
             // Sorting reviews.

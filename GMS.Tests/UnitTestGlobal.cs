@@ -8,6 +8,10 @@ using GMS.Url.Agent.Model;
 using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Text.Json.Nodes;
+using GMS.Sdk.Core.XPath;
+using OpenQA.Selenium;
+using System.Collections.ObjectModel;
+using System;
 
 namespace GMS.Tests {
     [TestClass]
@@ -76,19 +80,26 @@ namespace GMS.Tests {
         /// Getting google infos of Mairie du 1er arrondissement
         /// </summary>
         [TestMethod]
-        public void TestBusinessProfile() {
-            DbBusinessProfile MairieDu1er = new("123", "123", "Mairie du 1ᵉʳ arrondissement", "Hôtel de ville", "4 Pl. du Louvre, 75001 Paris", "01 44 50 75 01", "https://mairiepariscentre.paris.fr/", null ,null, null, null);
-
+        public void ExportHotel() {
+            List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, 23918);
             SeleniumDriver driver = new();
-            
-            (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, "https://www.google.com/maps/place/H%C3%B4tel+Novotel+Paris+Pont-de-S%C3%A8vres/@48.830891,2.2163365,15z/data=!4m13!1m2!2m1!1shotel!3m9!1s0x47e67b04e1991d45:0xc614fbd8fc4f2280!5m2!4m1!1i2!8m2!3d48.826851!4d2.2212687!15sCgVob3RlbJIBBWhvdGVs4AEA!16s%2Fg%2F1v0lk2hl", "123");
-
-            Assert.IsTrue(MairieDu1er.Equals(business));
+            using StreamWriter sw2 = File.AppendText(@"C:\Users\maxim\Desktop\hotel.txt");
+            foreach (DbBusinessAgent elem in list) {
+                (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, elem.Url, "123");
+                if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.optionsButton)))
+                    ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.optionsButton).Click();
+                ReadOnlyCollection<IWebElement?> optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
+                List<string> optionsOnList = new();
+                foreach (IWebElement element in optionsOn) {
+                    optionsOnList.Add(element.GetAttribute("aria-label").Replace("L'option ", "").Replace(" est disponible", ""));
+                }
+                sw2.WriteLine(business.Name + "$$" + business.Category + "$$" + business.Tel + "$$" + businessScore.Score + "$$" + businessScore.NbReviews + "$$" + string.Join(",", optionsOnList));
+            }
         }
 
-        public void StartAgent(List<DbBusinessAgent> urlList, Operation operation) {
-            BusinessAgentRequest request = new(operation, true, null, urlList, DateTime.UtcNow.AddYears(-1));
-            BusinessService.Start(request);
+        public void StartAgent(List<DbBusinessAgent> urlList, Operation operation, int? threadNumber = null) {
+            BusinessAgentRequest request = new(operation, true, null, urlList, DateTime.UtcNow.AddMonths(-1));
+            BusinessService.Start(request, threadNumber);
         }
 
         public List<DbBusinessAgent> GetBusinessAgentListNetworkByActivity(string activity, int entries) {
@@ -159,15 +170,17 @@ namespace GMS.Tests {
         [TestMethod]
         public void ThreadsCategory() {
             int nbThreads = 8;
-            int nbEntries = 137303;
+            int nbEntries = 100;
             List<Task> tasks = new();
 
             //string category = "AGENCE IMMOBILIERE";
             //List<DbBusinessAgent> list = GetBusinessAgentListNetworkFromCategory(category, nbEntries);
 
             List<DbBusinessAgent> list = GetBusinessAgentListNetwork(nbEntries);
+            int threadNumber = 0;
             foreach (var chunk in list.Chunk(nbEntries / nbThreads)) {
-                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.CATEGORY); });
+                threadNumber++;
+                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.CATEGORY, threadNumber); });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
             }
@@ -190,8 +203,10 @@ namespace GMS.Tests {
             using StreamWriter sw2 = File.AppendText(pathLogFile);
             sw2.WriteLine("\n\nStarting selenium process !\n\n");
 
+            int threadNumber = 0;
             foreach (var chunk in bussinessList.Chunk(bussinessList.Count / nbThreads)) {
-                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.FILE); });
+                threadNumber++;
+                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.FILE, threadNumber); });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
             }
@@ -206,8 +221,11 @@ namespace GMS.Tests {
             int nbEntries = 111;
             List<Task> tasks = new();
             List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, nbEntries);
+
+            int threadNumber = 0;
             foreach (var chunk in list.Chunk(list.Count / nbThreads)) {
-                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.URL_STATE); });
+                threadNumber++;
+                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.URL_STATE, threadNumber); });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
             }

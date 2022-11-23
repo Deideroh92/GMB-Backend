@@ -29,7 +29,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 System.Diagnostics.Debug.WriteLine("Couldn't connect to DB");
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Connection to DB failed!");
+                throw;
             }
         }
 
@@ -44,7 +44,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 System.Diagnostics.Debug.WriteLine("Couldn't disconnect from DB");
                 System.Diagnostics.Debug.WriteLine(e.Message);
                 System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Disconnection from DB failed!");
+                throw;
             }
         }
 
@@ -69,7 +69,7 @@ namespace GMS.Sdk.Core.ToolBox {
 
                 return categories;
             } catch (Exception) {
-                throw new Exception("Failed getting categories with activity : " + activity);
+                throw;
             }
         }
 
@@ -94,7 +94,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             } catch (Exception) {
-                throw new Exception("Couldn't insert business url: " + businessUrl.Url + " in DB");
+                throw;
             }
         }
 
@@ -120,7 +120,7 @@ namespace GMS.Sdk.Core.ToolBox {
                     return false;
                 }
             } catch (Exception) {
-                throw new Exception("Failed searching url encoded: " + urlEncoded + " in DB");
+                throw;
             }
         }
 
@@ -147,7 +147,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
                 return businessAgentList;
             } catch (Exception) {
-                throw new Exception("Failed selecting " + entries.ToString() + " business url for profile agent with state: " + urlState + " from DB");
+                throw;
             }
         }
 
@@ -175,7 +175,7 @@ namespace GMS.Sdk.Core.ToolBox {
                         businessAgentList.Add(business);
                     }  
                 } catch (Exception) {
-                    throw new Exception("Failed selecting urls encoded from DB");
+                    throw;
                 }
             }
             return businessAgentList;
@@ -205,7 +205,7 @@ namespace GMS.Sdk.Core.ToolBox {
                         businessAgentList.Add(business);
                     }
                 } catch (Exception) {
-                    throw new Exception("Failed selecting urls encoded from DB");
+                    throw;
                 }
             }
             return businessAgentList;
@@ -227,7 +227,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             } catch (Exception) {
-                throw new Exception("Failed updating business url state with guid: " + guid + " and state: " + state.ToString() + " from DB");
+                throw;
             }
         }
 
@@ -250,7 +250,7 @@ namespace GMS.Sdk.Core.ToolBox {
 
                 return null;
             } catch (Exception) {
-                throw new Exception("Failed getting guid from url encoded :  " + urlEncoded);
+                throw;
             }
         }
 
@@ -266,10 +266,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@Guid", guid);
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Couldn't delete business url with guid: " + guid);
+            } catch (Exception) {
+                throw;
             }
         }
         #endregion
@@ -300,10 +298,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@Processing", businessProfile.Processing);
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Couldn't create business profile with guid: " + businessProfile.FirstGuid + " and with IdEtab: " + businessProfile.IdEtab + " in DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -335,10 +331,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
 
                 return businessUrlList;
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching " + entries.ToString() +  " business agent with category: " + category + " from DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -370,10 +364,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
 
                 return businessUrlList;
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching " + entries.ToString() + " business url with category: " + activity + " from DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -405,10 +397,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
 
                 return businessUrlList;
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching " + entries.ToString() + " business url with category: " + sector + " from DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -440,10 +430,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
 
                 return businessUrlList;
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching " + entries.ToString() + " business url with univers: " + univers + " from DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -475,10 +463,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
 
                 return businessUrlList;
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching " + entries.ToString() + " business url with brand: " + brand + " from DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -506,10 +492,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
 
                 return businessUrlList;
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching " + entries.ToString() + " business url from DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -537,10 +521,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 }
 
                 return null;
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed fetching business with url encoded : " + urlEncoded + " from DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -566,7 +548,7 @@ namespace GMS.Sdk.Core.ToolBox {
                     return false;
                 }
             } catch (Exception) {
-                throw new Exception("Failed checking if business profile exist for IdEtab: " + idEtab + " in DB");
+                throw;
             }
         }
 
@@ -589,10 +571,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed updating business profile information for IdEtab: " + businessProfile.IdEtab + " in DB");
+            } catch (Exception) {
+                throw;
             }
         }
 
@@ -612,7 +592,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             } catch (Exception) {
-                throw new Exception("Failed updating business profile state for IdEtab: " + idEtab + " in DB");
+                throw;
             }
         }
 
@@ -632,7 +612,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             } catch (Exception) {
-                throw new Exception("Failed updating business profile state for IdEtab: " + idEtab + " in DB");
+                throw;
             }
         }
 
@@ -653,10 +633,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@NbReviews", businessScore.NbReviews);
                 cmd.Parameters.AddWithValue("@DateInsert", businessScore.DateInsert);
                 cmd.ExecuteNonQuery();
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
-                throw new Exception("Failed inserting business score (" + businessScore.Score + "/" + businessScore.NbReviews + ") for IdEtab: " + businessScore.IdEtab + " in DB");
+            } catch (Exception) {
+                throw;
             }
         }
         #endregion
@@ -687,7 +665,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             } catch (Exception) {
-                throw new Exception("Failed inserting business review with id: " + businessReview.IdReview + " on business profile with IdEtab: " + businessReview.IdEtab + " in DB");
+                throw;
             }
         }
 
@@ -712,7 +690,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 else
                     return false;
             } catch (Exception) {
-                throw new Exception("Failed checking if business review with id: " + idReview + " exist on business profile with IdEtab: " + idEtab + " in DB");
+                throw;
             }
         }
         #endregion

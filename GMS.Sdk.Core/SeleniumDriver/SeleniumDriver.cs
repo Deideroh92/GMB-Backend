@@ -57,11 +57,11 @@ namespace GMS.Sdk.Core.SeleniumDriver {
         /// Accepting the cookies from the google cookie page.
         /// </summary>
         public void AcceptCookies() {
-            if (!ToolBox.ToolBox.Exists(ToolBox.ToolBox.FindElementSafe(WebDriver, XPath.XPathDriver.businessList)))
+            if (!ToolBox.ToolBox.Exists(ToolBox.ToolBox.FindElementSafe(WebDriver, new List<By>((IEnumerable<By>)XPath.XPathDriver.businessList))))
                 return;
 
             // Locating button and scrolling to it.
-            IWebElement? acceptButton = ToolBox.ToolBox.FindElementSafe(WebDriver, XPath.XPathDriver.businessList);
+            IWebElement? acceptButton = ToolBox.ToolBox.FindElementSafe(WebDriver, new List<By>((IEnumerable<By>)XPath.XPathDriver.businessList));
             ((IJavaScriptExecutor)WebDriver).ExecuteScript("arguments[0].scrollIntoView(true);", acceptButton);
             Thread.Sleep(1500);
 

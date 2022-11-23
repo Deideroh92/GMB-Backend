@@ -52,9 +52,9 @@ namespace GMS.Url.Agent {
             ReadOnlyCollection<IWebElement>? businessList = ScrollIntoBusinessUrls(driver);
             foreach (IWebElement business in businessList) {
                 name = business.Text.Split('\n')[0].Replace("\r", "");
-                if (!ToolBox.Exists(ToolBox.FindElementSafe(business, By.XPath(".//a[contains(@aria-label, '" + name + "')]"))))
+                if (!ToolBox.Exists(ToolBox.FindElementSafe(business, new() { By.XPath(".//a[contains(@aria-label, '" + name + "')]") })))
                     continue;
-                url = ToolBox.FindElementSafe(business, By.XPath(".//a[contains(@aria-label, '" + name + "')]")).GetAttribute("href").Replace("?authuser=0&hl=fr&rclk=1", "");
+                url = ToolBox.FindElementSafe(business, new() { By.XPath(".//a[contains(@aria-label, '" + name + "')]") }).GetAttribute("href").Replace("?authuser=0&hl=fr&rclk=1", "");
 
                 try {
                     if (!dbLib.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(url))) {

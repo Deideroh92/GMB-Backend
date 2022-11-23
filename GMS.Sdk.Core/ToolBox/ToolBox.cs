@@ -61,19 +61,15 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <param name="by">The search string for finding element</param>
         /// <param name="by2">The second search string (if any) for finding element</param>
         /// <returns>Returns element or null if not found</returns>
-        public static IWebElement? FindElementSafe(IWebDriver driver, By by, By? by2 = null) {
-            try {
-                return driver.FindElement(by);
-            } catch (NoSuchElementException) {
-                if (by2 != null) {
-                    try {
-                        return driver.FindElement(by2);
-                    } catch (NoSuchElementException) {
-                        return null;
-                    }
+        public static IWebElement? FindElementSafe(IWebDriver driver, List<By> by) {
+            foreach (By item in by) {
+                try {
+                    return driver.FindElement(item);
+                } catch (NoSuchElementException) {
+                    continue;
                 }
-                return null;
             }
+            return null;
         }
         
         /// <summary>
@@ -82,19 +78,15 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <param name="by">The search string for finding element</param>
         /// <param name="by2">The second search string (if any) for finding element</param>
         /// <returns>Returns element or null if not found</returns>
-        public static IWebElement? FindElementSafe(IWebElement webElement, By by, By? by2 = null) {
-            try {
-                return webElement.FindElement(by);
-            } catch (NoSuchElementException) {
-                if (by2 != null) {
-                    try {
-                        return webElement.FindElement(by2);
-                    } catch (NoSuchElementException) {
-                        return null;
-                    }
+        public static IWebElement? FindElementSafe(IWebElement webElement, List<By> by) {
+            foreach (By item in by) {
+                try {
+                    return webElement.FindElement(item);
+                } catch (NoSuchElementException) {
+                    continue;
                 }
-                return null;
             }
+            return null;
         }
         
         /// <summary>
@@ -103,19 +95,15 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <param name="by">The search string for finding element</param>
         /// <param name="by2">The second search string (if any) for finding element</param>
         /// <returns>Returns elements or null if not found</returns>
-        public static ReadOnlyCollection<IWebElement>? FindElementsSafe(IWebDriver driver, By by, By? by2 = null) {
-            try {
-                return driver.FindElements(by);
-            } catch (NoSuchElementException) {
-                if (by2 != null) {
-                    try {
-                        return driver.FindElements(by2);
-                    } catch (NoSuchElementException) {
-                        return null;
-                    }
+        public static ReadOnlyCollection<IWebElement>? FindElementsSafe(IWebDriver driver, List<By> by) {
+            foreach (By item in by) {
+                try {
+                    return driver.FindElements(item);
+                } catch (NoSuchElementException) {
+                    continue;
                 }
-                return null;
             }
+            return null;
         }
 
         /// <summary>
