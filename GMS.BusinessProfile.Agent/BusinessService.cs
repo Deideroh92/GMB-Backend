@@ -206,7 +206,7 @@ namespace GMS.Business.Agent {
 
             idEtab ??= ToolBox.ComputeMd5Hash(name + adress);
             DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, adress, tel, website, geoloc, DateTime.UtcNow, DateTime.UtcNow, status);
-            DbBusinessScore dbBusinessScore = new(idEtab, score, reviews, DateTime.UtcNow);
+            DbBusinessScore? dbBusinessScore = new(idEtab, score, reviews, DateTime.UtcNow);
             return (dbBusinessProfile, dbBusinessScore);
         }
 

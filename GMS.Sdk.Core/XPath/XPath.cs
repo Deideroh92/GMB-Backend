@@ -28,7 +28,6 @@ namespace GMS.Sdk.Core.XPath {
         public static readonly List<By> hotelCategory = new() { By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]/following-sibling::span") };
         public static readonly List<By> hotelScore = new() { By.XPath("//div[contains(@jsan, 'fontDisplayLarge') and @class='fontDisplayLarge']") };
         public static readonly List<By> optionsOn = new() { By.XPath("//div[contains(@aria-label, 'est disponible')]") };
-        public static readonly List<By> optionsButton = new() { By.XPath("//button[contains(@aria-label, 'Afficher plus d') and contains(@aria-label, 'équipements')]") };
     }
 
     public class XPathReview {

@@ -45,12 +45,12 @@
         /// <summary>
         /// Checking if Business Score is valid.
         /// </summary>
-        public void CheckValidity() {
+        public void CheckValidity() {/*
             if (Score != null && NbReviews == null)
                 Score = null;
 
             if (NbReviews != null && Score == null)
-                Score = null;
+                Score = null;*/
         }
         #endregion
     }
