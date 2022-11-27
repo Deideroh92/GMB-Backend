@@ -4,13 +4,9 @@ using GMS.Sdk.Core.SeleniumDriver;
 using GMS.Sdk.Core.ToolBox;
 using GMS.Sdk.Core.XPath;
 using OpenQA.Selenium;
-using OpenQA.Selenium.DevTools;
 using System.Collections.ObjectModel;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GMS.Business.Agent {
     /// <summary>
@@ -36,7 +32,7 @@ namespace GMS.Business.Agent {
 
             SeleniumDriver driver = new(DriverType.CHROME);
 
-            int count = 0;
+            int count = 0 ;
 
             DateTime time = DateTime.UtcNow;
 
