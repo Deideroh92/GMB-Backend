@@ -12,6 +12,7 @@ using GMS.Sdk.Core.XPath;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using System;
+using System.Globalization;
 
 namespace GMS.Tests {
     [TestClass]
@@ -83,6 +84,7 @@ namespace GMS.Tests {
         public void ExportHotel() {
             List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, 23918);
             SeleniumDriver driver = new();
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
             using StreamWriter sw2 = File.AppendText(@"C:\Users\maxim\Desktop\hotel.txt");
             sw2.WriteLine("NAME$$CATEGORY$$ADRESS$$TEL$$OPTIONS");
             foreach (DbBusinessAgent elem in list) {
