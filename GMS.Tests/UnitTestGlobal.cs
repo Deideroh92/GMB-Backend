@@ -13,6 +13,7 @@ using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using System;
 using System.Globalization;
+using System.Threading.Tasks;
 
 namespace GMS.Tests {
     [TestClass]
@@ -52,12 +53,16 @@ namespace GMS.Tests {
         public void TestUrlFinderService() {
             List<string> textSearch = new()
             {
-                "hotel", "camping", "résidence", "station de ski", "hebergement","\r\n"
+                "hotel", "camping"
             };
 
             string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-            string[] urlList = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\CpList.txt");
-            List<string> locations = new(urlList);
+
+            //string[] cp = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\CpList.txt");
+            //List<string> locations = new(cp);
+
+            string[] dept = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\DeptList.txt");
+            List<string> locations = new(dept);
 
             /*
             List<string> locations = new()
@@ -65,12 +70,23 @@ namespace GMS.Tests {
                 "97600", "97200", "97300", "97500", "97100", "97600", "98600", "98700"
             };*/
 
+            List<Task> tasks = new();
+
             foreach (string search in textSearch) {
-                foreach (string location in locations) {
-                    string searchString = search.Replace(' ', '+') + '+' + location.Replace(' ', '+');
-                    UrlAgentRequest request = new(searchString);
-                    UrlService.Start(request);
-                }
+                Task newThread = Task.Run(delegate { StartSearch(search, locations); });
+                tasks.Add(newThread);
+                Thread.Sleep(2000);
+            }
+
+            Task.WaitAll(tasks.ToArray());
+            return;
+        }
+
+        public void StartSearch(string textSearch, List<string> locations) {
+            foreach (string location in locations) {
+                string searchString = textSearch.Replace(' ', '+') + " " + location.Replace(';', ' ');
+                UrlAgentRequest request = new(searchString);
+                UrlService.Start(request);
             }
         }
         #endregion
