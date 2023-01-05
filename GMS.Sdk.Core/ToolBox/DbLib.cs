@@ -478,7 +478,7 @@ namespace GMS.Sdk.Core.ToolBox {
             List<DbBusinessAgent> businessUrlList = new();
 
             try {
-                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU" + "WHERE PROCESSING = 1" + "ORDER BY ID_ETAB ASC";
+                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU WHERE PROCESSING = 1 ORDER BY ID_ETAB ASC";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
