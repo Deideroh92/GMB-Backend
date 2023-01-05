@@ -116,6 +116,15 @@ namespace GMS.Tests {
             }
         }
 
+        [TestMethod]
+        public void StartAgentNow() {
+            List<DbBusinessAgent> urlList = new();
+            DbBusinessAgent business = new(null, "https://www.google.com/maps/place/Auchan+Roncq/data=!4m6!3m5!1s0x47c32e947a38cffd:0xc80cffd6bdd59b85!8m2!3d50.7377052!4d3.135205!16s%2Fg%2F1hc6sdsl0");
+            urlList.Add(business);
+            BusinessAgentRequest request = new(Operation.FILE, true, null, urlList, DateTime.UtcNow.AddYears(-1));
+            BusinessService.Start(request, 1);
+        }
+
         public void StartAgent(List<DbBusinessAgent> urlList, Operation operation, int? threadNumber = null) {
             BusinessAgentRequest request = new(operation, true, null, urlList, DateTime.UtcNow.AddMonths(-1));
             BusinessService.Start(request, threadNumber);
@@ -189,7 +198,7 @@ namespace GMS.Tests {
         [TestMethod]
         public void ThreadsCategory() {
             int nbThreads = 8;
-            int nbEntries = 100;
+            int nbEntries = 50000;
             List<Task> tasks = new();
 
             //string category = "AGENCE IMMOBILIERE";

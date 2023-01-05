@@ -28,7 +28,7 @@ namespace GMS.Business.Agent {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
             // Updating status of business to PROCESSING.
-            UpdateBusinessRequestState(request, db);
+            //UpdateBusinessRequestState(request, db);
 
             SeleniumDriver driver = new(DriverType.CHROME);
 
@@ -71,28 +71,17 @@ namespace GMS.Business.Agent {
                     if (request.Operation == Operation.URL_STATE)
                         db.UpdateBusinessUrlState(business.Guid, UrlState.UPDATED);
 
-                } catch (Exception e) {
+                    // Update Business State when finished
+                    if ((request.Operation == Operation.CATEGORY || request.Operation == Operation.FILE) && business.IdEtab != null)
+                        db.UpdateBusinessProfileProcessingState(business.IdEtab, false);
+
+                    } catch (Exception e) {
                     using StreamWriter sw = File.AppendText(pathLogFile);
                     sw.WriteLine(DateTime.UtcNow.ToString("G") + " - " + business.Url);
                     sw.WriteLine("Message : " + e.Message);
                     sw.WriteLine("Stack : " + e.StackTrace);
                     sw.WriteLine("\n");
                 }
-            }
-
-            try {
-                if (request.Operation == Operation.CATEGORY || request.Operation == Operation.FILE) {
-                    foreach (DbBusinessAgent business in request.BusinessList)
-                        if(business.IdEtab != null)
-                        db.UpdateBusinessProfileProcessingState(business.IdEtab, false);
-                }
-            } catch (Exception e) {
-                using StreamWriter sw = File.AppendText(pathLogFile);
-                sw.WriteLine(DateTime.UtcNow.ToString("g"));
-                sw.WriteLine("FAILED WHEN PROCESS FINISHED : UPDATING BUSINESS PROCESSING TO 0.");
-                sw.WriteLine("Message : " + e.Message);
-                sw.WriteLine("Stack : " + e.StackTrace);
-                sw.WriteLine("\n");
             }
 
             driver.WebDriver.Quit();
@@ -138,7 +127,7 @@ namespace GMS.Business.Agent {
             float? score = null;
             BusinessStatus status = BusinessStatus.OPEN;
             string? geoloc = null;
-            bool hotel = true;
+            bool hotel = false;
 
             driver.GetToPage(url);
 
@@ -173,22 +162,27 @@ namespace GMS.Business.Agent {
 
                 if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews))) {
                     try {
-                        if (int.TryParse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).GetAttribute("aria-label").Replace(" avis", "").Trim(), @"\s", ""), out _))
+                        if (int.TryParse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).GetAttribute("aria-label").Replace(" avis", "").Trim(), @"\s", ""), out _)) {
                             reviews = int.Parse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).GetAttribute("aria-label").Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
+                        }
                     } catch (Exception) { }
                     try {
                         if (int.TryParse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).Text.Replace(" avis", "").Trim(), @"\s", ""), out _))
                             reviews = int.Parse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).Text.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
+                    } catch (Exception) { }
+                    try {
+                        if (int.TryParse(Regex.Replace(((OpenQA.Selenium.WebElement)ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews)).ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""), out _))
+                            reviews = int.Parse(Regex.Replace(((OpenQA.Selenium.WebElement)ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews)).ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
                     } catch (Exception) { }
                 }
                     
             }
 
             //HOTEL
-            if (category == null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)))
+            if (hotel && category == null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)))
                 category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory).Text.Replace("·", "");
 
-            if (score == null && reviews != null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)))
+            if (hotel && score == null && reviews != null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)))
                 score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore).Text);
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)))
