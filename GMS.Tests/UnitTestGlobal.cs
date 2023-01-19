@@ -126,7 +126,7 @@ namespace GMS.Tests {
         }
 
         public void StartAgent(List<DbBusinessAgent> urlList, Operation operation, int? threadNumber = null) {
-            BusinessAgentRequest request = new(operation, true, null, urlList, DateTime.UtcNow.AddMonths(-1));
+            BusinessAgentRequest request = new(operation, true, null, urlList, DateTime.UtcNow.AddYears(-1));
             BusinessService.Start(request, threadNumber);
         }
 
