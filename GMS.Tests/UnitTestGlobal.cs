@@ -198,7 +198,7 @@ namespace GMS.Tests {
         [TestMethod]
         public void ThreadsCategory() {
             int nbThreads = 8;
-            int nbEntries = 50000;
+            int nbEntries = 1;
             List<Task> tasks = new();
 
             //string category = "AGENCE IMMOBILIERE";
@@ -206,7 +206,7 @@ namespace GMS.Tests {
 
             List<DbBusinessAgent> list = GetBusinessAgentListNetwork(nbEntries);
             int threadNumber = 0;
-            foreach (var chunk in list.Chunk(nbEntries / nbThreads)) {
+            foreach (var chunk in list.Chunk(list.Count / nbThreads)) {
                 threadNumber++;
                 Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.CATEGORY, threadNumber); });
                 tasks.Add(newThread);

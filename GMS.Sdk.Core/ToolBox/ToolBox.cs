@@ -8,6 +8,12 @@ using System.Collections.ObjectModel;
 namespace GMS.Sdk.Core.ToolBox {
     public class ToolBox {
 
+        public class GoogleDate {
+            public GoogleDate() { }
+            public string key;
+            public string value;
+        }
+
         #region Local
 
         /// <summary>
@@ -46,13 +52,13 @@ namespace GMS.Sdk.Core.ToolBox {
 
             // Computing date.
             if (googleDate.Contains("moi"))
-                date =  DateTime.UtcNow.AddMonths(-(jsonValue));
-            else if (googleDate.Contains("an"))
-                date =  DateTime.UtcNow.AddYears(-(jsonValue));
-                else
-                    date = DateTime.UtcNow.AddDays(-(jsonValue));
+                return DateTime.UtcNow.AddMonths(-(jsonValue));
+            if (googleDate.Contains("an"))
+                return DateTime.UtcNow.AddYears(-(jsonValue));
+            if (googleDate.Contains("jour"))
+                return DateTime.UtcNow.AddDays(-(jsonValue));
 
-            return date;
+            return DateTime.UtcNow;
         }
 
         /// <summary>

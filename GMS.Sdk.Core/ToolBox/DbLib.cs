@@ -478,7 +478,7 @@ namespace GMS.Sdk.Core.ToolBox {
             List<DbBusinessAgent> businessUrlList = new();
 
             try {
-                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU WHERE PROCESSING = 1 ORDER BY ID_ETAB ASC";
+                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU WHERE PROCESSING = 2";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
@@ -582,7 +582,7 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <param name="idEtab"></param>
         /// <param name="processing"></param>
         /// <exception cref="Exception"></exception>
-        public void UpdateBusinessProfileProcessingState(string idEtab, bool processing) {
+        public void UpdateBusinessProfileProcessingState(string idEtab, int processing) {
             try {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET PROCESSING = @Processing, DATE_UPDATE = @DateUpdate WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);

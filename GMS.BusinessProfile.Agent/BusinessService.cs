@@ -73,7 +73,7 @@ namespace GMS.Business.Agent {
 
                     // Update Business State when finished
                     if ((request.Operation == Operation.CATEGORY || request.Operation == Operation.FILE) && business.IdEtab != null)
-                        db.UpdateBusinessProfileProcessingState(business.IdEtab, false);
+                        db.UpdateBusinessProfileProcessingState(business.IdEtab, 0);
 
                     } catch (Exception e) {
                     using StreamWriter sw = File.AppendText(pathLogFile);
@@ -90,21 +90,6 @@ namespace GMS.Business.Agent {
             using StreamWriter sw2 = File.AppendText(pathLogFile);
             sw2.WriteLine(DateTime.UtcNow.ToString("G") + " - Thread number " + threadNumber + " finished.");
             sw2.WriteLine("Treated " + count + " businesses in " + (DateTime.UtcNow - time).ToString("g") + ".\n");
-        }
-
-        public static void UpdateBusinessRequestState(BusinessAgentRequest request, DbLib db) {
-            switch (request.Operation) {
-                case Operation.URL_STATE:
-                    foreach (DbBusinessAgent business in request.BusinessList)
-                        db.UpdateBusinessUrlState(business.Guid, UrlState.PROCESSING);
-                    break;
-                case Operation.CATEGORY:
-                case Operation.FILE:
-                    foreach (DbBusinessAgent business in request.BusinessList)
-                        if(business.IdEtab != null)
-                            db.UpdateBusinessProfileProcessingState(business.IdEtab, true);
-                    break;
-            }
         }
 
         #region Profile & Score
@@ -156,7 +141,7 @@ namespace GMS.Business.Agent {
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)))
                 adress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress).GetAttribute("aria-label").Replace("Adresse:", "").Trim();
 
-            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.globalScore))) {
+            try {
                 if (float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label").Replace("étoiles", "").Trim(), out _))
                    score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label").Replace("étoiles", "").Trim());
 
@@ -176,7 +161,7 @@ namespace GMS.Business.Agent {
                     } catch (Exception) { }
                 }
                     
-            }
+            } catch (Exception) { }
 
             //HOTEL
             if (hotel && category == null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)))
