@@ -46,6 +46,14 @@ namespace GMS.Sdk.Core.ToolBox {
             string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
             using StreamReader r = new(path + @"\GMS.Sdk.Core\ToolBox\GoogleDate.json");
             string json = r.ReadToEnd();
+            Dictionary<string, string> mapper = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+
+            foreach (KeyValuePair<string, string> pair in mapper) {
+                if(pair.Key == googleDate) {
+                    jsonValue = int.Parse(pair.Value);
+                    break;
+                }
+            }
 
             if (jsonValue == 0)
                 return DateTime.UtcNow;
