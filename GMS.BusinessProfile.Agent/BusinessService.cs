@@ -45,7 +45,7 @@ namespace GMS.Business.Agent {
 
                     if (request.Operation == Operation.FILE) {
                         if (businessProfile == null) {
-                            using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber + ".txt");
+                            using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber.ToString() + ".txt");
                             operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
                             continue;
                         }
