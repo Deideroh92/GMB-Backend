@@ -15,7 +15,7 @@ namespace GMS.Business.Agent {
     /// </summary>
     public class BusinessService {
 
-        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
+        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
         public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
 
         #region Local
@@ -45,7 +45,7 @@ namespace GMS.Business.Agent {
 
                     if (request.Operation == Operation.FILE) {
                         if (businessProfile == null) {
-                            using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);
+                            using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber + ".txt");
                             operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
                             continue;
                         }
