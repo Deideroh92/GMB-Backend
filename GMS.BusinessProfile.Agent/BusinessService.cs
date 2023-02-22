@@ -43,11 +43,16 @@ namespace GMS.Business.Agent {
                     // Get business profile infos from Google.
                     (DbBusinessProfile? businessProfile, DbBusinessScore? businessScore) = GetBusinessProfileAndScoreFromGooglePage(driver, business.Url, business.Guid, business.IdEtab);
 
-                    if (request.Operation == Operation.FILE && !db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(business.Url))) {
-                        using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);
-                        operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
-                        DbBusinessUrl businessUrl = new(businessProfile.FirstGuid, driver.WebDriver.Url, DateTime.UtcNow, UrlState.UPDATED, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(business.Url));
-                        db.CreateBusinessUrl(businessUrl);
+                    if (request.Operation == Operation.FILE) {
+                        if (businessProfile == null) {
+                            using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);
+                            operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
+                            continue;
+                        }
+                        if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(driver.WebDriver.Url))) {
+                            DbBusinessUrl businessUrl = new(businessProfile.FirstGuid, driver.WebDriver.Url, DateTime.UtcNow, UrlState.UPDATED, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(driver.WebDriver.Url));
+                            db.CreateBusinessUrl(businessUrl);
+                        }
                     }
 
                     // No business found at this url.
