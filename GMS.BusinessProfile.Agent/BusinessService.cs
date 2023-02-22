@@ -15,8 +15,8 @@ namespace GMS.Business.Agent {
     /// </summary>
     public class BusinessService {
 
-        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
-        public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
+        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
+        public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
 
         #region Local
 
@@ -87,7 +87,7 @@ namespace GMS.Business.Agent {
                     db.UpdateBusinessProfileProcessingState(businessProfile.IdEtab, 0);
 
                     if (request.Operation == Operation.FILE) {
-                        using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);
+                        using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber.ToString() + ".txt");
                         operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + businessProfile.Name + "$$" + businessProfile.Adress + "$$" + businessProfile.IdEtab + "$$" + driver.WebDriver.Url);
                     }
 
