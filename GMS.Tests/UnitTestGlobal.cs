@@ -5,21 +5,21 @@ using GMS.Sdk.Core.SeleniumDriver;
 using GMS.Sdk.Core.ToolBox;
 using GMS.Url.Agent;
 using GMS.Url.Agent.Model;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System.Text.Json.Nodes;
 using GMS.Sdk.Core.XPath;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
-using System;
 using System.Globalization;
-using System.Threading.Tasks;
+using Microsoft.VisualBasic;
+using AngleSharp.Dom;
+using System.Text.Encodings.Web;
+using System;
 
 namespace GMS.Tests {
     [TestClass]
     public class UnitTestGlobal {
 
         public static readonly string pathUrlFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
+        public static readonly string pathNameFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\name.txt";
         public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy") + ".txt";
 
         #region All
@@ -89,23 +89,40 @@ namespace GMS.Tests {
                 UrlService.Start(request);
             }
         }
+
+        [TestMethod]
+        public void InsertNewUrl() {
+            DbLib db = new();
+            string url = "https://www.google.fr/maps/place/Lidl/@45.6945776,4.8226045,17z/data=!3m1!4b1!4m5!3m4!1s0x47f4e9aedb97e42b:0xdfb4d943672c4bd8!8m2!3d45.6945748!4d4.8247889?hl=fr";
+            DateTime date = DateTime.Now;
+            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, date, UrlState.NEW, "manually", date, ToolBox.ComputeMd5Hash(url));
+            db.CreateBusinessUrl(businessUrl);
+        }
         #endregion
 
         #region BusinessAgent
 
         /// <summary>
-        /// Getting google infos of Mairie du 1er arrondissement
+        /// Exporting Hotels info
         /// </summary>
         [TestMethod]
         public void ExportHotel() {
-            List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, 23918);
+
+            // CONFIG
+            int nbEntries = 1;
+            UrlState urlState = UrlState.NEW;
+
+            DbLib db = new();
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListByUrlState(urlState, nbEntries);
+            db.DisconnectFromDB();
+
             SeleniumDriver driver = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
             using StreamWriter sw2 = File.AppendText(@"C:\Users\maxim\Desktop\hotel.txt");
             sw2.WriteLine("NAME$$CATEGORY$$ADRESS$$TEL$$OPTIONS");
-            foreach (DbBusinessAgent elem in list) {
+            foreach (DbBusinessAgent elem in businessList) {
                 try {
-                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, elem.Url, "123");
+                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, elem.Url, null, null, true);
                     ReadOnlyCollection<IWebElement?> optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
                     List<string> optionsOnList = new();
                     foreach (IWebElement element in optionsOn) {
@@ -116,99 +133,38 @@ namespace GMS.Tests {
             }
         }
 
-        [TestMethod]
-        public void StartAgentNow() {
-            List<DbBusinessAgent> urlList = new();
-            DbBusinessAgent business = new(null, "https://www.google.com/maps/place/Auchan+Roncq/data=!4m6!3m5!1s0x47c32e947a38cffd:0xc80cffd6bdd59b85!8m2!3d50.7377052!4d3.135205!16s%2Fg%2F1hc6sdsl0");
-            urlList.Add(business);
-            BusinessAgentRequest request = new(Operation.FILE, true, null, urlList, DateTime.UtcNow.AddYears(-1));
-            BusinessService.Start(request, 1);
-        }
-
-        public void StartAgent(List<DbBusinessAgent> urlList, Operation operation, int? threadNumber = null) {
-            BusinessAgentRequest request = new(operation, true, null, urlList, DateTime.UtcNow.AddYears(-1));
-            BusinessService.Start(request, threadNumber);
-        }
-
-        public List<DbBusinessAgent> GetBusinessAgentListNetworkByActivity(string activity, int entries) {
-            DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkByActivity(activity, entries);
-            db.DisconnectFromDB();
-            return businessList;
-        }
-
-        public List<DbBusinessAgent> GetBusinessAgentListNetworkByCategory(string category, int entries) {
-            DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkByCategory(category, entries);
-            db.DisconnectFromDB();
-            return businessList;
-        }
-
-        public List<DbBusinessAgent> GetBusinessAgentListNetworkByBrand(string brand, int entries) {
-            DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkByBrand(brand, entries);
-            db.DisconnectFromDB();
-            return businessList;
-        }
-
-        public List<DbBusinessAgent> GetBusinessAgentListNetworkBySectory(string sector, int entries) {
-            DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetworkBySector(sector, entries);
-            db.DisconnectFromDB();
-            return businessList;
-        }
-
-        public List<DbBusinessAgent> GetBusinessAgentListNetwork(int entries) {
-            DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessAgentListNetwork(entries);
-            db.DisconnectFromDB();
-            return businessList;
-        }
-
-        public List<DbBusinessAgent> GetBusinessAgentListFromUrlState(UrlState urlState, int entries) {
-            DbLib db = new();
-            List<DbBusinessAgent> businessList = db.GetBusinessAgentListByUrlState(urlState, entries);
-            db.DisconnectFromDB();
-            return businessList;
-        }
-
-        public (List<DbBusinessAgent>, List<string>) GetBusinessAgentListFromUrlFile(string[] urlList) {
-            DbLib db = new();
-            List<DbBusinessAgent> businessList = new();
-            List<string> urlNotFound = new();
-
-            foreach (string url in urlList) {
-                string urlEncoded = ToolBox.ComputeMd5Hash(url);
-                DbBusinessAgent? business = db.GetBusinessAgentByUrlEncoded(urlEncoded);
-                if (business != null)
-                    businessList.Add(business);
-                else {
-                    urlNotFound.Add(url);
-                }
-            }
-            
-            db.DisconnectFromDB();
-            return (businessList, urlNotFound);
-        }
-
-        #region THREADS
         /// <summary>
         /// STARTING APP
         /// </summary>
         [TestMethod]
         public void ThreadsCategory() {
+
+            // CONFIG
             int nbThreads = 8;
             int nbEntries = 1;
-            List<Task> tasks = new();
+            string? sector = "AGENCE IMMOBILIERE";
+            int processing = 0;
+            Operation opertationType = Operation.CATEGORY;
+            bool getReviews = true;
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
 
-            //string category = "AGENCE IMMOBILIERE";
-            //List<DbBusinessAgent> list = GetBusinessAgentListNetworkFromCategory(category, nbEntries);
+            List<DbBusinessAgent> businessList = new();
+            List <Task> tasks = new();
+            
+            DbLib db = new();
+            if (sector == null) businessList = db.GetBusinessAgentListNetwork(nbEntries, processing);
+            else businessList = db.GetBusinessAgentListNetworkBySector(sector, nbEntries);
+            db.DisconnectFromDB();
 
-            List<DbBusinessAgent> list = GetBusinessAgentListNetwork(nbEntries);
+            
+
             int threadNumber = 0;
-            foreach (var chunk in list.Chunk(list.Count / nbThreads)) {
+            foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
                 threadNumber++;
-                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.CATEGORY, threadNumber); });
+                Task newThread = Task.Run(delegate {
+                    BusinessAgentRequest request = new(opertationType, getReviews, new List<DbBusinessAgent>(chunk), reviewsDate);
+                    BusinessService.Start(request, threadNumber);
+                });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
             }
@@ -217,24 +173,50 @@ namespace GMS.Tests {
         }
 
         [TestMethod]
-        public void ThreadsUrlList() {
-            int nbThreads = 1;
-            string[] urlList = File.ReadAllLines(pathUrlFile);
-            List<Task> tasks = new();
+        public void ThreadsFile() {
 
-            (List<DbBusinessAgent> bussinessList, List<string> urlNotFound) = GetBusinessAgentListFromUrlFile(urlList);
-            foreach (string url in urlNotFound) {
-                using StreamWriter sw = File.AppendText(pathLogFile);
-                sw.WriteLine(url + "\n");
+            // CONFIG
+            int nbThreads = 1;
+            Operation opertationType = Operation.FILE;
+            bool getReviews = true;
+            DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
+            bool isUrlFile = false;
+            string[] urlList = File.ReadAllLines(isUrlFile ? pathUrlFile : pathNameFile);
+
+            List<Task> tasks = new();
+            List<DbBusinessAgent> businessList = new();
+
+            if (isUrlFile) {
+                DbLib db = new();
+                foreach (string url in urlList) {
+                    DbBusinessAgent? business = db.GetBusinessAgentByUrlEncoded(ToolBox.ComputeMd5Hash(url));
+
+                    if (business == null) {
+                        using StreamWriter sw = File.AppendText(pathLogFile);
+                        sw.WriteLine(url + "\n");
+                        continue;
+                    }
+
+                    businessList.Add(business);
+                }
+                db.DisconnectFromDB();
+            } else {
+                foreach (string url in urlList) {
+                    businessList.Add(new DbBusinessAgent(null, "https://www.google.fr/maps/search/" + url.ToLower()));
+                }
             }
+            
 
             using StreamWriter sw2 = File.AppendText(pathLogFile);
             sw2.WriteLine("\n\nStarting selenium process !\n\n");
 
             int threadNumber = 0;
-            foreach (var chunk in bussinessList.Chunk(bussinessList.Count / nbThreads)) {
+            foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
                 threadNumber++;
-                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.FILE, threadNumber); });
+                Task newThread = Task.Run(delegate {
+                    BusinessAgentRequest request = new(opertationType, getReviews, new List<DbBusinessAgent>(chunk), reviewsDate);
+                    BusinessService.Start(request, threadNumber);
+                });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
             }
@@ -244,23 +226,33 @@ namespace GMS.Tests {
 
         [TestMethod]
         public void ThreadsUrlState() {
-            int nbThreads = 1;
-            UrlState state = UrlState.NEW;
+
+            // CONFIG
+            int nbThreads = 8;
             int nbEntries = 111;
+            UrlState urlState = UrlState.NEW;
+            Operation opertationType = Operation.URL_STATE;
+            bool getReviews = true;
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
+
             List<Task> tasks = new();
-            List<DbBusinessAgent> list = GetBusinessAgentListFromUrlState(UrlState.NEW, nbEntries);
+            DbLib db = new();
+            List<DbBusinessAgent> businessList = db.GetBusinessAgentListByUrlState(urlState, nbEntries);
+            db.DisconnectFromDB();
 
             int threadNumber = 0;
-            foreach (var chunk in list.Chunk(list.Count / nbThreads)) {
+            foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
                 threadNumber++;
-                Task newThread = Task.Run(delegate { StartAgent(new List<DbBusinessAgent>(chunk), Operation.URL_STATE, threadNumber); });
+                Task newThread = Task.Run(delegate {
+                    BusinessAgentRequest request = new(opertationType, getReviews, new List<DbBusinessAgent>(chunk), reviewsDate);
+                    BusinessService.Start(request, threadNumber);
+                });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
             }
             Task.WaitAll(tasks.ToArray());
             return;
         }
-        #endregion
         #endregion
     }
 }

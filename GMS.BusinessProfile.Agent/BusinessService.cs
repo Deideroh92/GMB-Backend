@@ -1,4 +1,5 @@
-﻿using GMS.BusinessProfile.Agent.Model;
+﻿using AngleSharp.Dom;
+using GMS.BusinessProfile.Agent.Model;
 using GMS.Sdk.Core.Database;
 using GMS.Sdk.Core.SeleniumDriver;
 using GMS.Sdk.Core.ToolBox;
@@ -15,6 +16,7 @@ namespace GMS.Business.Agent {
     public class BusinessService {
 
         public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
+        public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss") + ".txt";
 
         #region Local
 
@@ -27,9 +29,6 @@ namespace GMS.Business.Agent {
             DbLib db = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
-            // Updating status of business to PROCESSING.
-            //UpdateBusinessRequestState(request, db);
-
             SeleniumDriver driver = new(DriverType.CHROME);
 
             int count = 0 ;
@@ -40,13 +39,21 @@ namespace GMS.Business.Agent {
                 try {
                     count++;
                     float percentage = (count / request.BusinessList.Count) * 100;
+
                     // Get business profile infos from Google.
                     (DbBusinessProfile? businessProfile, DbBusinessScore? businessScore) = GetBusinessProfileAndScoreFromGooglePage(driver, business.Url, business.Guid, business.IdEtab);
+
+                    if (request.Operation == Operation.FILE && !db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(business.Url))) {
+                        using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);
+                        operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
+                        DbBusinessUrl businessUrl = new(businessProfile.FirstGuid, driver.WebDriver.Url, DateTime.UtcNow, UrlState.UPDATED, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(business.Url));
+                        db.CreateBusinessUrl(businessUrl);
+                    }
 
                     // No business found at this url.
                     if (businessProfile == null) {
                         if (request.Operation == Operation.URL_STATE)
-                            db.DeleteBusinessUrlByGuid(business.Guid);
+                            db.DeleteBusinessUrlByGuid(businessProfile.FirstGuid);
                         else
                             if (business.IdEtab != null)
                                 db.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
@@ -54,7 +61,7 @@ namespace GMS.Business.Agent {
                     }
 
                     // Update or insert Business Profile if exist or not.
-                    if (request.Operation == Operation.CATEGORY || request.Operation == Operation.FILE || db.CheckBusinessProfileExist(businessProfile.IdEtab))
+                    if (request.Operation == Operation.CATEGORY || db.CheckBusinessProfileExist(businessProfile.IdEtab))
                         db.UpdateBusinessProfile(businessProfile);
                     else
                         db.CreateBusinessProfile(businessProfile);
@@ -67,13 +74,17 @@ namespace GMS.Business.Agent {
                     if (request.GetReviews && request.DateLimit != null)
                         GetReviews(businessProfile, request.DateLimit, db, driver);
 
-                    // Update Url state to updated when finished.
+                    // Update Url state when finished.
                     if (request.Operation == Operation.URL_STATE)
-                        db.UpdateBusinessUrlState(business.Guid, UrlState.UPDATED);
+                        db.UpdateBusinessUrlState(businessProfile.FirstGuid, UrlState.UPDATED);
 
                     // Update Business State when finished
-                    if ((request.Operation == Operation.CATEGORY || request.Operation == Operation.FILE) && business.IdEtab != null)
-                        db.UpdateBusinessProfileProcessingState(business.IdEtab, 0);
+                    db.UpdateBusinessProfileProcessingState(businessProfile.IdEtab, 0);
+
+                    if (request.Operation == Operation.FILE) {
+                        using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);
+                        operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + businessProfile.Name + "$$" + businessProfile.Adress + "$$" + businessProfile.IdEtab + "$$" + driver.WebDriver.Url);
+                    }
 
                     } catch (Exception e) {
                     using StreamWriter sw = File.AppendText(pathLogFile);
@@ -101,7 +112,7 @@ namespace GMS.Business.Agent {
         /// <param name="guid"></param>
         /// <returns>Business Profile and a Business Score if any</returns>
         /// <exception cref="Exception"></exception>
-        public static (DbBusinessProfile?, DbBusinessScore?) GetBusinessProfileAndScoreFromGooglePage(SeleniumDriver driver, string url, string guid, string? idEtab = null) {
+        public static (DbBusinessProfile?, DbBusinessScore?) GetBusinessProfileAndScoreFromGooglePage(SeleniumDriver driver, string url, string? guid = null, string? idEtab = null, bool isHotel = false) {
             // Initialization of all variables
             string? name = null;
             string? category = null;
@@ -112,7 +123,7 @@ namespace GMS.Business.Agent {
             float? score = null;
             BusinessStatus status = BusinessStatus.OPEN;
             string? geoloc = null;
-            bool hotel = false;
+            bool hotel = isHotel;
 
             driver.GetToPage(url);
 
@@ -164,11 +175,13 @@ namespace GMS.Business.Agent {
             } catch (Exception) { }
 
             //HOTEL
-            if (hotel && category == null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)))
-                category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory).Text.Replace("·", "");
+            if (hotel) {
+                if (category == null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)))
+                    category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory).Text.Replace("·", "");
 
-            if (hotel && score == null && reviews != null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)))
-                score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore).Text);
+                if (score == null && reviews != null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)))
+                    score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore).Text);
+            }
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)))
                 tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel).GetAttribute("aria-label").Replace("Numéro de téléphone:", "").Trim();
@@ -180,6 +193,7 @@ namespace GMS.Business.Agent {
             }
 
             idEtab ??= ToolBox.ComputeMd5Hash(name + adress);
+            guid ??= Guid.NewGuid().ToString("N");
             DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, adress, tel, website, geoloc, DateTime.UtcNow, DateTime.UtcNow, status);
             DbBusinessScore? dbBusinessScore = new(idEtab, score, reviews, DateTime.UtcNow);
             return (dbBusinessProfile, dbBusinessScore);

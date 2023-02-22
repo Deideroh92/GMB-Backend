@@ -474,14 +474,15 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <param name="entries"></param>
         /// <returns>List of Business Agent</returns>
         /// <exception cref="Exception"></exception>
-        public List<DbBusinessAgent> GetBusinessAgentListNetwork(int entries) {
+        public List<DbBusinessAgent> GetBusinessAgentListNetwork(int entries, int processing) {
             List<DbBusinessAgent> businessUrlList = new();
 
             try {
-                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU WHERE PROCESSING = 2";
+                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU WHERE PROCESSING = @Processing";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
+                cmd.Parameters.AddWithValue("@Processing", processing);
                 cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
                 cmd.Dispose();
