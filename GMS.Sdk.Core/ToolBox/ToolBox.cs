@@ -63,6 +63,8 @@ namespace GMS.Sdk.Core.ToolBox {
                 return DateTime.UtcNow.AddMonths(-(jsonValue));
             if (googleDate.Contains("an"))
                 return DateTime.UtcNow.AddYears(-(jsonValue));
+            if (googleDate.Contains("semaine"))
+                return DateTime.UtcNow.AddDays(-(jsonValue));
             if (googleDate.Contains("jour"))
                 return DateTime.UtcNow.AddDays(-(jsonValue));
 

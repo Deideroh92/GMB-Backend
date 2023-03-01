@@ -18,8 +18,8 @@ namespace GMS.Tests {
     [TestClass]
     public class UnitTestGlobal {
 
-        public static readonly string pathUrlFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
-        public static readonly string pathNameFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\name.txt";
+        public static readonly string pathUrlKnownFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
+        public static readonly string pathUknownBusinessFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\unknown_url.txt";
         public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy") + ".txt";
 
         #region All
@@ -36,7 +36,7 @@ namespace GMS.Tests {
         #region ToolBox
         [TestMethod]
         public void HashToMd5() {
-            string messageEncoded = ToolBox.ComputeMd5Hash("https://www.google.com/maps/search/EMILIE+ALBINET+conseilli%C3%A8re+immobili%C3%A8re+SAFTI+VARENNES,+VILLEBRUMIER,+SAINT+NAUPHARY,+NOHIC,+ORGUEIL");
+            string messageEncoded = ToolBox.ComputeMd5Hash("Eurorepar Garage Barbeyron" + "23 Le Bourg, 33330 Saint-Christophe-des-Bardes");
             return;
         }
 
@@ -140,13 +140,13 @@ namespace GMS.Tests {
         public void ThreadsCategory() {
 
             // CONFIG
-            int nbThreads = 8;
+            int nbThreads = 1;
             int nbEntries = 1;
-            string? sector = "AGENCE IMMOBILIERE";
-            int processing = 0;
+            string? sector = null;
+            int processing = 2;
             Operation opertationType = Operation.CATEGORY;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
+            DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
 
             List<DbBusinessAgent> businessList = new();
             List <Task> tasks = new();
@@ -180,13 +180,14 @@ namespace GMS.Tests {
             Operation opertationType = Operation.FILE;
             bool getReviews = true;
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
-            bool isUrlFile = false;
-            string[] urlList = File.ReadAllLines(isUrlFile ? pathUrlFile : pathNameFile);
+            bool isUrlKnownFile = false;
+            bool isUrlFile = true;
+            string[] urlList = File.ReadAllLines(isUrlKnownFile ? pathUrlKnownFile : pathUknownBusinessFile);
 
             List<Task> tasks = new();
             List<DbBusinessAgent> businessList = new();
 
-            if (isUrlFile) {
+            if (isUrlKnownFile) {
                 DbLib db = new();
                 foreach (string url in urlList) {
                     DbBusinessAgent? business = db.GetBusinessAgentByUrlEncoded(ToolBox.ComputeMd5Hash(url));
@@ -202,7 +203,8 @@ namespace GMS.Tests {
                 db.DisconnectFromDB();
             } else {
                 foreach (string url in urlList) {
-                    businessList.Add(new DbBusinessAgent(null, "https://www.google.fr/maps/search/" + url.ToLower()));
+                    if (isUrlFile) businessList.Add(new DbBusinessAgent(null, "https://www.google.fr/maps/search/" + url.ToLower()));
+                    else businessList.Add(new DbBusinessAgent(null, url));
                 }
             }
             

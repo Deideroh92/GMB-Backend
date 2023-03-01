@@ -199,7 +199,7 @@ namespace GMS.Business.Agent {
 
             idEtab ??= ToolBox.ComputeMd5Hash(name + adress);
             guid ??= Guid.NewGuid().ToString("N");
-            DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, adress, tel, website, geoloc, DateTime.UtcNow, DateTime.UtcNow, status);
+            DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, adress, tel, website, geoloc, DateTime.UtcNow, DateTime.UtcNow, status, "");
             DbBusinessScore? dbBusinessScore = new(idEtab, score, reviews, DateTime.UtcNow);
             return (dbBusinessProfile, dbBusinessScore);
         }

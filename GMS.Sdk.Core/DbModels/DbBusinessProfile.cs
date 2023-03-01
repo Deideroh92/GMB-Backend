@@ -23,7 +23,8 @@
         public DateTime? DateInsert { get; set; }
         public DateTime? DateUpdate { get; set; }
         public BusinessStatus Status { get; set; }
-        public bool Processing { get; set; }
+        public int Processing { get; set; }
+        public string PictureUrl { get; set; }
 
         #region Equality
 
@@ -75,7 +76,7 @@
         /// <param name="dateUpdate"></param>
         /// <param name="status"></param>
         /// <param name="processing"></param>
-        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? adress, string? tel, string? website, string? geoloc, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus status, bool processing = false) {
+        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? adress, string? tel, string? website, string? geoloc, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus status, string pictureUrl, int processing = 0) {
             IdEtab = idEtab;
             FirstGuid = firstGuid;
             Name = name;
@@ -87,6 +88,7 @@
             DateInsert = dateInsert;
             DateUpdate = dateUpdate;
             Status = status;
+            PictureUrl= pictureUrl;
             Processing = processing;
 
             if (DateInsert == null)

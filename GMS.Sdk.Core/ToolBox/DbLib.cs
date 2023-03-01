@@ -281,7 +281,7 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <exception cref="Exception"></exception>
         public void CreateBusinessProfile(DbBusinessProfile businessProfile) {
             try {
-                string insertCommand = "INSERT INTO BUSINESS_PROFILE VALUES (@IdEtab, @FirstGuid, @Name, @Category, @Adress, @Tel, @Website, @Geoloc, @DateInsert, @UpdateCount, @DateUpdate, @Status, @Processing)";
+                string insertCommand = "INSERT INTO BUSINESS_PROFILE VALUES (@IdEtab, @FirstGuid, @Name, @Category, @Adress, @Tel, @Website, @Geoloc, @DateInsert, @UpdateCount, @DateUpdate, @Status, @Processing, @UrlPicture)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@FirstGuid", businessProfile.FirstGuid);
@@ -296,6 +296,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@DateUpdate", businessProfile.DateUpdate);
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@Processing", businessProfile.Processing);
+                cmd.Parameters.AddWithValue("@UrlPicture", businessProfile.Processing);
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             } catch (Exception) {
