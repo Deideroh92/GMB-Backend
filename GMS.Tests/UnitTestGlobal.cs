@@ -9,17 +9,13 @@ using GMS.Sdk.Core.XPath;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using System.Globalization;
-using Microsoft.VisualBasic;
-using AngleSharp.Dom;
-using System.Text.Encodings.Web;
-using System;
 
 namespace GMS.Tests {
     [TestClass]
     public class UnitTestGlobal {
 
         public static readonly string pathUrlKnownFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
-        public static readonly string pathUknownBusinessFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\unknown_url.txt";
+        public static readonly string pathUnknownBusinessFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\unknown_url.txt";
         public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy") + ".txt";
 
         #region All
@@ -31,12 +27,40 @@ namespace GMS.Tests {
             
             return;
         }
+
+        [TestMethod]
+        public void GetXPathfromPage() {
+            string url = "https://www.google.com/maps/place/BRED-Banque+Populaire/@48.8280761,2.2411834,15z/data=!4m10!1m2!2m1!1sbanque!3m6!1s0x47e67af2357c45ab:0x1b7baec714122e5b!8m2!3d48.8255006!4d2.2479565!15sCgZiYW5xdWWSAQRiYW5r4AEA!16s%2Fg%2F1wf37y2x";
+            SeleniumDriver driver = new();
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
+            driver.GetToPage(url);
+
+            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test))) {
+                string value = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test).GetAttribute("src").Trim();
+                Console.WriteLine(value);
+            }
+
+            driver.WebDriver.Quit();
+        }
         #endregion
 
         #region ToolBox
         [TestMethod]
         public void HashToMd5() {
             string messageEncoded = ToolBox.ComputeMd5Hash("Eurorepar Garage Barbeyron" + "23 Le Bourg, 33330 Saint-Christophe-des-Bardes");
+            return;
+        }
+
+        [TestMethod]
+        public void HashFileToMd5() {
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\test.txt";
+            string endFilePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\test_out.txt";
+            string[] etabs = File.ReadAllLines(filePath);
+            using StreamWriter sw = File.AppendText(endFilePath);
+            foreach (string etab in etabs) {
+                string[] line = etab.Split("\t");
+                sw.WriteLine(etab + "\t" + ToolBox.ComputeMd5Hash(line[1] + line[4]));
+            }
             return;
         }
 
@@ -182,7 +206,7 @@ namespace GMS.Tests {
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
             bool isUrlKnownFile = false;
             bool isUrlFile = true;
-            string[] urlList = File.ReadAllLines(isUrlKnownFile ? pathUrlKnownFile : pathUknownBusinessFile);
+            string[] urlList = File.ReadAllLines(isUrlKnownFile ? pathUrlKnownFile : pathUnknownBusinessFile);
 
             List<Task> tasks = new();
             List<DbBusinessAgent> businessList = new();

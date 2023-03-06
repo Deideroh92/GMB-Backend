@@ -126,6 +126,7 @@ namespace GMS.Business.Agent {
             string? website = null;
             string? tel = null;
             float? score = null;
+            string? img = null;
             BusinessStatus status = BusinessStatus.OPEN;
             string? geoloc = null;
             bool hotel = isHotel;
@@ -157,6 +158,12 @@ namespace GMS.Business.Agent {
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)))
                 adress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress).GetAttribute("aria-label").Replace("Adresse:", "").Trim();
 
+            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)))
+                adress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress).GetAttribute("aria-label").Replace("Adresse:", "").Trim();
+
+            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test)))
+                img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test).GetAttribute("src").Trim();
+
             try {
                 if (float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label").Replace("étoiles", "").Trim(), out _))
                    score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label").Replace("étoiles", "").Trim());
@@ -172,8 +179,8 @@ namespace GMS.Business.Agent {
                             reviews = int.Parse(Regex.Replace(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews).Text.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
                     } catch (Exception) { }
                     try {
-                        if (int.TryParse(Regex.Replace(((OpenQA.Selenium.WebElement)ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews)).ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""), out _))
-                            reviews = int.Parse(Regex.Replace(((OpenQA.Selenium.WebElement)ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews)).ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
+                        if (int.TryParse(Regex.Replace(((WebElement)ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews)).ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""), out _))
+                            reviews = int.Parse(Regex.Replace(((WebElement)ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews)).ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim(), @"\s", ""));
                     } catch (Exception) { }
                 }
                     
@@ -199,7 +206,7 @@ namespace GMS.Business.Agent {
 
             idEtab ??= ToolBox.ComputeMd5Hash(name + adress);
             guid ??= Guid.NewGuid().ToString("N");
-            DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, adress, tel, website, geoloc, DateTime.UtcNow, DateTime.UtcNow, status, "");
+            DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, adress, tel, website, geoloc, DateTime.UtcNow, DateTime.UtcNow, status, img);
             DbBusinessScore? dbBusinessScore = new(idEtab, score, reviews, DateTime.UtcNow);
             return (dbBusinessProfile, dbBusinessScore);
         }

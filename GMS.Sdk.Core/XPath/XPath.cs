@@ -23,6 +23,7 @@ namespace GMS.Sdk.Core.XPath {
         public static readonly List<By> score = new() { By.XPath("//span[contains(@aria-label, 'étoiles')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]") };
         public static readonly List<By> status = new() { By.XPath("//div[contains(@jsaction, 'pane.openhours')]") };
         public static readonly List<By> globalScore = new() { By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]") };
+        public static readonly List<By> test = new() { By.XPath("//img[contains(@decoding, 'async')]") };
 
         // Hotels
         public static readonly List<By> hotelCategory = new() { By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]/following-sibling::span") };
