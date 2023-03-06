@@ -206,7 +206,7 @@ namespace GMS.Tests {
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
             bool isUrlKnownFile = false;
             bool isUrlFile = true;
-            string[] urlList = File.ReadAllLines(isUrlKnownFile ? pathUrlKnownFile : pathUnknownBusinessFile);
+            string[] urlList = File.ReadAllLines(pathUrlKnownFile);
 
             List<Task> tasks = new();
             List<DbBusinessAgent> businessList = new();
@@ -227,7 +227,7 @@ namespace GMS.Tests {
                 db.DisconnectFromDB();
             } else {
                 foreach (string url in urlList) {
-                    if (isUrlFile) businessList.Add(new DbBusinessAgent(null, "https://www.google.fr/maps/search/" + url.ToLower()));
+                    if (!isUrlFile) businessList.Add(new DbBusinessAgent(null, "https://www.google.fr/maps/search/" + url.ToLower()));
                     else businessList.Add(new DbBusinessAgent(null, url));
                 }
             }
