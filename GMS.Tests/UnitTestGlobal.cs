@@ -9,6 +9,7 @@ using GMS.Sdk.Core.XPath;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using System.Globalization;
+using System;
 
 namespace GMS.Tests {
     [TestClass]
@@ -68,6 +69,27 @@ namespace GMS.Tests {
         public void ComputeDateFromGoogleDate() {
             string googleDate = "il y a 2 jours";
             DateTime date = ToolBox.ComputeDateFromGoogleDate(googleDate);
+            return;
+        }
+
+        [TestMethod]
+        public void ChangeUrlStateByGivenUrlFile() {
+            string[] urlList = File.ReadAllLines(pathUrlKnownFile);
+            DbLib db = new();
+            int count = 0;
+
+            foreach (string url in urlList) {
+                try {
+                    string? guid = db.GetBusinessUrlGuidByUrlEncoded(ToolBox.ComputeMd5Hash(url));
+                    if (guid != null) {
+                        db.UpdateBusinessUrlState(guid, UrlState.NEW);
+                    } else
+                        count++;
+                }
+                catch(Exception e) {
+                    Console.WriteLine(e);
+                }
+            }
             return;
         }
         #endregion
