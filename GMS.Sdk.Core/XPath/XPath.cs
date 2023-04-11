@@ -33,17 +33,17 @@ namespace GMS.Sdk.Core.XPath {
 
     public class XPathReview {
 
-        public static readonly List<By> toReviewsPage = new() { By.XPath("//div[@jsaction=\'pane.rating.moreReviews\']") };
+        public static readonly List<By> toReviewsPage = new() { By.XPath("//button[@role='tab' and contains(@aria-label, 'Avis')]") };
         public static readonly List<By> sortReviews = new() { By.XPath("//button[@data-value='Trier']") };
         public static readonly List<By> sortReviews2 = new() { By.XPath("//li[@data-index='1']"), By.XPath("//div[@data-index='1']") };
-        public static readonly List<By> reviewList = new() { By.XPath("//div[@jsaction=\'mouseover:pane.review.in;mouseout:pane.review.out\']"), By.XPath("//div[@tabindex='-1']") };
+        public static readonly List<By> reviewList = new() { By.XPath("//div[@jsaction='mouseover:pane.review.in; mouseout:pane.review.out']") };
         public static readonly List<By> scrollingPanel = new() { By.XPath("//button[@aria-label='Rédiger un avis']") };
 
         // Review Infos
         public static readonly List<By> googleDate = new() { By.XPath(".//span[contains(text(), 'il y a')]") };
         public static readonly List<By> userName = new() { By.XPath(".//a[contains(@aria-label, 'Photo de')]") };
-        public static readonly List<By> score = new() { By.XPath(".//span[contains(@role, 'img')]") };
-        public static readonly List<By> userNbReviews = new() { By.XPath(".//span[contains(text(), 'Guide')]" + "/following::span") };
+        public static readonly List<By> score = new() { By.XPath(".//span[contains(@role, 'img')]//img[contains(@src, 'ic_star_rate_14')]") };
+        public static readonly List<By> userNbReviews = new() { By.XPath(".//div[contains(text(), 'avis')]") };
         public static readonly List<By> text = new() { By.XPath(".//div[contains(@class, 'MyEned')]") };
 
         // Review reply infos

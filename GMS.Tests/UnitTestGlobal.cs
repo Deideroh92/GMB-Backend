@@ -186,10 +186,10 @@ namespace GMS.Tests {
         public void ThreadsCategory() {
 
             // CONFIG
-            int nbThreads = 1;
-            int nbEntries = 1;
+            int nbThreads = 8;
+            int nbEntries = 10;
             string? sector = null;
-            int processing = 2;
+            int processing = 1;
             Operation opertationType = Operation.CATEGORY;
             bool getReviews = true;
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);

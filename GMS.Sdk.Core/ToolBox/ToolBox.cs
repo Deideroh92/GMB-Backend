@@ -75,7 +75,6 @@ namespace GMS.Sdk.Core.ToolBox {
         /// Same as FindElement only returns null when not found instead of an exception.
         /// </summary>
         /// <param name="by">The search string for finding element</param>
-        /// <param name="by2">The second search string (if any) for finding element</param>
         /// <returns>Returns element or null if not found</returns>
         public static IWebElement? FindElementSafe(IWebDriver driver, List<By> by) {
             foreach (By item in by) {
@@ -92,7 +91,6 @@ namespace GMS.Sdk.Core.ToolBox {
         /// Same as FindElement only returns null when not found instead of an exception.
         /// </summary>
         /// <param name="by">The search string for finding element</param>
-        /// <param name="by2">The second search string (if any) for finding element</param>
         /// <returns>Returns element or null if not found</returns>
         public static IWebElement? FindElementSafe(IWebElement webElement, List<By> by) {
             foreach (By item in by) {
@@ -109,12 +107,27 @@ namespace GMS.Sdk.Core.ToolBox {
         /// Same as FindElements only returns null when not found instead of an exception.
         /// </summary>
         /// <param name="by">The search string for finding element</param>
-        /// <param name="by2">The second search string (if any) for finding element</param>
         /// <returns>Returns elements or null if not found</returns>
         public static ReadOnlyCollection<IWebElement>? FindElementsSafe(IWebDriver driver, List<By> by) {
             foreach (By item in by) {
                 try {
                     return driver.FindElements(item);
+                } catch (NoSuchElementException) {
+                    continue;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Same as FindElements only returns null when not found instead of an exception.
+        /// </summary>
+        /// <param name="by">The search string for finding element</param>
+        /// <returns>Returns elements or null if not found</returns>
+        public static ReadOnlyCollection<IWebElement>? FindElementsSafe(IWebElement webElement, List<By> by) {
+            foreach (By item in by) {
+                try {
+                    return webElement.FindElements(item);
                 } catch (NoSuchElementException) {
                     continue;
                 }

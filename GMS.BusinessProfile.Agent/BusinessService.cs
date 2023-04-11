@@ -258,14 +258,14 @@ namespace GMS.Business.Agent {
             if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName)))
                 userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName).GetAttribute("aria-label").Replace("Photo de", "").Trim();
 
-            if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score)))
-                reviewScore = int.Parse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score).GetAttribute("aria-label").Replace("étoile", "").Replace("s", "").Trim());
-            else
+            if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score))) {
+                reviewScore = ToolBox.FindElementsSafe(reviewWebElement, XPathReview.score).Count();
+            } else
                 throw new Exception("No score for this review");
 
-            if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)))
-                userNbReviews = int.Parse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Replace("avis", "").Replace("·", "").Replace(" ", "").Trim());
-            else
+            if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews))) {
+                userNbReviews = int.Parse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Replace("avis", "").Replace("·", "").Replace("Local Guide", "").Replace(" ", "").Trim());
+            } else
                 userNbReviews = 1;
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)))
@@ -309,7 +309,7 @@ namespace GMS.Business.Agent {
 
             reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
 
-            if (reviewList == null)
+            if (reviewList == null || reviewList.Count == 0)
                 return null;
 
             IWebElement? scrollingPanel = ToolBox.FindElementSafe(driver, XPathReview.scrollingPanel);
@@ -322,7 +322,8 @@ namespace GMS.Business.Agent {
                     reviewListLength = reviewList.Count;
                     reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
                     if (ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathReview.googleDate))) {
-                        reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate).Text.Trim();
+                        var test = reviewList.Last();
+                        reviewGoogleDate = ToolBox.FindElementSafe(test, XPathReview.googleDate).Text.Trim();
                         if (ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate) < dateLimit)
                             break;
                     }
@@ -333,7 +334,6 @@ namespace GMS.Business.Agent {
                 else
                     throw new Exception();
             }
-
             return reviewList;
         }
             
