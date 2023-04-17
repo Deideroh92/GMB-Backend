@@ -148,6 +148,19 @@ namespace GMS.Tests {
 
         #region BusinessAgent
 
+        [TestMethod]
+        public void GetInfosByUrl() {
+            string url = "https://www.google.com/maps/place/MONOPRIX/@46.3401195,2.6014815,17z/data=!4m16!1m9!3m8!1s0x47f0a7e780134f53:0x3dbab3dce9a2e639!2sMONOPRIX!8m2!3d46.3401195!4d2.6014815!9m1!1b1!16s%2Fg%2F1ts3kk0r!3m5!1s0x47f0a7e780134f53:0x3dbab3dce9a2e639!8m2!3d46.3401195!4d2.6014815!16s%2Fg%2F1ts3kk0r";
+            Operation opertationType = Operation.FILE;
+            bool getReviews = true;
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
+            List<DbBusinessAgent> business = new() {
+                new DbBusinessAgent(null, url.ToLower(), "e38c646bf09ccde19bb7002ba4b5ba69")
+            };
+            BusinessAgentRequest request = new(opertationType, getReviews, business, reviewsDate);
+            BusinessService.Start(request, 1);
+        }
+
         /// <summary>
         /// Exporting Hotels info
         /// </summary>
