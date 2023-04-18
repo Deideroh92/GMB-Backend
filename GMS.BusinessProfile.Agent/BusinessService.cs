@@ -263,10 +263,11 @@ namespace GMS.Business.Agent {
             } else
                 throw new Exception("No score for this review");
 
-            if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews))) {
+            try {
                 userNbReviews = int.Parse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Replace("avis", "").Replace("·", "").Replace("Local Guide", "").Replace(" ", "").Trim());
-            } else
+            } catch (Exception) { 
                 userNbReviews = 1;
+            }
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)))
                 reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text).Text.Replace("\n", "").Replace("(Traduit par google)", "").Trim();

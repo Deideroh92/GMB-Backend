@@ -658,7 +658,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@UserStatus", businessReview.User.LocalGuide);
                 cmd.Parameters.AddWithValue("@Score", businessReview.Score);
                 cmd.Parameters.AddWithValue("@UserNbReviews", businessReview.User.NbReviews);
-                cmd.Parameters.AddWithValue("@Review", businessReview.ReviewText);
+                cmd.Parameters.AddWithValue("@Review", businessReview.ReviewText as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@ReviewGoogleDate", businessReview.ReviewGoogleDate);
                 cmd.Parameters.AddWithValue("@ReviewDate", businessReview.ReviewDate);
                 cmd.Parameters.AddWithValue("@ReviewReplied", businessReview.ReviewReplied);
