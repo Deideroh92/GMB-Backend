@@ -41,7 +41,7 @@ namespace GMS.Sdk.Core.XPath {
 
         // Review Infos
         public static readonly List<By> googleDate = new() { By.XPath(".//span[contains(text(), 'il y a')]") };
-        public static readonly List<By> userName = new() { By.XPath(".//a[contains(@aria-label, 'Photo de')]") };
+        public static readonly List<By> userName = new() { By.XPath(".//a[contains(@aria-label, 'Photo de')]"), By.XPath(".//button[contains(@aria-label, 'Photo de')]") };
         public static readonly List<By> score = new() { By.XPath(".//span[contains(@role, 'img')]//img[contains(@src, 'ic_star_rate_14')]") };
         public static readonly List<By> userNbReviews = new() { By.XPath(".//div[contains(text(), 'avis')]") };
         public static readonly List<By> text = new() { By.XPath(".//div[contains(@class, 'MyEned')]") };
