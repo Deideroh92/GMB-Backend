@@ -41,7 +41,7 @@ namespace GMS.Sdk.Core.SeleniumDriver {
                     case DriverType.CHROME:
                     default:
                         ChromeOptions chromeOptions = new();
-                        chromeOptions.AddArguments("-headless");
+                        chromeOptions.AddArguments("--headless=new");
                         chromeOptions.AddArguments("--lang=fr");
                         new DriverManager().SetUpDriver(new ChromeConfig());
                         WebDriver = new ChromeDriver(chromeOptions);
