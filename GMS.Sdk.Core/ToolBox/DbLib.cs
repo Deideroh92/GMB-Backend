@@ -291,12 +291,12 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@Tel", businessProfile.Tel as object  ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Website", businessProfile.Website as object  ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Geoloc", businessProfile.Geoloc as object  ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@UrlPicture", businessProfile.PictureUrl as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@DateInsert", businessProfile.DateInsert);
                 cmd.Parameters.AddWithValue("@UpdateCount", 0);
                 cmd.Parameters.AddWithValue("@DateUpdate", businessProfile.DateUpdate);
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@Processing", businessProfile.Processing);
-                cmd.Parameters.AddWithValue("@UrlPicture", businessProfile.Processing);
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             } catch (Exception) {
@@ -561,13 +561,14 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <exception cref="Exception"></exception>
         public void UpdateBusinessProfile(DbBusinessProfile businessProfile) {
             try {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @Adress, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @Adress, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@Name", businessProfile.Name as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Adress", businessProfile.Adress as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Category", businessProfile.Category as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Tel", businessProfile.Tel as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Website", businessProfile.Website as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@UrlPicture", businessProfile.PictureUrl as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@DateUpdate", businessProfile.DateUpdate);
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
@@ -650,7 +651,7 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <exception cref="Exception"></exception>
         public void CreateBusinessReview(DbBusinessReview businessReview) {
             try {
-                string insertCommand = "INSERT INTO BUSINESS_REVIEWS VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateInsert, @DateUpdate)";
+                string insertCommand = "INSERT INTO BUSINESS_REVIEWS VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateInsert, @DateUpdate, @Processing)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessReview.IdEtab);
                 cmd.Parameters.AddWithValue("@IdReview", businessReview.IdReview);
@@ -664,6 +665,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@ReviewReplied", businessReview.ReviewReplied);
                 cmd.Parameters.AddWithValue("@DateInsert", businessReview.DateInsert);
                 cmd.Parameters.AddWithValue("@DateUpdate", businessReview.DateUpdate);
+                cmd.Parameters.AddWithValue("@Processing", 0);
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             } catch (Exception) {

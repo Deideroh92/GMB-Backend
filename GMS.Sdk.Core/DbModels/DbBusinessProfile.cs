@@ -76,7 +76,7 @@
         /// <param name="dateUpdate"></param>
         /// <param name="status"></param>
         /// <param name="processing"></param>
-        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? adress, string? tel, string? website, string? geoloc, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus status, string pictureUrl, int processing = 0) {
+        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? adress, string? tel, string? website, string? geoloc, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, int processing = 0) {
             IdEtab = idEtab;
             FirstGuid = firstGuid;
             Name = name;
