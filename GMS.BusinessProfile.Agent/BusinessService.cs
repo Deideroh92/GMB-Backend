@@ -57,8 +57,8 @@ namespace GMS.Business.Agent {
 
                     // No business found at this url.
                     if (businessProfile == null) {
-                        if (request.Operation == Operation.URL_STATE)
-                            db.DeleteBusinessUrlByGuid(businessProfile.FirstGuid);
+                        if (request.Operation == Operation.URL_STATE && business.Guid != null)
+                            db.DeleteBusinessUrlByGuid(business.Guid);
                         else
                             if (business.IdEtab != null)
                                 db.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
