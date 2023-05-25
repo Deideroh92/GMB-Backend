@@ -60,8 +60,10 @@ namespace GMS.Business.Agent {
                         if (request.Operation == Operation.URL_STATE && business.Guid != null)
                             db.DeleteBusinessUrlByGuid(business.Guid);
                         else
-                            if (business.IdEtab != null)
-                                db.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
+                            if (business.IdEtab != null) {
+                            db.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
+                            db.UpdateBusinessProfileProcessingState(business.IdEtab, 0);
+                        }     
                         continue;
                     }
 
