@@ -99,41 +99,54 @@ namespace GMS.Tests {
         public void TestUrlFinderService() {
             List<string> textSearch = new()
             {
-                "hotel", "camping"
+                "hotel", "hotelier", "restaurant", "fast food", "office de tourisme", "agence de voyages"
             };
-
             string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-
-            //string[] cp = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\CpList.txt");
-            //List<string> locations = new(cp);
-
             string[] dept = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\DeptList.txt");
-            List<string> locations = new(dept);
-
-            /*
-            List<string> locations = new()
-            {
-                "97600", "97200", "97300", "97500", "97100", "97600", "98600", "98700"
-            };*/
-
+            string[] idf = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\IleDeFrance.txt");
+            List<string> locations = new(idf) {
+                "Paris",
+                "Ile de france",
+                "paris 1er",
+                "paris 12eme",
+                "paris 11eme",
+                "paris 10eme",
+                "paris 9eme",
+                "paris 8eme",
+                "paris 7eme",
+                "paris 6eme",
+                "paris 5eme",
+                "paris 4eme",
+                "paris 3eme",
+                "paris 2eme",
+                "paris 13eme",
+                "paris 14eme",
+                "paris 15eme",
+                "paris 16eme",
+                "paris 17eme",
+                "paris 18eme",
+                "paris 19eme",
+                "paris 20eme",
+                "boulogne",
+                "issy les moulineaux",
+                "courbevoie",
+                "levallois",
+                "versailles",
+                "malakoff",
+                "neuilly",
+                "aubervilliers",
+            };
             List<Task> tasks = new();
 
             foreach (string search in textSearch) {
-                Task newThread = Task.Run(delegate { StartSearch(search, locations); });
+                UrlAgentRequest request = new(locations.Select(s => s.Replace(';', ' ').Replace(' ', '+')).ToList(), search.Replace(' ', '+'));
+                Task newThread = Task.Run(delegate { UrlService.Start(request); });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
             }
 
             Task.WaitAll(tasks.ToArray());
             return;
-        }
-
-        public void StartSearch(string textSearch, List<string> locations) {
-            foreach (string location in locations) {
-                string searchString = textSearch.Replace(' ', '+') + " " + location.Replace(';', ' ');
-                UrlAgentRequest request = new(searchString);
-                UrlService.Start(request);
-            }
         }
 
         [TestMethod]

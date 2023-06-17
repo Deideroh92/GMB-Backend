@@ -22,13 +22,16 @@ namespace GMS.Url.Agent {
         public static void Start(UrlAgentRequest request) {
             DbLib dbLib = new();
             SeleniumDriver driver = new(DriverType.CHROME);
-            string url = "https://www.google.com/maps/search/" + request.TextSearch;
-            try {
-                driver.GetToPage(url);
-                GetUrls(driver.WebDriver, request.TextSearch, dbLib);
-            } catch (Exception e) {
-                System.Diagnostics.Debug.WriteLine(e.Message);
-                System.Diagnostics.Debug.WriteLine(e.StackTrace);
+            foreach (string location in request.Locations) {
+                try {
+                    string textSearch = request.TextSearch + "+" + location;
+                    string url = "https://www.google.com/maps/search/" + textSearch;
+                    driver.GetToPage(url);
+                    GetUrls(driver.WebDriver, textSearch, dbLib);
+                } catch (Exception e) {
+                    System.Diagnostics.Debug.WriteLine(e.Message);
+                    System.Diagnostics.Debug.WriteLine(e.StackTrace);
+                }
             }
 
             driver.WebDriver.Quit();
