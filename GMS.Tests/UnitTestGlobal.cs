@@ -163,7 +163,7 @@ namespace GMS.Tests {
             sw2.WriteLine("NAME$$CATEGORY$$ADRESS$$TEL$$OPTIONS");
             foreach (DbBusinessAgent elem in businessList) {
                 try {
-                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, elem.Url, null, null, true);
+                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, elem.Url, null, null);
                     ReadOnlyCollection<IWebElement?> optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
                     List<string> optionsOnList = new();
                     foreach (IWebElement element in optionsOn) {
