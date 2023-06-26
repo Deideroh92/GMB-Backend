@@ -121,7 +121,7 @@ namespace GMS.Business.Agent {
         /// <param name="guid"></param>
         /// <returns>Business Profile and a Business Score if any</returns>
         /// <exception cref="Exception"></exception>
-        public static (DbBusinessProfile?, DbBusinessScore?) GetBusinessProfileAndScoreFromGooglePage(SeleniumDriver driver, string url, string? guid = null, string? idEtab = null, bool isHotel = false) {
+        public static (DbBusinessProfile?, DbBusinessScore?) GetBusinessProfileAndScoreFromGooglePage(SeleniumDriver driver, string url, string? guid = null, string? idEtab = null) {
             // Initialization of all variables
             string? name = null;
             string? category = null;
@@ -133,7 +133,6 @@ namespace GMS.Business.Agent {
             string? img = null;
             BusinessStatus status = BusinessStatus.OPEN;
             string? geoloc = null;
-            bool hotel = isHotel;
 
             driver.GetToPage(url);
 
@@ -191,13 +190,10 @@ namespace GMS.Business.Agent {
             } catch (Exception) { }
 
             //HOTEL
-            if (hotel) {
-                if (category == null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)))
-                    category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory).Text.Replace("·", "");
-
-                if (score == null && reviews != null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)))
-                    score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore).Text);
-            }
+            if (category == null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)))
+                category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory).Text.Replace("·", "");
+            if (score == null && reviews != null && ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)))
+                score = float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore).Text);
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)))
                 tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel).GetAttribute("aria-label").Replace("Numéro de téléphone:", "").Trim();
