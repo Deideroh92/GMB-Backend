@@ -697,6 +697,57 @@ namespace GMS.Sdk.Core.ToolBox {
                 throw;
             }
         }
+
+        /// <summary>
+        /// Get Business Review.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        /// <param name="idReview"></param>
+        /// <returns>Business Review or Null (doesn't exist)</returns>
+        /// <exception cref="Exception"></exception>
+        public DbBusinessReview? GetBusinessReview(string idEtab, string idReview) {
+            try {
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED FROM BUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", idEtab);
+                cmd.Parameters.AddWithValue("@IdReview", idReview);
+                using SqlDataReader reader = cmd.ExecuteReader();
+                cmd.Dispose();
+                
+
+                if (reader.Read()) {
+                    return new DbBusinessReview(idEtab, idReview, new GoogleUser(reader.GetString(0), reader.GetInt32(3), reader.GetString(1) == "1"), reader.GetInt32(2), reader.GetString(4), null, null, reader.GetBoolean(5), null, null);
+                } else
+                    return null;
+
+            } catch (Exception) {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update Business Review.
+        /// </summary>
+        /// <param name="review"></param>
+        /// <exception cref="Exception"></exception>
+        public void UpdateBusinessReview(DbBusinessReview review) {
+            try {
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@UserName", review.User.Name);
+                cmd.Parameters.AddWithValue("@UserStatus", review.User.LocalGuide);
+                cmd.Parameters.AddWithValue("@Score", review.Score);
+                cmd.Parameters.AddWithValue("@UserNbReviews", review.User.NbReviews);
+                cmd.Parameters.AddWithValue("@Review", review.ReviewText);
+                cmd.Parameters.AddWithValue("@ReviewAnswered", review.ReviewReplied);
+                cmd.Parameters.AddWithValue("@IdEtab", review.IdEtab);
+                cmd.Parameters.AddWithValue("@IdReview", review.IdReview);
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
+            } catch (Exception) {
+                throw;
+            }
+        }
         #endregion
     }
     #endregion

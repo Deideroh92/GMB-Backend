@@ -26,12 +26,7 @@
                    EqualityComparer<GoogleUser>.Default.Equals(User, other.User) &&
                    Score == other.Score &&
                    ReviewText == other.ReviewText &&
-                   ReviewGoogleDate == other.ReviewGoogleDate &&
-                   ReviewDate == other.ReviewDate &&
-                   ReviewReplied == other.ReviewReplied &&
-                   DateInsert == other.DateInsert &&
-                   DateUpdate == other.DateUpdate &&
-                   EqualityComparer<DbBusinessReviewReply?>.Default.Equals(ReviewReply, other.ReviewReply);
+                   ReviewReplied == other.ReviewReplied;
         }
 
         public override int GetHashCode() {

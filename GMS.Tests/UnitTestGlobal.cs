@@ -99,43 +99,12 @@ namespace GMS.Tests {
         public void TestUrlFinderService() {
             List<string> textSearch = new()
             {
-                "hotel", "hotelier", "restaurant", "fast food", "office de tourisme", "agence de voyages"
+                "Magasin de vêtements pour hommes", "salon de manucure", "Entreprise de terrassement", "Atelier de menuiserie", "Charpentier"
             };
             string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
             string[] dept = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\DeptList.txt");
             string[] idf = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\IleDeFrance.txt");
-            List<string> locations = new(idf) {
-                "Paris",
-                "Ile de france",
-                "paris 1er",
-                "paris 12eme",
-                "paris 11eme",
-                "paris 10eme",
-                "paris 9eme",
-                "paris 8eme",
-                "paris 7eme",
-                "paris 6eme",
-                "paris 5eme",
-                "paris 4eme",
-                "paris 3eme",
-                "paris 2eme",
-                "paris 13eme",
-                "paris 14eme",
-                "paris 15eme",
-                "paris 16eme",
-                "paris 17eme",
-                "paris 18eme",
-                "paris 19eme",
-                "paris 20eme",
-                "boulogne",
-                "issy les moulineaux",
-                "courbevoie",
-                "levallois",
-                "versailles",
-                "malakoff",
-                "neuilly",
-                "aubervilliers",
-            };
+            List<string> locations = new(dept);
             List<Task> tasks = new();
 
             foreach (string search in textSearch) {
@@ -213,7 +182,7 @@ namespace GMS.Tests {
 
             // CONFIG
             int nbThreads = 8;
-            int nbEntries = 10;
+            int nbEntries = 100000;
             string? sector = null;
             int processing = 1;
             Operation opertationType = Operation.CATEGORY;

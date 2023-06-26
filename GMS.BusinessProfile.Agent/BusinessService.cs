@@ -66,7 +66,7 @@ namespace GMS.Business.Agent {
                         }     
                         continue;
                     }
-
+                    
                     // Update or insert Business Profile if exist or not.
                     if (request.Operation == Operation.CATEGORY || db.CheckBusinessProfileExist(businessProfile.IdEtab))
                         db.UpdateBusinessProfile(businessProfile);
@@ -244,10 +244,9 @@ namespace GMS.Business.Agent {
             DateTime reviewDate;
 
             // Review reply
-            bool replied = true;
-            string replyGoogleDate;
-            string replyText;
-            DbBusinessReviewReply? businessReviewReply = null;
+            bool replied = false;
+            /*string replyGoogleDate;
+            string replyText;*/
 
 
             if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate))) {
@@ -285,15 +284,14 @@ namespace GMS.Business.Agent {
             GoogleUser user = new(userName, userNbReviews, localGuide);
             
             if (ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText))) {
-                replyText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText).Text.Replace("\n", "").Trim();
+                replied = true;
+                /*replyText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText).Text.Replace("\n", "").Trim();
                 replyGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyGoogleDate).Text.Replace("\n", "").Trim();
                 DateTime replyDate = ToolBox.ComputeDateFromGoogleDate(replyGoogleDate);
-                businessReviewReply = new(replyText, idReview, replyGoogleDate, replyDate, DateTime.UtcNow, DateTime.UtcNow);
+                businessReviewReply = new(replyText, idReview, replyGoogleDate, replyDate, DateTime.UtcNow, DateTime.UtcNow);*/
             }
-            else
-                replied = false;
 
-            businessReview = new(idEtab, idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, DateTime.UtcNow, businessReviewReply);
+            businessReview = new(idEtab, idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, DateTime.UtcNow);
 
             return businessReview;
         }
@@ -383,8 +381,12 @@ namespace GMS.Business.Agent {
             foreach (IWebElement review in reviews) {
                 try {
                     DbBusinessReview businessReview = GetBusinessReviewsInfosFromReviews(review, businessProfile.IdEtab, dateLimit);
-                    if (!db.CheckBusinessReviewExist(businessProfile.IdEtab, businessReview.IdReview))
+                    DbBusinessReview? dbBusinessReview = db.GetBusinessReview(businessProfile.IdEtab, businessReview.IdReview);
+                    if (dbBusinessReview == null)
                         db.CreateBusinessReview(businessReview);
+                    else {
+                        if (!dbBusinessReview.Equals(businessReview)) db.UpdateBusinessReview(businessReview);
+                    }
                 } catch (Exception e) {
                     System.Diagnostics.Debug.WriteLine(e.Message);
                     System.Diagnostics.Debug.WriteLine(e.StackTrace);

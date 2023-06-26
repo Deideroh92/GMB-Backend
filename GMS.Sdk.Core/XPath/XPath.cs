@@ -46,8 +46,9 @@ namespace GMS.Sdk.Core.XPath {
         public static readonly List<By> userNbReviews = new() { By.XPath(".//div[contains(text(), 'avis')]") };
         public static readonly List<By> text = new() { By.XPath(".//div[contains(@class, 'MyEned')]") };
 
+        
         // Review reply infos
         public static readonly List<By> replyText = new() { By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::div") };
-        public static readonly List<By> replyGoogleDate = new() { By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::span") };
+        //public static readonly List<By> replyGoogleDate = new() { By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::span") };
     }
 }
