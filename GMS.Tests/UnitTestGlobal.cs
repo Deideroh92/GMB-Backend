@@ -182,7 +182,7 @@ namespace GMS.Tests {
 
             // CONFIG
             int nbThreads = 8;
-            int nbEntries = 100000;
+            int nbEntries = 10000;
             string? sector = null;
             int processing = 1;
             Operation opertationType = Operation.CATEGORY;

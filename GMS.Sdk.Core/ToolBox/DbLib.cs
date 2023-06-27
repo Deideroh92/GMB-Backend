@@ -716,7 +716,7 @@ namespace GMS.Sdk.Core.ToolBox {
                 
 
                 if (reader.Read()) {
-                    return new DbBusinessReview(idEtab, idReview, new GoogleUser(reader.GetString(0), reader.GetInt32(3), reader.GetString(1) == "1"), reader.GetInt32(2), reader.GetString(4), null, null, reader.GetBoolean(5), null, null);
+                    return new DbBusinessReview(idEtab, idReview, new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0), reader.IsDBNull(3) ? null : reader.GetInt32(3), reader.IsDBNull(1) ? false : reader.GetString(1) == "1"), reader.GetInt32(2), reader.IsDBNull(4) ? null : reader.GetString(4), null, null, reader.GetBoolean(5), null, null);
                 } else
                     return null;
 
@@ -732,7 +732,7 @@ namespace GMS.Sdk.Core.ToolBox {
         /// <exception cref="Exception"></exception>
         public void UpdateBusinessReview(DbBusinessReview review) {
             try {
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate, REVIEW_DATE = @ReviewDate WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@UserName", review.User.Name);
                 cmd.Parameters.AddWithValue("@UserStatus", review.User.LocalGuide);
@@ -740,6 +740,34 @@ namespace GMS.Sdk.Core.ToolBox {
                 cmd.Parameters.AddWithValue("@UserNbReviews", review.User.NbReviews);
                 cmd.Parameters.AddWithValue("@Review", review.ReviewText);
                 cmd.Parameters.AddWithValue("@ReviewAnswered", review.ReviewReplied);
+                cmd.Parameters.AddWithValue("@DateUpdate", review.DateUpdate);
+                cmd.Parameters.AddWithValue("@ReviewGoogleDate", review.ReviewGoogleDate);
+                cmd.Parameters.AddWithValue("@ReviewDate", review.ReviewDate);
+                cmd.Parameters.AddWithValue("@IdEtab", review.IdEtab);
+                cmd.Parameters.AddWithValue("@IdReview", review.IdReview);
+                cmd.ExecuteNonQuery();
+                cmd.Dispose();
+            } catch (Exception) {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Update Business Review without updating date.
+        /// </summary>
+        /// <param name="review"></param>
+        /// <exception cref="Exception"></exception>
+        public void UpdateBusinessReviewWithoutUpdatingDate(DbBusinessReview review) {
+            try {
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@UserName", review.User.Name);
+                cmd.Parameters.AddWithValue("@UserStatus", review.User.LocalGuide);
+                cmd.Parameters.AddWithValue("@Score", review.Score);
+                cmd.Parameters.AddWithValue("@UserNbReviews", review.User.NbReviews);
+                cmd.Parameters.AddWithValue("@Review", review.ReviewText);
+                cmd.Parameters.AddWithValue("@ReviewAnswered", review.ReviewReplied);
+                cmd.Parameters.AddWithValue("@DateUpdate", review.DateUpdate);
                 cmd.Parameters.AddWithValue("@IdEtab", review.IdEtab);
                 cmd.Parameters.AddWithValue("@IdReview", review.IdReview);
                 cmd.ExecuteNonQuery();

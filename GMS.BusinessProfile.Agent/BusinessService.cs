@@ -54,7 +54,7 @@ namespace GMS.Business.Agent {
                             db.CreateBusinessUrl(businessUrl);
                         }
                     }
-
+                    
                     // No business found at this url.
                     if (businessProfile == null) {
                         if (request.Operation == Operation.URL_STATE && business.Guid != null)
@@ -378,11 +378,15 @@ namespace GMS.Business.Agent {
                 try {
                     DbBusinessReview businessReview = GetBusinessReviewsInfosFromReviews(review, businessProfile.IdEtab, dateLimit);
                     DbBusinessReview? dbBusinessReview = db.GetBusinessReview(businessProfile.IdEtab, businessReview.IdReview);
-                    if (dbBusinessReview == null)
+                    if (dbBusinessReview == null) {
                         db.CreateBusinessReview(businessReview);
-                    else {
-                        if (!dbBusinessReview.Equals(businessReview)) db.UpdateBusinessReview(businessReview);
+                        continue;
                     }
+                    if (dbBusinessReview.ReviewText != businessReview.ReviewText || dbBusinessReview.Score != businessReview.Score) {
+                        db.UpdateBusinessReview(businessReview);
+                        continue;
+                    } else if (!dbBusinessReview.Equals(businessReview))
+                        db.UpdateBusinessReviewWithoutUpdatingDate(businessReview);
                 } catch (Exception e) {
                     System.Diagnostics.Debug.WriteLine(e.Message);
                     System.Diagnostics.Debug.WriteLine(e.StackTrace);
