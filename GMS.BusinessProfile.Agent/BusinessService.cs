@@ -97,7 +97,7 @@ namespace GMS.Business.Agent {
                     if (e.Message != "Couldn't sort") {
                         using StreamWriter sw = File.AppendText(pathLogFile);
                         sw.WriteLine(DateTime.UtcNow.ToString("G") + " - " + business.Url);
-                        sw.WriteLine("warning : " + e.Message);
+                        sw.WriteLine("Message : " + e.Message);
                         sw.WriteLine("Stack : " + e.StackTrace);
                         sw.WriteLine("\n");
                     }
