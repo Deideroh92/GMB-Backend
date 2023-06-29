@@ -122,7 +122,7 @@ namespace GMS.Tests
             };
 
             string[] dept = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "DeptList.txt"));
-            string[] idf = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "IleDeFrance.txt"););
+            string[] idf = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "IleDeFrance.txt"));
             List<string> locations = new(dept);
             List<Task> tasks = new();
 
@@ -199,13 +199,13 @@ namespace GMS.Tests
         public async Task ThreadsCategory() {
 
             // CONFIG
-            int nbThreads = 1;
+            int nbThreads = 8;
             int nbEntries = 10000;
             string? sector = null;
-            int processing = 1;
+            int processing = 2;
             Operation opertationType = Operation.CATEGORY;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-7);
 
             List<DbBusinessAgent> businessList = new();
             List <Task> tasks = new();
