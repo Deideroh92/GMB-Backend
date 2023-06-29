@@ -41,7 +41,7 @@ namespace GMS.Sdk.Core
         /// <returns>Real date from google date.</returns>
         public static DateTime ComputeDateFromGoogleDate(string googleDate)
         {
-            string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core.ToolBox", "GoogleDate.json");
+            string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "GoogleDate.json");
             string json = File.ReadAllText(path);
             Dictionary<string, string>? mapper = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
 
@@ -184,7 +184,7 @@ namespace GMS.Sdk.Core
                 string responseBody = await response.Content.ReadAsStringAsync();
                 AddressResponse? addressResponse = AddressResponse.FromJson(responseBody);
 
-                if (addressResponse.Features.Length > 0) {
+                if (addressResponse?.Features?.Length > 0) {
                     return addressResponse;
                 }
             }
