@@ -120,9 +120,9 @@ namespace GMS.Tests
             {
                 "Magasin de vêtements pour hommes", "salon de manucure", "Entreprise de terrassement", "Atelier de menuiserie", "Charpentier"
             };
-            string path = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName;
-            string[] dept = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\DeptList.txt");
-            string[] idf = File.ReadAllLines(path + @"\GMS.Sdk.Core\ToolBox\IleDeFrance.txt");
+
+            string[] dept = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "DeptList.txt"));
+            string[] idf = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "IleDeFrance.txt"););
             List<string> locations = new(dept);
             List<Task> tasks = new();
 
