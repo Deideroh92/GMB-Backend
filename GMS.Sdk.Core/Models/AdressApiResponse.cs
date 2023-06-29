@@ -2,7 +2,7 @@
 
 namespace GMS.Sdk.Core.Models
 {
-    public class AddressResponse
+    public class AddressApiResponse
     {
         [JsonProperty("type")]
         public string? Type { get; set; }
@@ -25,9 +25,9 @@ namespace GMS.Sdk.Core.Models
         [JsonProperty("limit")]
         public int? Limit { get; set; }
 
-        public static AddressResponse? FromJson(string json)
+        public static AddressApiResponse? FromJson(string json)
         {
-            return JsonConvert.DeserializeObject<AddressResponse>(json);
+            return JsonConvert.DeserializeObject<AddressApiResponse>(json);
         }
     }
 

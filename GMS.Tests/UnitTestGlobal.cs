@@ -45,7 +45,7 @@ namespace GMS.Tests
         public async Task ApiCallForAdress() {
 
             string adress = "zone d'activité Moulin Pleysse, D653, 46800 Montcuq";
-            AddressResponse? addressResponse = await ToolBox.ApiCallForAddress(adress);
+            AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(adress);
             Assert.IsNotNull(addressResponse);
 
             var x = addressResponse.Features[0].Geometry.Coordinates[0];
@@ -118,7 +118,7 @@ namespace GMS.Tests
         public void TestUrlFinderService() {
             List<string> textSearch = new()
             {
-                "Magasin de vêtements pour hommes", "salon de manucure", "Entreprise de terrassement", "Atelier de menuiserie", "Charpentier"
+                "123 pare brise"
             };
 
             string[] dept = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "DeptList.txt"));
@@ -127,8 +127,8 @@ namespace GMS.Tests
             List<Task> tasks = new();
 
             foreach (string search in textSearch) {
-                UrlAgentRequest request = new(locations.Select(s => s.Replace(';', ' ').Replace(' ', '+')).ToList(), search.Replace(' ', '+'));
-                Task newThread = Task.Run(delegate { UrlService.Start(request); });
+                UrlFinderRequest request = new(locations.Select(s => s.Replace(';', ' ').Replace(' ', '+')).ToList(), search.Replace(' ', '+'));
+                Task newThread = Task.Run(delegate { UrlFinderService.Start(request); });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
             }
@@ -142,7 +142,7 @@ namespace GMS.Tests
             DbLib db = new();
             string url = "https://www.google.fr/maps/place/Lidl/@45.6945776,4.8226045,17z/data=!3m1!4b1!4m5!3m4!1s0x47f4e9aedb97e42b:0xdfb4d943672c4bd8!8m2!3d45.6945748!4d4.8247889?hl=fr";
             DateTime date = DateTime.Now;
-            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, date, UrlState.NEW, "manually", date, ToolBox.ComputeMd5Hash(url));
+            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, date, "manually", date, ToolBox.ComputeMd5Hash(url));
             db.CreateBusinessUrl(businessUrl);
         }
         #endregion

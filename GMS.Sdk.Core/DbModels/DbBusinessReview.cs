@@ -1,5 +1,5 @@
 ﻿namespace GMS.Sdk.Core.DbModels {
-    public class DbBusinessReview : IEquatable<DbBusinessReview?> {
+    public class DbBusinessReview {
         public long Id { get; set; }
         public string IdEtab { get; set; }
         public string IdReview { get; set; }
@@ -12,39 +12,6 @@
         public DateTime? DateInsert { get; set; }
         public DateTime? DateUpdate { get; set; }
         public DbBusinessReviewReply? ReviewReply { get; set; }
-
-        #region Equality
-        
-        public override bool Equals(object? obj) {
-            return Equals(obj as DbBusinessReview);
-        }
-
-        public bool Equals(DbBusinessReview? other) {
-            return other is not null &&
-                   IdEtab == other.IdEtab &&
-                   IdReview == other.IdReview &&
-                   EqualityComparer<GoogleUser>.Default.Equals(User, other.User) &&
-                   Score == other.Score &&
-                   ReviewText == other.ReviewText &&
-                   ReviewReplied == other.ReviewReplied;
-        }
-
-        public override int GetHashCode() {
-            HashCode hash = new();
-            hash.Add(IdEtab);
-            hash.Add(IdReview);
-            hash.Add(User);
-            hash.Add(Score);
-            hash.Add(ReviewText);
-            hash.Add(ReviewGoogleDate);
-            hash.Add(ReviewDate);
-            hash.Add(ReviewReplied);
-            hash.Add(DateInsert);
-            hash.Add(DateUpdate);
-            hash.Add(ReviewReply);
-            return hash.ToHashCode();
-        }
-        #endregion
 
         #region Local
 

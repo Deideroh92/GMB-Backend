@@ -1,28 +1,10 @@
 ﻿namespace GMS.Sdk.Core.DbModels {
-    public class DbBusinessScore : IEquatable<DbBusinessScore?> {
+    public class DbBusinessScore {
         public long Id { get; set; }
         public string IdEtab { get; set; }
         public float? Score { get; set; }
         public int? NbReviews { get; set; }
         public DateTime? DateInsert { get; set; }
-
-        #region Equality
-        public override bool Equals(object? obj) {
-            return Equals(obj as DbBusinessScore);
-        }
-
-        public bool Equals(DbBusinessScore? other) {
-            return other is not null &&
-                   IdEtab == other.IdEtab &&
-                   Score == other.Score &&
-                   NbReviews == other.NbReviews &&
-                   DateInsert == other.DateInsert;
-        }
-
-        public override int GetHashCode() {
-            return HashCode.Combine(IdEtab, Score, NbReviews, DateInsert);
-        }
-        #endregion
 
         #region Local
 
@@ -46,11 +28,7 @@
         /// Checking if Business Score is valid.
         /// </summary>
         public void CheckValidity() {
-
-            if (Score != null && NbReviews == null)
-                Score = null;
-
-            if (NbReviews != null && Score == null)
+            if (Score != null && NbReviews == null || NbReviews != null && Score == null)
                 Score = null;
         }
         #endregion

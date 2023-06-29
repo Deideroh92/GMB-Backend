@@ -4,19 +4,20 @@ using System.Text;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using GMS.Sdk.Core.Models;
-using System.Web;
 
 namespace GMS.Sdk.Core
 {
     public class ToolBox
     {
 
+        #region classes
         public class GoogleDate
         {
 
             public string? key;
             public string? value;
         }
+        #endregion
 
         #region Local
 
@@ -147,27 +148,13 @@ namespace GMS.Sdk.Core
         }
 
         /// <summary>
-        /// Requires finding element by FindElementSafe(By).
-        /// Checking if web element exist or not.
-        /// </summary>
-        /// <param name="element">Current element</param>
-        /// <returns>Returns T/F depending on if element is defined or null.</returns>
-        public static bool Exists(IWebElement? element)
-        {
-            if (element == null) { return false; }
-            return true;
-        }
-
-        /// <summary>
         /// Requires finding elements by FindElementsSafe(By).
         /// Checking if web elements exist or not.
         /// </summary>
         /// <param name="elements">Current element</param>
         /// <returns>Returns T/F depending on if element is defined or null.</returns>
-        public static bool Exists(ReadOnlyCollection<IWebElement>? elements)
-        {
-            if (elements == null) { return false; }
-            return true;
+        public static bool Exists<T>(T elements) {
+            return elements == null;
         }
 
         /// <summary>
@@ -175,14 +162,14 @@ namespace GMS.Sdk.Core
         /// </summary>
         /// <param name="address"></param>
         /// <returns>addressResponse object if adress found or null.</returns>
-        public static async Task<AddressResponse?> ApiCallForAddress(string address) {
+        public static async Task<AddressApiResponse?> ApiCallForAddress(string address) {
             using HttpClient client = new();
             string apiUrl = $"https://api-adresse.data.gouv.fr/search/?q={Uri.EscapeDataString(address)}";
             string[] types = { "housenumber", "street", "locality", "municipality" };
             foreach (string type in types) {
                 HttpResponseMessage response = await client.GetAsync(apiUrl + $"&type={type}");
                 string responseBody = await response.Content.ReadAsStringAsync();
-                AddressResponse? addressResponse = AddressResponse.FromJson(responseBody);
+                AddressApiResponse? addressResponse = AddressApiResponse.FromJson(responseBody);
 
                 if (addressResponse?.Features?.Length > 0) {
                     return addressResponse;

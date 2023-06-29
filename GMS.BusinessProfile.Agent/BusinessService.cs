@@ -27,10 +27,9 @@ namespace GMS.Business.Agent
         /// <param name="threadNumber"></param>
         /// <exception cref="Exception"></exception>
         public static async Task StartAsync(BusinessAgentRequest request, int? threadNumber = 0) {
-            using DbLib db = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
-
-            using SeleniumDriver driver = new(DriverType.CHROME);
+            using DbLib db = new();
+            using SeleniumDriver driver = new();
 
             int count = 0 ;
 
@@ -39,8 +38,6 @@ namespace GMS.Business.Agent
             foreach (DbBusinessAgent business in request.BusinessList) {
                 try {
                     count++;
-                    float percentage = (count / request.BusinessList.Count) * 100;
-
 
                     // Get business profile infos from Google.
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, business.Url, business.Guid, business.IdEtab);
@@ -52,7 +49,7 @@ namespace GMS.Business.Agent
                             continue;
                         }
                         if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(driver.WebDriver.Url))) {
-                            DbBusinessUrl businessUrl = new(profile.FirstGuid, driver.WebDriver.Url, DateTime.UtcNow, UrlState.UPDATED, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(driver.WebDriver.Url));
+                            using DbBusinessUrl businessUrl = new(profile.FirstGuid, driver.WebDriver.Url, DateTime.UtcNow, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(driver.WebDriver.Url), UrlState.UPDATED);
                             db.CreateBusinessUrl(businessUrl);
                         }
                     }
@@ -137,7 +134,7 @@ namespace GMS.Business.Agent
 
             driver.GetToPage(url);
 
-            string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Trim() ?? ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)?.Text?.Replace("·", "");
+            string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
             string? googleAddress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)?.GetAttribute("aria-label")?.Replace("Adresse:", "")?.Trim();
             string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test)?.GetAttribute("src")?.Trim();
             string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();
@@ -177,7 +174,7 @@ namespace GMS.Business.Agent
             }
 
             if (googleAddress != null) {
-                AddressResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
+                AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
                 if (addressResponse != null)
                 {
                     lon = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[0]);

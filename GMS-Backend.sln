@@ -5,7 +5,7 @@ VisualStudioVersion = 17.3.32825.248
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMS.Sdk.Core", "GMS.Sdk.Core\GMS.Sdk.Core.csproj", "{6D1168DA-59DF-41AF-A126-AC578F297256}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMS.Url.Agent", "GMS.UrlFinder.Agent\GMS.Url.Agent.csproj", "{55262794-07E8-420D-BAE9-52B44157A505}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMS.UrlFinder.Agent", "GMS.UrlFinder.Agent\GMS.UrlFinder.Agent.csproj", "{55262794-07E8-420D-BAE9-52B44157A505}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMS.Tests", "GMS.Tests\GMS.Tests.csproj", "{B57BBAAF-7F69-469C-AC3A-42E6082BC100}"
 EndProject

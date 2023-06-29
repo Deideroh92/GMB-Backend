@@ -1,7 +1,5 @@
 ﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Edge;
-using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using WebDriverManager;
@@ -9,51 +7,26 @@ using WebDriverManager.DriverConfigs.Impl;
 
 namespace GMS.Sdk.Core.Models
 {
-    #region Enum
-
-    public enum DriverType {
-        CHROME,
-        FIREFOX,
-        EDGE
-    }
-
-    #endregion
 
     public class SeleniumDriver : IDisposable {
         public IWebDriver WebDriver { get; set; }
-        public DriverType DriverType { get; set; }
 
         #region Local
 
         /// <summary>
         /// Create an instance of Selenium Driver.
         /// </summary>
-        /// <param name="driverType"></param>
         /// <exception cref="Exception"></exception>
-        public SeleniumDriver(DriverType driverType = DriverType.CHROME) {
+        public SeleniumDriver() {
             try {
-                switch (driverType) {
-                    case DriverType.FIREFOX:
-                        new DriverManager().SetUpDriver(new FirefoxConfig());
-                        WebDriver = new FirefoxDriver();
-                        break;
-                    case DriverType.EDGE:
-                        new DriverManager().SetUpDriver(new EdgeConfig());
-                        WebDriver = new EdgeDriver();
-                        break;
-                    case DriverType.CHROME:
-                    default:
-                        ChromeOptions chromeOptions = new();
-                        chromeOptions.AddArguments("--headless=new");
-                        chromeOptions.AddArguments("--lang=fr");
-                        new DriverManager().SetUpDriver(new ChromeConfig());
-                        WebDriver = new ChromeDriver(chromeOptions);
-                        break;
-                }
+                ChromeOptions chromeOptions = new();
+                //chromeOptions.AddArguments("--headless=new");
+                chromeOptions.AddArguments("--lang=fr");
+                new DriverManager().SetUpDriver(new ChromeConfig());
+                WebDriver = new ChromeDriver(chromeOptions);
             } catch (Exception) {
                 throw new Exception("Failed initializing driver");
             }
-            DriverType = driverType;
         }
 
         /// <summary>

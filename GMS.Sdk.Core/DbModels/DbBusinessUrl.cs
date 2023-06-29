@@ -10,7 +10,7 @@
     }
     #endregion
 
-    public class DbBusinessUrl : IEquatable<DbBusinessUrl?> {
+    public class DbBusinessUrl : IDisposable {
         public long Id { get; set; }
         public string Guid { get; set; }
         public string Url { get; set; }
@@ -20,27 +20,7 @@
         public DateTime? DateUpdate { get; set; }
         public string UrlEncoded { get; set; }
 
-        #region Equality
-
-        public override bool Equals(object? obj) {
-            return Equals(obj as DbBusinessUrl);
-        }
-
-        public bool Equals(DbBusinessUrl? other) {
-            return other is not null &&
-                   Guid == other.Guid &&
-                   Url == other.Url &&
-                   DateInsert == other.DateInsert &&
-                   State == other.State &&
-                   TextSearch == other.TextSearch &&
-                   DateUpdate == other.DateUpdate &&
-                   UrlEncoded == other.UrlEncoded;
-        }
-
-        public override int GetHashCode() {
-            return HashCode.Combine(Guid, Url, DateInsert, State, TextSearch, DateUpdate, UrlEncoded);
-        }
-        #endregion
+        private bool disposed = false;
 
         #region Local
 
@@ -54,7 +34,7 @@
         /// <param name="textSearch"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="urlEncoded"></param>
-        public DbBusinessUrl(string guid, string url, DateTime? dateInsert, UrlState state, string? textSearch, DateTime? dateUpdate, string urlEncoded) {
+        public DbBusinessUrl(string guid, string url, DateTime? dateInsert, string? textSearch, DateTime? dateUpdate, string urlEncoded, UrlState state = UrlState.NEW) {
             Guid = guid;
             Url = url;
             DateInsert = dateInsert;
@@ -63,6 +43,36 @@
             DateUpdate = dateUpdate;
             UrlEncoded = urlEncoded;
         }
+
+        /// <summary>
+        /// Dispose method implementation.
+        /// </summary>
+        public void Dispose() {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose method implementation.
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing) {
+            if (!disposed) {
+                if (disposing) {
+                    // Dispose managed resources here
+                }
+
+                // Dispose unmanaged resources here
+
+                disposed = true;
+            }
+        }
+
         #endregion
+
+        // Finalizer
+        ~DbBusinessUrl() {
+            Dispose(false);
+        }
     }
 }
