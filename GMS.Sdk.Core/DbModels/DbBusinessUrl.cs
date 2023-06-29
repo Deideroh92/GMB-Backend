@@ -1,4 +1,4 @@
-﻿namespace GMS.Sdk.Core.Database {
+﻿namespace GMS.Sdk.Core.DbModels {
     #region Enums
     public enum UrlState {
         NEW,

@@ -1,7 +1,7 @@
-﻿using GMS.Sdk.Core.Database;
-using GMS.Sdk.Core.SeleniumDriver;
+﻿using GMS.Sdk.Core.DbModels;
 
-namespace GMS.BusinessProfile.Agent.Model {
+namespace GMS.Sdk.Core.Models
+{
     public enum Operation {
         URL_STATE,
         CATEGORY,

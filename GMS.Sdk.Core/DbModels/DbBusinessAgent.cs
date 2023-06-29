@@ -1,4 +1,4 @@
-﻿namespace GMS.BusinessProfile.Agent.Model {
+﻿namespace GMS.Sdk.Core.DbModels {
     public class DbBusinessAgent {
         public string? IdEtab { get; set; }
         public string? Guid { get; set; }

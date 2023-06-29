@@ -1,22 +1,26 @@
 ﻿using OpenQA.Selenium;
 
-namespace GMS.Sdk.Core.XPath {
-    public class XPathDriver {
-        public static readonly List<By> businessList = new() { By.XPath("//button[@aria-label='Tout accepter']") };
+namespace GMS.Sdk.Core.Models
+{
+    public class XPathDriver
+    {
+        public static readonly List<By> acceptCookies = new() { By.XPath("//button[@aria-label='Tout accepter']") };
     }
-    public class XPathUrl {
+    public class XPathUrl
+    {
 
-    public static readonly List<By> businessList = new() { By.XPath("//div[contains(@jsaction, 'mouseover:pane')]") };
-    public static readonly List<By> body = new() { By.XPath("//div[contains(@aria-label, 'Résultats pour')]") };
-    public static readonly List<By> endOfList = new() { By.XPath("//span[text() = 'Vous êtes arrivé à la fin de la liste.']") };
+        public static readonly List<By> businessList = new() { By.XPath("//div[contains(@jsaction, 'mouseover:pane')]") };
+        public static readonly List<By> body = new() { By.XPath("//div[contains(@aria-label, 'Résultats pour')]") };
+        public static readonly List<By> endOfList = new() { By.XPath("//span[text() = 'Vous êtes arrivé à la fin de la liste.']") };
     }
 
-    public class XPathProfile {
+    public class XPathProfile
+    {
 
         // Profile infos
         public static readonly List<By> name = new() { By.XPath("//div[@role='main' and @aria-label]") };
         public static readonly List<By> category = new() { By.XPath("//button[@jsaction='pane.rating.category']") };
-        public static readonly List<By> adress = new() {By.XPath("//button[@data-item-id='address']") };
+        public static readonly List<By> adress = new() { By.XPath("//button[@data-item-id='address']") };
         public static readonly List<By> nbReviews = new() { By.XPath("//button[contains(@jsaction, 'pane.rating.moreReviews')]"), By.XPath("//span[contains(@arial-label, 'avis')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]") };
         public static readonly List<By> tel = new() { By.XPath("//button[contains(@aria-label, 'Numéro de téléphone:')]") };
         public static readonly List<By> website = new() { By.XPath("//button[contains(@aria-label, 'Site Web:')]"), By.XPath("//a[contains(@aria-label, 'Site Web:')]") };
@@ -31,7 +35,8 @@ namespace GMS.Sdk.Core.XPath {
         public static readonly List<By> optionsOn = new() { By.XPath("//div[contains(@aria-label, 'est disponible')]") };
     }
 
-    public class XPathReview {
+    public class XPathReview
+    {
 
         public static readonly List<By> toReviewsPage = new() { By.XPath("//button[@role='tab' and contains(@aria-label, 'Avis')]") };
         public static readonly List<By> sortReviews = new() { By.XPath("//button[@data-value='Trier']") };
@@ -46,7 +51,7 @@ namespace GMS.Sdk.Core.XPath {
         public static readonly List<By> userNbReviews = new() { By.XPath(".//div[contains(text(), 'avis')]") };
         public static readonly List<By> text = new() { By.XPath(".//div[contains(@class, 'MyEned')]") };
 
-        
+
         // Review reply infos
         public static readonly List<By> replyText = new() { By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::div") };
         //public static readonly List<By> replyGoogleDate = new() { By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::span") };

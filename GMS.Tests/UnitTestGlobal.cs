@@ -1,17 +1,15 @@
-using GMS.BusinessProfile.Agent.Model;
 using GMS.Business.Agent;
-using GMS.Sdk.Core.Database;
-using GMS.Sdk.Core.SeleniumDriver;
-using GMS.Sdk.Core.ToolBox;
 using GMS.Url.Agent;
 using GMS.Url.Agent.Model;
-using GMS.Sdk.Core.XPath;
 using OpenQA.Selenium;
-using System.Collections.ObjectModel;
 using System.Globalization;
-using System;
+using GMS.Sdk.Core.Models;
+using GMS.Sdk.Core.DbModels;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using GMS.Sdk.Core;
 
-namespace GMS.Tests {
+namespace GMS.Tests
+{
     [TestClass]
     public class UnitTestGlobal {
 
@@ -32,7 +30,7 @@ namespace GMS.Tests {
         [TestMethod]
         public void GetXPathfromPage() {
             string url = "https://www.google.com/maps/place/BRED-Banque+Populaire/@48.8280761,2.2411834,15z/data=!4m10!1m2!2m1!1sbanque!3m6!1s0x47e67af2357c45ab:0x1b7baec714122e5b!8m2!3d48.8255006!4d2.2479565!15sCgZiYW5xdWWSAQRiYW5r4AEA!16s%2Fg%2F1wf37y2x";
-            SeleniumDriver driver = new();
+            using SeleniumDriver driver = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
             driver.GetToPage(url);
 
@@ -41,7 +39,28 @@ namespace GMS.Tests {
                 Console.WriteLine(value);
             }
 
-            driver.WebDriver.Quit();
+        }
+
+        [TestMethod]
+        public async Task ApiCallForAdress() {
+
+            string adress = "zone d'activité Moulin Pleysse, D653, 46800 Montcuq";
+            AddressResponse? addressResponse = await ToolBox.ApiCallForAddress(adress);
+            Assert.IsNotNull(addressResponse);
+
+            var x = addressResponse.Features[0].Geometry.Coordinates[0];
+            var y = addressResponse.Features[0].Geometry.Coordinates[0];
+            var town = addressResponse.Features[0].Properties.City;
+            var postalCode = addressResponse.Features[0].Properties.Postcode;
+            var street = addressResponse.Features[0].Properties.Street;
+            var houseNumber = addressResponse.Features[0].Properties.HouseNumber;
+
+            Assert.IsNotNull(x);
+            Assert.IsNotNull(y);
+            Assert.IsTrue(town.ToLower() == "boulogne-billancourt");
+            Assert.IsTrue(postalCode == "92100");
+            Assert.IsTrue(street.ToLower() == "boulevard jean jaurès");
+            Assert.IsTrue(houseNumber == "25");
         }
         #endregion
 
@@ -140,36 +159,35 @@ namespace GMS.Tests {
                 new DbBusinessAgent(null, url.ToLower(), "e38c646bf09ccde19bb7002ba4b5ba69")
             };
             BusinessAgentRequest request = new(opertationType, getReviews, business, reviewsDate);
-            BusinessService.Start(request, 1);
+            _ = BusinessService.StartAsync(request, 1);
         }
 
         /// <summary>
         /// Exporting Hotels info
         /// </summary>
         [TestMethod]
-        public void ExportHotel() {
+        public async Task ExportHotelAsync() {
 
             // CONFIG
             int nbEntries = 1;
             UrlState urlState = UrlState.NEW;
 
-            DbLib db = new();
+            using DbLib db = new();
             List<DbBusinessAgent> businessList = db.GetBusinessAgentListByUrlState(urlState, nbEntries);
-            db.DisconnectFromDB();
 
-            SeleniumDriver driver = new();
+            using SeleniumDriver driver = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
             using StreamWriter sw2 = File.AppendText(@"C:\Users\maxim\Desktop\hotel.txt");
             sw2.WriteLine("NAME$$CATEGORY$$ADRESS$$TEL$$OPTIONS");
             foreach (DbBusinessAgent elem in businessList) {
                 try {
-                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = BusinessService.GetBusinessProfileAndScoreFromGooglePage(driver, elem.Url, null, null);
-                    ReadOnlyCollection<IWebElement?> optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
+                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, elem.Url, null, null);
+                    var optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
                     List<string> optionsOnList = new();
                     foreach (IWebElement element in optionsOn) {
                         optionsOnList.Add(element.GetAttribute("aria-label").Replace("L'option ", "").Replace(" est disponible", ""));
                     }
-                    sw2.WriteLine(business.Name + "$$" + business.Category + "$$" + business.Adress + "$$" + business.Tel + "$$" + string.Join(",", optionsOnList));
+                    sw2.WriteLine(business.Name + "$$" + business.Category + "$$" + business.GoogleAddress + "$$" + business.Tel + "$$" + string.Join(",", optionsOnList));
                 } catch (Exception) { }
             }
         }
@@ -178,39 +196,40 @@ namespace GMS.Tests {
         /// STARTING APP
         /// </summary>
         [TestMethod]
-        public void ThreadsCategory() {
+        public async Task ThreadsCategory() {
 
             // CONFIG
-            int nbThreads = 8;
+            int nbThreads = 1;
             int nbEntries = 10000;
             string? sector = null;
             int processing = 1;
             Operation opertationType = Operation.CATEGORY;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
 
             List<DbBusinessAgent> businessList = new();
             List <Task> tasks = new();
-            
-            DbLib db = new();
-            if (sector == null) businessList = db.GetBusinessAgentListNetwork(nbEntries, processing);
-            else businessList = db.GetBusinessAgentListNetworkBySector(sector, nbEntries);
-            db.DisconnectFromDB();
 
-            
+            using DbLib db = new();
+            if (sector == null) businessList = db.GetBusinessListNotNetwork(nbEntries, processing);
+            else businessList = db.GetBusinessListNetworkBySector(sector, nbEntries);
+
+
 
             int threadNumber = 0;
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
                 threadNumber++;
-                Task newThread = Task.Run(delegate {
+                Task newThread = Task.Run(async () =>
+                {
                     BusinessAgentRequest request = new(opertationType, getReviews, new List<DbBusinessAgent>(chunk), reviewsDate);
-                    BusinessService.Start(request, threadNumber);
+                    await BusinessService.StartAsync(request, threadNumber).ConfigureAwait(false);
                 });
                 tasks.Add(newThread);
-                Thread.Sleep(2000);
             }
-            Task.WaitAll(tasks.ToArray());
+
+            await Task.WhenAll(tasks);
             return;
+
         }
 
         [TestMethod]
@@ -229,9 +248,9 @@ namespace GMS.Tests {
             List<DbBusinessAgent> businessList = new();
 
             if (isUrlKnownFile) {
-                DbLib db = new();
+                using DbLib db = new();
                 foreach (string url in urlList) {
-                    DbBusinessAgent? business = db.GetBusinessAgentByUrlEncoded(ToolBox.ComputeMd5Hash(url));
+                    DbBusinessAgent? business = db.GetBusinessByUrlEncoded(ToolBox.ComputeMd5Hash(url));
 
                     if (business == null) {
                         using StreamWriter sw = File.AppendText(pathLogFile);
@@ -241,7 +260,6 @@ namespace GMS.Tests {
 
                     businessList.Add(business);
                 }
-                db.DisconnectFromDB();
             } else {
                 foreach (string url in urlList) {
                     if (!isUrlFile) businessList.Add(new DbBusinessAgent(null, "https://www.google.fr/maps/search/" + url.ToLower()));
@@ -258,7 +276,7 @@ namespace GMS.Tests {
                 threadNumber++;
                 Task newThread = Task.Run(delegate {
                     BusinessAgentRequest request = new(opertationType, getReviews, new List<DbBusinessAgent>(chunk), reviewsDate);
-                    BusinessService.Start(request, threadNumber);
+                    _ = BusinessService.StartAsync(request, threadNumber);
                 });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);
@@ -279,16 +297,15 @@ namespace GMS.Tests {
             DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
 
             List<Task> tasks = new();
-            DbLib db = new();
+            using DbLib db = new();
             List<DbBusinessAgent> businessList = db.GetBusinessAgentListByUrlState(urlState, nbEntries);
-            db.DisconnectFromDB();
 
             int threadNumber = 0;
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
                 threadNumber++;
                 Task newThread = Task.Run(delegate {
                     BusinessAgentRequest request = new(opertationType, getReviews, new List<DbBusinessAgent>(chunk), reviewsDate);
-                    BusinessService.Start(request, threadNumber);
+                    _ = BusinessService.StartAsync(request, threadNumber);
                 });
                 tasks.Add(newThread);
                 Thread.Sleep(2000);

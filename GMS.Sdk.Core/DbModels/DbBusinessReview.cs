@@ -1,4 +1,4 @@
-﻿namespace GMS.Sdk.Core.Database {
+﻿namespace GMS.Sdk.Core.DbModels {
     public class DbBusinessReview : IEquatable<DbBusinessReview?> {
         public long Id { get; set; }
         public string IdEtab { get; set; }

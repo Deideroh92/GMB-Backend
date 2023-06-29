@@ -1,4 +1,4 @@
-﻿namespace GMS.Sdk.Core.Database {
+﻿namespace GMS.Sdk.Core.DbModels {
     public class GoogleUser : IEquatable<GoogleUser?> {
         public string? Name { get; set; }
         public bool LocalGuide { get; set; }

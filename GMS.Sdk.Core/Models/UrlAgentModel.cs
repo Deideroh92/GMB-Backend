@@ -1,6 +1,7 @@
-﻿using GMS.Sdk.Core.SeleniumDriver;
+﻿using GMS.Sdk.Core.Models;
 
-namespace GMS.Url.Agent.Model {
+namespace GMS.Url.Agent.Model
+{
     #region Requests
 
     public class UrlAgentRequest {
