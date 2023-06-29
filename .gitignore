@@ -247,3 +247,6 @@ ModelManifest.xml
 log/
 logs/
 *.log.*
+
+v17/*.futdcache.v2
+DesignTimeBuild/*.dtbcache.v2
