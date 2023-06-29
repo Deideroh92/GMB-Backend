@@ -214,8 +214,6 @@ namespace GMS.Tests
             if (sector == null) businessList = db.GetBusinessListNotNetwork(nbEntries, processing);
             else businessList = db.GetBusinessListNetworkBySector(sector, nbEntries);
 
-
-
             int threadNumber = 0;
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
                 threadNumber++;

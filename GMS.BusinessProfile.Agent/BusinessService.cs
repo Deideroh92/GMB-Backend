@@ -128,27 +128,36 @@ namespace GMS.Business.Agent
             string? postCode = null;
             string? city = null;
             string? cityCode = null;
-            string? lat = null;
-            string? lon = null;
+            float? lat = null;
+            float? lon = null;
             string? idBan = null;
             string? addressType = null;
+            string? streetNumber = null;
             BusinessStatus status = BusinessStatus.OPEN;
 
             driver.GetToPage(url);
 
-            string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category).Text.Trim() ?? ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory).Text.Replace("·", "");
-            string? googleAddress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress).GetAttribute("aria-label").Replace("Adresse:", "").Trim();
-            string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test).GetAttribute("src").Trim();
-            string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel).GetAttribute("aria-label").Replace("Numéro de téléphone:", "").Trim();
-            string? website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website).GetAttribute("href").Trim();
-            _ = float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label").Replace("étoiles", "").Trim(), out float parsedScore);
-            float? score = parsedScore;
-            score ??= float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore).Text);
-            string? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name).GetAttribute("aria-label").Trim();
-            Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),-]+", "");
-            Regex.Replace(name, @"\s{2,}", " ");
+            string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Trim() ?? ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelCategory)?.Text?.Replace("·", "");
+            string? googleAddress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)?.GetAttribute("aria-label")?.Replace("Adresse:", "")?.Trim();
+            string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test)?.GetAttribute("src")?.Trim();
+            string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();
+            string? website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website)?.GetAttribute("href")?.Trim();
+            float? parsedScore = null;
+            float? score = null;
+            string? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
+            if (name != null)
+            {
+                name = Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),-]+", "");
+                name = Regex.Replace(name, @"\s{2,}", " ");
+            }
 
-            string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status).Text.Trim();
+            if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null && float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim(), out float parsedScoreValue))
+                parsedScore = parsedScoreValue;
+
+            score ??= parsedScore ?? float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)?.Text ?? "0");
+
+
+            string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status)?.Text.Trim();
             if (status_tmp != null) {
                 if (status_tmp.Contains("Fermé définitivement") || status_tmp.Contains("Définitivement fermé"))
                     status = BusinessStatus.CLOSED;
@@ -169,20 +178,23 @@ namespace GMS.Business.Agent
 
             if (googleAddress != null) {
                 AddressResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
-                lon = addressResponse.Features[0].Geometry.Coordinates[0].ToString();
-                lat = addressResponse.Features[0].Geometry.Coordinates[1].ToString();
-                city = addressResponse.Features[0].Properties.City;
-                postCode = addressResponse.Features[0].Properties.Postcode;
-                cityCode = addressResponse.Features[0].Properties.CityCode;
-                address = addressResponse.Features[0].Properties.Street;
-                addressType = addressResponse.Features[0].Properties.PropertyType;
-                idBan = addressResponse.Features[0].Properties.Id;
+                if (addressResponse != null)
+                {
+                    lon = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[0]);
+                    lat = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[1]);
+                    city = addressResponse.Features[0]?.Properties?.City;
+                    postCode = addressResponse.Features[0]?.Properties?.Postcode;
+                    cityCode = addressResponse.Features[0]?.Properties?.CityCode;
+                    address = addressResponse.Features[0]?.Properties?.Street;
+                    addressType = addressResponse.Features[0]?.Properties?.PropertyType;
+                    idBan = addressResponse.Features[0]?.Properties?.Id;
+                    streetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
+                }
             }
-            
 
             idEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
             guid ??= Guid.NewGuid().ToString("N");
-            DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, tel, website, DateTime.UtcNow, DateTime.UtcNow, status, img);
+            DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, tel, website, DateTime.UtcNow, DateTime.UtcNow, status, img);
             DbBusinessScore? dbBusinessScore = new(idEtab, score, reviews, DateTime.UtcNow);
             return (dbBusinessProfile, dbBusinessScore);
         }

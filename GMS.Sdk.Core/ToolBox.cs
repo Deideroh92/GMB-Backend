@@ -4,6 +4,7 @@ using System.Text;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using GMS.Sdk.Core.Models;
+using System.Web;
 
 namespace GMS.Sdk.Core
 {
@@ -176,9 +177,8 @@ namespace GMS.Sdk.Core
         /// <returns>addressResponse object if adress found or null.</returns>
         public static async Task<AddressResponse?> ApiCallForAddress(string address) {
             using HttpClient client = new();
-            string apiUrl = $"https://api-adresse.data.gouv.fr/search/?q={address}&limit=1&autocomplete=0";
+            string apiUrl = $"https://api-adresse.data.gouv.fr/search/?q={Uri.EscapeDataString(address)}";
             string[] types = { "housenumber", "street", "locality", "municipality" };
-
             foreach (string type in types) {
                 HttpResponseMessage response = await client.GetAsync(apiUrl + $"&type={type}");
                 string responseBody = await response.Content.ReadAsStringAsync();

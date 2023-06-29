@@ -732,7 +732,7 @@ namespace GMS.Sdk.Core.DbModels
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, ADRESS = @Address, ADRESS = @Address, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@Name", businessProfile.Name as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@GoogleAddress", businessProfile.GoogleAddress as object ?? DBNull.Value);
@@ -740,11 +740,12 @@ namespace GMS.Sdk.Core.DbModels
                 cmd.Parameters.AddWithValue("@City", businessProfile.City as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@CityCode", businessProfile.CityCode as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@IdBan", businessProfile.IdBan as object ?? DBNull.Value);
-                cmd.Parameters.AddWithValue("@AddressType", businessProfile.AddressType as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@AddressType", businessProfile.AddressType as object ?? "n/a");
                 cmd.Parameters.AddWithValue("@Lon", businessProfile.Lon as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Lat", businessProfile.Lat as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@PostCode", businessProfile.PostCode as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Category", businessProfile.Category as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@StreetNumber", businessProfile.StreetNumber as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Tel", businessProfile.Tel as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Website", businessProfile.Website as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@UrlPicture", businessProfile.PictureUrl as object ?? DBNull.Value);

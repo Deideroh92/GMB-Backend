@@ -21,9 +21,10 @@
         public string? PostCode { get; set; }
         public string? City { get; set; }
         public string? CityCode { get; set; }
-        public string? Lat { get; set; }
-        public string? Lon { get; set; }
+        public float? Lat { get; set; }
+        public float? Lon { get; set; }
         public string? IdBan { get; set; }
+        public string? StreetNumber { get; set; } 
         public string? AddressType { get; set; }
         public string? Tel { get; set; }
         public string? Website { get; set; }
@@ -55,7 +56,7 @@
         /// <param name="dateInsert"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="status"></param>
-        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, string? lat, string? lon, string? idBan, string? addressType, string? tel, string? website, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, int processing = 0) {
+        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber,  string? tel, string? website, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, int processing = 0) {
             IdEtab = idEtab;
             FirstGuid = firstGuid;
             Name = name;
@@ -76,6 +77,7 @@
             Status = status;
             PictureUrl = pictureUrl;
             Processing = processing;
+            StreetNumber = streetNumber;
 
             CheckValidity();
         }
