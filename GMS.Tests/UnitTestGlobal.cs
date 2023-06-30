@@ -118,7 +118,7 @@ namespace GMS.Tests
         public void TestUrlFinderService() {
             List<string> textSearch = new()
             {
-                "123 pare brise"
+                "123 pare brise Saint Martin d'hères", "123 pare brise Beauvais"
             };
 
             string[] dept = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "DeptList.txt"));
@@ -202,7 +202,7 @@ namespace GMS.Tests
             int nbThreads = 8;
             int nbEntries = 10000;
             string? sector = null;
-            int processing = 2;
+            int processing = 1;
             Operation opertationType = Operation.CATEGORY;
             bool getReviews = true;
             DateTime reviewsDate = DateTime.UtcNow.AddMonths(-7);
@@ -211,7 +211,7 @@ namespace GMS.Tests
             List <Task> tasks = new();
 
             using DbLib db = new();
-            if (sector == null) businessList = db.GetBusinessListNotNetwork(nbEntries, processing);
+            if (sector == null) businessList = db.GetBusinessListNetwork(nbEntries, processing);
             else businessList = db.GetBusinessListNetworkBySector(sector, nbEntries);
 
             int threadNumber = 0;

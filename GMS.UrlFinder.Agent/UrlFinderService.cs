@@ -1,10 +1,8 @@
-﻿using AngleSharp.Dom;
-using GMS.Sdk.Core;
+﻿using GMS.Sdk.Core;
 using GMS.Sdk.Core.DbModels;
 using GMS.Sdk.Core.Models;
 using GMS.Url.Agent.Model;
 using OpenQA.Selenium;
-using System;
 using System.Collections.ObjectModel;
 
 namespace GMS.Url.Agent
