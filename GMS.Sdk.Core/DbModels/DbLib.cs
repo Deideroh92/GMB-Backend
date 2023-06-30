@@ -576,7 +576,7 @@ namespace GMS.Sdk.Core.DbModels
 
             try
             {
-                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU WHERE PROCESSING = @Processing";
+                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE_RESEAU WHERE PROCESSING = @Processing order by id_etab asc";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
@@ -609,7 +609,7 @@ namespace GMS.Sdk.Core.DbModels
             List<DbBusinessAgent> businessUrlList = new();
 
             try {
-                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE WHERE PROCESSING = @Processing";
+                string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM vBUSINESS_PROFILE WHERE PROCESSING = @Processing order by id_etab desc";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);

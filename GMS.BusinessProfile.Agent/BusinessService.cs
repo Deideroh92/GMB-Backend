@@ -78,7 +78,7 @@ namespace GMS.Business.Agent
                         db.CreateBusinessScore(score);
                     
                     // Getting reviews if option checked.s
-                    if (request.GetReviews && request.DateLimit != null)
+                    if (request.GetReviews && request.DateLimit != null && score?.Score != null)
                         GetReviews(profile, request.DateLimit, db, driver);
 
                     // Update Url state when finished.
@@ -163,10 +163,11 @@ namespace GMS.Business.Agent
             }
 
             if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews) is WebElement nbReviewsElement) {
-                string? label = nbReviewsElement.GetAttribute("aria-label")?.Replace(" avis", "").Replace("avis", "").Replace(" ", "").Trim();
-                if (label != null && int.TryParse(Regex.Replace(label, @"\s", ""), out int parsedReviews)) {
+                string? label = nbReviewsElement.GetAttribute("aria-label")?.Replace("avis", "").Replace(" ", "").Trim();
+                if (label == null && score != null)
+                    label = nbReviewsElement.ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim();
+                if (label != null && int.TryParse(Regex.Replace(label, @"\s", ""), out int parsedReviews))
                     reviews = parsedReviews;
-                }
             }
 
             if (googleAddress != null) {
@@ -325,6 +326,8 @@ namespace GMS.Business.Agent
                 toReviewPage.Click();
             }
             catch (Exception) { return; }
+
+            IWebElement? test = ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage);
 
             Thread.Sleep(2000);
 

@@ -21,7 +21,7 @@ namespace GMS.Sdk.Core.Models
         public static readonly List<By> name = new() { By.XPath("//div[@role='main' and @aria-label]") };
         public static readonly List<By> category = new() { By.XPath("//button[@jsaction='pane.rating.category']"), By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]/following-sibling::span") };
         public static readonly List<By> adress = new() { By.XPath("//button[@data-item-id='address']") };
-        public static readonly List<By> nbReviews = new() { By.XPath("//button[contains(@jsaction, 'pane.rating.moreReviews')]"), By.XPath("//span[contains(@arial-label, 'avis')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]") };
+        public static readonly List<By> nbReviews = new() { By.XPath("//button[contains(@jsaction, 'pane.rating.moreReviews')]"), By.XPath("//span[contains(@arial-label, 'avis')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]/following::span") };
         public static readonly List<By> tel = new() { By.XPath("//button[contains(@aria-label, 'Numéro de téléphone:')]") };
         public static readonly List<By> website = new() { By.XPath("//button[contains(@aria-label, 'Site Web:')]"), By.XPath("//a[contains(@aria-label, 'Site Web:')]") };
         public static readonly List<By> score = new() { By.XPath("//span[contains(@aria-label, 'étoiles')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]") };
