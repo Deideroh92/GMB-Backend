@@ -40,8 +40,10 @@ namespace GMS.Sdk.Core
         /// </summary>
         /// <param name="googleDate"></param>
         /// <returns>Real date from google date.</returns>
-        public static DateTime ComputeDateFromGoogleDate(string googleDate)
+        public static DateTime ComputeDateFromGoogleDate(string? googleDate)
         {
+            if (googleDate == null) return DateTime.UtcNow;
+
             string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMS.Sdk.Core\\Files", "GoogleDate.json");
             string json = File.ReadAllText(path);
             Dictionary<string, string>? mapper = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
@@ -154,7 +156,7 @@ namespace GMS.Sdk.Core
         /// <param name="elements">Current element</param>
         /// <returns>Returns T/F depending on if element is defined or null.</returns>
         public static bool Exists<T>(T elements) {
-            return elements == null;
+            return elements != null;
         }
 
         /// <summary>

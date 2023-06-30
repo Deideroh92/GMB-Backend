@@ -340,7 +340,7 @@ namespace GMS.Sdk.Core.DbModels
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_PROFILE VALUES (@IdEtab, @FirstGuid, @Name, @Category, @GoogleAddress, @Tel, @Website, NULL, @DateInsert, @UpdateCount, @DateUpdate, @Status, @Processing, @UrlPicture, @Address, @PostCode, @City, @CityCode, @Lat, @Lon, @IdBan, @AddressType)";
+                string insertCommand = "INSERT INTO BUSINESS_PROFILE VALUES (@IdEtab, @FirstGuid, @Name, @Category, @GoogleAddress, @Tel, @Website, @Geoloc, @DateInsert, @UpdateCount, @DateUpdate, @Status, @Processing, @UrlPicture, @Address, @PostCode, @City, @CityCode, @Lat, @Lon, @IdBan, @AddressType, @StreetNumber)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@FirstGuid", businessProfile.FirstGuid);
@@ -351,17 +351,20 @@ namespace GMS.Sdk.Core.DbModels
                 cmd.Parameters.AddWithValue("@Website", businessProfile.Website as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@UrlPicture", businessProfile.PictureUrl as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@DateInsert", businessProfile.DateInsert);
+                cmd.Parameters.AddWithValue("@Geoloc", DBNull.Value);
+                cmd.Parameters.AddWithValue("@Processing", 0);
                 cmd.Parameters.AddWithValue("@UpdateCount", 0);
                 cmd.Parameters.AddWithValue("@DateUpdate", businessProfile.DateUpdate);
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
-                cmd.Parameters.AddWithValue("@Address", businessProfile.Address);
-                cmd.Parameters.AddWithValue("@PostCode", businessProfile.PostCode);
-                cmd.Parameters.AddWithValue("@City", businessProfile.City);
-                cmd.Parameters.AddWithValue("@CityCode", businessProfile.CityCode);
-                cmd.Parameters.AddWithValue("@Lat", businessProfile.Lat);
-                cmd.Parameters.AddWithValue("@Lon", businessProfile.Lon);
-                cmd.Parameters.AddWithValue("@IdBan", businessProfile.IdBan);
-                cmd.Parameters.AddWithValue("@AddressType", businessProfile.AddressType);
+                cmd.Parameters.AddWithValue("@Address", businessProfile.Address as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@PostCode", businessProfile.PostCode as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@City", businessProfile.City as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@CityCode", businessProfile.CityCode as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Lat", businessProfile.Lat as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Lon", businessProfile.Lon as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@IdBan", businessProfile.IdBan as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@AddressType", businessProfile.AddressType as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@StreetNumber", businessProfile.StreetNumber as object ?? DBNull.Value);
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             }
@@ -849,10 +852,10 @@ namespace GMS.Sdk.Core.DbModels
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessReview.IdEtab);
                 cmd.Parameters.AddWithValue("@IdReview", businessReview.IdReview);
-                cmd.Parameters.AddWithValue("@UserName", businessReview.User.Name);
+                cmd.Parameters.AddWithValue("@UserName", businessReview.User.Name as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@UserStatus", businessReview.User.LocalGuide);
                 cmd.Parameters.AddWithValue("@Score", businessReview.Score);
-                cmd.Parameters.AddWithValue("@UserNbReviews", businessReview.User.NbReviews);
+                cmd.Parameters.AddWithValue("@UserNbReviews", businessReview.User.NbReviews as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@Review", businessReview.ReviewText as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@ReviewGoogleDate", businessReview.ReviewGoogleDate);
                 cmd.Parameters.AddWithValue("@ReviewDate", businessReview.ReviewDate);
@@ -942,11 +945,11 @@ namespace GMS.Sdk.Core.DbModels
             {
                 string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate, REVIEW_DATE = @ReviewDate WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@UserName", review.User.Name);
+                cmd.Parameters.AddWithValue("@UserName", review.User.Name as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@UserStatus", review.User.LocalGuide);
                 cmd.Parameters.AddWithValue("@Score", review.Score);
-                cmd.Parameters.AddWithValue("@UserNbReviews", review.User.NbReviews);
-                cmd.Parameters.AddWithValue("@Review", review.ReviewText);
+                cmd.Parameters.AddWithValue("@UserNbReviews", review.User.NbReviews as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Review", review.ReviewText as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@ReviewAnswered", review.ReviewReplied);
                 cmd.Parameters.AddWithValue("@DateUpdate", review.DateUpdate);
                 cmd.Parameters.AddWithValue("@ReviewGoogleDate", review.ReviewGoogleDate);
@@ -956,7 +959,7 @@ namespace GMS.Sdk.Core.DbModels
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw;
             }
@@ -973,11 +976,11 @@ namespace GMS.Sdk.Core.DbModels
             {
                 string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@UserName", review.User.Name);
+                cmd.Parameters.AddWithValue("@UserName", review.User.Name as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@UserStatus", review.User.LocalGuide);
                 cmd.Parameters.AddWithValue("@Score", review.Score);
-                cmd.Parameters.AddWithValue("@UserNbReviews", review.User.NbReviews);
-                cmd.Parameters.AddWithValue("@Review", review.ReviewText);
+                cmd.Parameters.AddWithValue("@UserNbReviews", review.User.NbReviews as object ?? DBNull.Value);
+                cmd.Parameters.AddWithValue("@Review", review.ReviewText as object ?? DBNull.Value);
                 cmd.Parameters.AddWithValue("@ReviewAnswered", review.ReviewReplied);
                 cmd.Parameters.AddWithValue("@DateUpdate", review.DateUpdate);
                 cmd.Parameters.AddWithValue("@IdEtab", review.IdEtab);
@@ -985,7 +988,7 @@ namespace GMS.Sdk.Core.DbModels
                 cmd.ExecuteNonQuery();
                 cmd.Dispose();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 throw;
             }

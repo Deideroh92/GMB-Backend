@@ -7,6 +7,7 @@ using GMS.Sdk.Core.Models;
 using GMS.Sdk.Core.DbModels;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using GMS.Sdk.Core;
+using System.Text.RegularExpressions;
 
 namespace GMS.Tests
 {
@@ -20,10 +21,10 @@ namespace GMS.Tests
         #region All
         [TestMethod]
         public void SandBox() {
-            DbLib dbLib = new();
-            string work = Directory.GetCurrentDirectory();
-            string test = Directory.GetParent(work).Parent.Parent.FullName;
-            
+            string? name = "123 pare-brise";
+            name = Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),\s-]+|\s{2,}", "");
+
+
             return;
         }
 
@@ -199,7 +200,7 @@ namespace GMS.Tests
         public async Task ThreadsCategory() {
 
             // CONFIG
-            int nbThreads = 8;
+            int nbThreads = 1;
             int nbEntries = 10000;
             string? sector = null;
             int processing = 1;
@@ -231,7 +232,7 @@ namespace GMS.Tests
         }
 
         [TestMethod]
-        public void ThreadsFile() {
+        public async Task ThreadsFileAsync() {
 
             // CONFIG
             int nbThreads = 1;
@@ -272,27 +273,27 @@ namespace GMS.Tests
             int threadNumber = 0;
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
                 threadNumber++;
-                Task newThread = Task.Run(delegate {
+                Task newThread = Task.Run(async () =>
+                {
                     BusinessAgentRequest request = new(opertationType, getReviews, new List<DbBusinessAgent>(chunk), reviewsDate);
-                    _ = BusinessService.StartAsync(request, threadNumber);
+                    await BusinessService.StartAsync(request, threadNumber).ConfigureAwait(false);
                 });
                 tasks.Add(newThread);
-                Thread.Sleep(2000);
             }
-            Task.WaitAll(tasks.ToArray());
+            await Task.WhenAll(tasks);
             return;
         }
 
         [TestMethod]
-        public void ThreadsUrlState() {
+        public async Task ThreadsUrlStateAsync() {
 
             // CONFIG
-            int nbThreads = 8;
+            int nbThreads = 1;
             int nbEntries = 111;
             UrlState urlState = UrlState.NEW;
             Operation opertationType = Operation.URL_STATE;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-7);
 
             List<Task> tasks = new();
             using DbLib db = new();
@@ -301,14 +302,14 @@ namespace GMS.Tests
             int threadNumber = 0;
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
                 threadNumber++;
-                Task newThread = Task.Run(delegate {
+                Task newThread = Task.Run(async () =>
+                {
                     BusinessAgentRequest request = new(opertationType, getReviews, new List<DbBusinessAgent>(chunk), reviewsDate);
-                    _ = BusinessService.StartAsync(request, threadNumber);
+                    await BusinessService.StartAsync(request, threadNumber).ConfigureAwait(false);
                 });
                 tasks.Add(newThread);
-                Thread.Sleep(2000);
             }
-            Task.WaitAll(tasks.ToArray());
+            await Task.WhenAll(tasks);
             return;
         }
         #endregion

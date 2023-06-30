@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Text.RegularExpressions;
 using SeleniumExtras.WaitHelpers;
 using GMS.Sdk.Core;
+using System.Reflection.PortableExecutable;
 
 namespace GMS.Business.Agent
 {
@@ -142,11 +143,10 @@ namespace GMS.Business.Agent
             float? parsedScore = null;
             float? score = null;
             string? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
-            if (name != null)
-            {
-                name = Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),-]+", "");
-                name = Regex.Replace(name, @"\s{2,}", " ");
-            }
+            if (name == null)
+                return (null, null);
+            else
+                Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),\s-]+|\s{2,}", "");
 
             if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null && float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim(), out float parsedScoreValue))
                 parsedScore = parsedScoreValue;
@@ -167,10 +167,6 @@ namespace GMS.Business.Agent
                 if (label != null && int.TryParse(Regex.Replace(label, @"\s", ""), out int parsedReviews)) {
                     reviews = parsedReviews;
                 }
-            }
-
-            if (name == null) {
-                return (null, null);
             }
 
             if (googleAddress != null) {
@@ -206,18 +202,14 @@ namespace GMS.Business.Agent
         /// <param name="dateLimit"></param>
         /// <returns>Business Review</returns>
         /// <exception cref="Exception"></exception>
-        public static DbBusinessReview GetBusinessReviewsInfosFromReviews(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit) {
+        public static DbBusinessReview? GetBusinessReviewsInfosFromReviews(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit) {
             string idReview = reviewWebElement.GetAttribute("data-review-id")?.Trim() ?? throw new Exception("No review id");
 
             string? reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate)?.Text?.Trim();
-            if (reviewGoogleDate == null) {
-                throw new Exception("No date for this review");
-            }
-
             DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
-            if (dateLimit.HasValue && reviewDate < dateLimit.Value) {
-                throw new Exception("Review too old.");
-            }
+
+            if (reviewGoogleDate == null || (dateLimit.HasValue && reviewDate < dateLimit.Value))
+                return null;
 
             string userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName)?.GetAttribute("aria-label")?.Replace("Photo de", "").Trim() ?? "";
 
@@ -230,6 +222,9 @@ namespace GMS.Business.Agent
             }
 
             string? reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
+            if (reviewText != null && reviewText.EndsWith(" Plus"))
+                reviewText = reviewText.TrimEnd(" Plus".ToCharArray());
+
 
             bool localGuide = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)) && ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Contains('·');
             GoogleUser user = new(userName, userNbReviews, localGuide);
@@ -247,10 +242,6 @@ namespace GMS.Business.Agent
         /// <param name="dateLimit"></param>
         /// <returns>Review list</returns>
         public static ReadOnlyCollection<IWebElement>? GetReviewsFromGooglePage(IWebDriver driver, DateTime? dateLimit) {
-            if (!ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathReview.reviewList))) {
-                throw new Exception("Failed to get review list.");
-            }
-
             ReadOnlyCollection<IWebElement>? reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
 
             if (reviewList == null || reviewList.Count == 0) {
@@ -264,6 +255,7 @@ namespace GMS.Business.Agent
 
                 int reviewListLength = 0;
                 string? reviewGoogleDate;
+                DateTime realDate;
 
                 while (reviewListLength != reviewList.Count) {
                     ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
@@ -275,10 +267,12 @@ namespace GMS.Business.Agent
                         break;
                     }
 
-                    if (ToolBox.Exists(ToolBox.FindElementsSafe(driver, XPathReview.googleDate))) {
-                        reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Trim();
-
-                        if (reviewGoogleDate != null && ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate) < dateLimit) {
+                    reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Trim();
+                    if (reviewGoogleDate != null)
+                    {
+                        realDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
+                        if (realDate < dateLimit)
+                        {
                             break;
                         }
                     }
@@ -323,15 +317,21 @@ namespace GMS.Business.Agent
         /// <param name="driver"></param>
         /// <exception cref="Exception"></exception>
         public static void GetReviews(DbBusinessProfile businessProfile, DateTime? dateLimit, DbLib db, SeleniumDriver driver) {
-            if (!ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage))) {
-                return;
-            }
 
-            ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage).Click();
-            Thread.Sleep(2500);
+            try
+            {
+                WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(2));
+                IWebElement toReviewPage = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage)));
+                toReviewPage.Click();
+            }
+            catch (Exception) { return; }
+
+            Thread.Sleep(2000);
 
             // Sorting reviews.
             SortReviews(driver.WebDriver);
+
+            Thread.Sleep(1000);
 
             // Getting reviews.
             ReadOnlyCollection<IWebElement>? reviews = GetReviewsFromGooglePage(driver.WebDriver, dateLimit);
@@ -342,7 +342,9 @@ namespace GMS.Business.Agent
 
             foreach (IWebElement review in reviews) {
                 try {
-                    DbBusinessReview businessReview = GetBusinessReviewsInfosFromReviews(review, businessProfile.IdEtab, dateLimit);
+                    DbBusinessReview? businessReview = GetBusinessReviewsInfosFromReviews(review, businessProfile.IdEtab, dateLimit);
+                    if (businessReview == null)
+                        continue;
                     DbBusinessReview? dbBusinessReview = db.GetBusinessReview(businessProfile.IdEtab, businessReview.IdReview);
 
                     if (dbBusinessReview == null) {
@@ -350,10 +352,12 @@ namespace GMS.Business.Agent
                         continue;
                     }
 
+                    if (dbBusinessReview.ReviewText == "") dbBusinessReview.ReviewText = null;
+
                     if (dbBusinessReview.ReviewText != businessReview.ReviewText || dbBusinessReview.Score != businessReview.Score) {
                         db.UpdateBusinessReview(businessReview);
                         continue;
-                    } else if (!dbBusinessReview.Equals(businessReview)) {
+                    } else if (dbBusinessReview.User.Name != businessReview.User.Name || dbBusinessReview.User.NbReviews != businessReview.User.NbReviews || dbBusinessReview.User.LocalGuide != businessReview.User.LocalGuide || dbBusinessReview.ReviewReplied != businessReview.ReviewReplied) {
                         db.UpdateBusinessReviewWithoutUpdatingDate(businessReview);
                     }
                 } catch (Exception e) {
