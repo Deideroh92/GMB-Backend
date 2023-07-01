@@ -38,6 +38,9 @@ namespace GMS.Business.Agent
 
             foreach (DbBusinessAgent business in request.BusinessList) {
                 try {
+
+                    ToolBox.BreakingHours();
+
                     count++;
 
                     // Get business profile infos from Google.

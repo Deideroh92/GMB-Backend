@@ -18,7 +18,11 @@ namespace GMS.Url.Agent
         public static void Start(UrlFinderRequest request) {
             using DbLib dbLib = new();
             using SeleniumDriver driver = new();
+
             foreach (string location in request.Locations) {
+
+                ToolBox.BreakingHours();
+
                 try {
                     string textSearch = request.TextSearch + "+" + location;
                     string url = "https://www.google.com/maps/search/" + textSearch;

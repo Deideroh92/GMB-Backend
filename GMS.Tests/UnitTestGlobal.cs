@@ -200,8 +200,8 @@ namespace GMS.Tests
         public async Task ThreadsCategory() {
 
             // CONFIG
-            int nbThreads = 1;
-            int nbEntries = 1577;
+            int nbThreads = 8;
+            int nbEntries = 10000;
             string? sector = null;
             int processing = 1;
             Operation opertationType = Operation.CATEGORY;
@@ -235,7 +235,7 @@ namespace GMS.Tests
         public async Task ThreadsFileAsync() {
 
             // CONFIG
-            int nbThreads = 1;
+            int nbThreads = 8;
             Operation opertationType = Operation.FILE;
             bool getReviews = true;
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
@@ -288,7 +288,7 @@ namespace GMS.Tests
         public async Task ThreadsUrlStateAsync() {
 
             // CONFIG
-            int nbThreads = 1;
+            int nbThreads = 8;
             int nbEntries = 111;
             UrlState urlState = UrlState.NEW;
             Operation opertationType = Operation.URL_STATE;

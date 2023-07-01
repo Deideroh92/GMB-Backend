@@ -4,6 +4,7 @@ using System.Text;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using GMS.Sdk.Core.Models;
+using System.Security.Authentication;
 
 namespace GMS.Sdk.Core
 {
@@ -165,20 +166,45 @@ namespace GMS.Sdk.Core
         /// <param name="address"></param>
         /// <returns>addressResponse object if adress found or null.</returns>
         public static async Task<AddressApiResponse?> ApiCallForAddress(string address) {
-            using HttpClient client = new();
+            using HttpClientHandler handler = new();
+            handler.SslProtocols = SslProtocols.Tls12;
+            using HttpClient client = new(handler);
+
             string apiUrl = $"https://api-adresse.data.gouv.fr/search/?q={Uri.EscapeDataString(address)}";
             string[] types = { "housenumber", "street", "locality", "municipality" };
             foreach (string type in types) {
-                HttpResponseMessage response = await client.GetAsync(apiUrl + $"&type={type}");
-                string responseBody = await response.Content.ReadAsStringAsync();
-                AddressApiResponse? addressResponse = AddressApiResponse.FromJson(responseBody);
+                try {
+                    HttpResponseMessage response = await client.GetAsync(apiUrl + $"&type={type}");
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    AddressApiResponse? addressResponse = AddressApiResponse.FromJson(responseBody);
 
-                if (addressResponse?.Features?.Length > 0) {
-                    return addressResponse;
+                    if (addressResponse?.Features?.Length > 0) {
+                        return addressResponse;
+                    }
+                } catch (Exception) {
+                    continue;
                 }
             }
 
             return null;
+        }
+
+
+        /// <summary>
+        /// Breaking hours, when the program needs to stop.
+        /// </summary>
+        public static void BreakingHours() {
+            DateTime actualTime = DateTime.Now;
+
+            // Breaking hours
+            TimeSpan startTime = new(0, 0, 0);  // Midnight
+            TimeSpan endTime = new(3, 0, 0);    // 3AM
+
+            while (actualTime.TimeOfDay >= startTime && actualTime.TimeOfDay <= endTime) {
+                // Pausing program for 1 hour
+                Thread.Sleep(3600000);
+                actualTime = DateTime.Now;
+            }
         }
 
         #endregion
