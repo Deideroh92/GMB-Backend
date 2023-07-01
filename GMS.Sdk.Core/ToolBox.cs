@@ -197,10 +197,10 @@ namespace GMS.Sdk.Core
             DateTime actualTime = DateTime.Now;
 
             // Breaking hours
-            TimeSpan startTime = new(0, 0, 0);  // Midnight
-            TimeSpan endTime = new(3, 0, 0);    // 3AM
+            TimeSpan heureDebut = new TimeSpan(22, 0, 0); // 22h00
+            TimeSpan heureFin = new TimeSpan(1, 0, 0); // 3AM
 
-            while (actualTime.TimeOfDay >= startTime && actualTime.TimeOfDay <= endTime) {
+            while (actualTime.TimeOfDay >= heureDebut && actualTime.TimeOfDay <= heureFin) {
                 // Pausing program for 1 hour
                 Thread.Sleep(3600000);
                 actualTime = DateTime.Now;
