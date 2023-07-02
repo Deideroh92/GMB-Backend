@@ -945,34 +945,6 @@ namespace GMS.Sdk.Core.DbModels
                 throw;
             }
         }
-
-        /// <summary>
-        /// Update Business Review without updating date.
-        /// </summary>
-        /// <param name="review"></param>
-        /// <exception cref="Exception"></exception>
-        public void UpdateBusinessReviewWithoutUpdatingDate(DbBusinessReview review)
-        {
-            try
-            {
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
-                using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@UserName", GetValueOrDefault(review.User.Name));
-                cmd.Parameters.AddWithValue("@UserStatus", GetValueOrDefault(review.User.LocalGuide));
-                cmd.Parameters.AddWithValue("@Score", GetValueOrDefault(review.Score));
-                cmd.Parameters.AddWithValue("@UserNbReviews", GetValueOrDefault(review.User.NbReviews));
-                cmd.Parameters.AddWithValue("@Review", GetValueOrDefault(review.ReviewText));
-                cmd.Parameters.AddWithValue("@ReviewAnswered", GetValueOrDefault(review.ReviewReplied));
-                cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(review.DateUpdate));
-                cmd.Parameters.AddWithValue("@IdEtab", GetValueOrDefault(review.IdEtab));
-                cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
-                cmd.ExecuteNonQuery();
-            }
-            catch (Exception)
-            {
-                throw;
-            }
-        }
         #endregion
     }  
 }

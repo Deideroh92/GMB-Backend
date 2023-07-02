@@ -330,8 +330,6 @@ namespace GMS.Business.Agent
             }
             catch (Exception) { return; }
 
-            IWebElement? test = ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage);
-
             Thread.Sleep(2000);
 
             // Sorting reviews.
@@ -360,12 +358,12 @@ namespace GMS.Business.Agent
 
                     if (dbBusinessReview.ReviewText == "") dbBusinessReview.ReviewText = null;
 
-                    if (dbBusinessReview.ReviewText != businessReview.ReviewText || dbBusinessReview.Score != businessReview.Score) {
+                    db.UpdateBusinessReview(businessReview);
+
+                    /*if (dbBusinessReview.ReviewText != businessReview.ReviewText || dbBusinessReview.Score != businessReview.Score || dbBusinessReview.User.Name != businessReview.User.Name || dbBusinessReview.User.NbReviews != businessReview.User.NbReviews || dbBusinessReview.User.LocalGuide != businessReview.User.LocalGuide || dbBusinessReview.ReviewReplied != businessReview.ReviewReplied) {
                         db.UpdateBusinessReview(businessReview);
                         continue;
-                    } else if (dbBusinessReview.User.Name != businessReview.User.Name || dbBusinessReview.User.NbReviews != businessReview.User.NbReviews || dbBusinessReview.User.LocalGuide != businessReview.User.LocalGuide || dbBusinessReview.ReviewReplied != businessReview.ReviewReplied) {
-                        db.UpdateBusinessReviewWithoutUpdatingDate(businessReview);
-                    }
+                    }*/
                 } catch (Exception e) {
                     System.Diagnostics.Debug.WriteLine(e.Message);
                     System.Diagnostics.Debug.WriteLine(e.StackTrace);

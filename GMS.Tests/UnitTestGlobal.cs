@@ -200,13 +200,13 @@ namespace GMS.Tests
         public async Task ThreadsCategory() {
 
             // CONFIG
-            int nbThreads = 8;
-            int nbEntries = 10000;
+            int nbThreads = 1;
+            int nbEntries = 10;
             string? sector = null;
             int processing = 1;
             Operation opertationType = Operation.CATEGORY;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-6);
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-7);
 
             List<DbBusinessAgent> businessList = new();
             List<Task> tasks = new();

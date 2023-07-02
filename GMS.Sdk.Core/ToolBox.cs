@@ -58,7 +58,7 @@ namespace GMS.Sdk.Core
                 if (googleDate.Contains("an"))
                     return currentDate.AddYears(-jsonValue);
                 if (googleDate.Contains("semaine"))
-                    return currentDate.AddDays(-jsonValue * 7);
+                    return currentDate.AddDays(-jsonValue);
                 if (googleDate.Contains("jour"))
                     return currentDate.AddDays(-jsonValue);
             }
