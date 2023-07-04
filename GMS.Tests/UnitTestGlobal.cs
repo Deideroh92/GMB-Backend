@@ -73,6 +73,13 @@ namespace GMS.Tests
         }
 
         [TestMethod]
+        public void BreakingHours()
+        {
+            ToolBox.BreakingHours();
+            return;
+        }
+
+        [TestMethod]
         public void HashFileToMd5() {
             string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\test.txt";
             string endFilePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\test_out.txt";
@@ -200,13 +207,13 @@ namespace GMS.Tests
         public async Task ThreadsCategory() {
 
             // CONFIG
-            int nbThreads = 1;
-            int nbEntries = 10;
+            int nbThreads = 8;
+            int nbEntries = 4349;
             string? sector = null;
-            int processing = 1;
+            int processing = 2;
             Operation opertationType = Operation.CATEGORY;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-7);
+            DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
 
             List<DbBusinessAgent> businessList = new();
             List<Task> tasks = new();
