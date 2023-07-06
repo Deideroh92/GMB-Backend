@@ -226,10 +226,17 @@ namespace GMS.Business.Agent
             }
 
             string? reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
-            if (reviewText != null && reviewText.EndsWith(" Plus"))
-                reviewText = reviewText.TrimEnd(" Plus".ToCharArray());
-
-
+            if (reviewText != null && reviewText.EndsWith(" Plus")) {
+                try {
+                    var test = ToolBox.FindElementSafe(reviewWebElement, XPathReview.plusButton);
+                    test.Click();
+                    Thread.Sleep(1000);
+                    reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
+                } catch {
+                    reviewText = reviewText.TrimEnd(" Plus".ToCharArray());
+                }
+            }
+                
             bool localGuide = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)) && ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Contains('·');
             GoogleUser user = new(userName, userNbReviews, localGuide);
 
@@ -360,7 +367,7 @@ namespace GMS.Business.Agent
 
                     db.UpdateBusinessReview(businessReview);
 
-                    /*if (dbBusinessReview.ReviewText != businessReview.ReviewText || dbBusinessReview.Score != businessReview.Score || dbBusinessReview.User.Name != businessReview.User.Name || dbBusinessReview.User.NbReviews != businessReview.User.NbReviews || dbBusinessReview.User.LocalGuide != businessReview.User.LocalGuide || dbBusinessReview.ReviewReplied != businessReview.ReviewReplied) {
+                    /*if (!businessReview.Equals(dbBusinessReview)) {
                         db.UpdateBusinessReview(businessReview);
                         continue;
                     }*/

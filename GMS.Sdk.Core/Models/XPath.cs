@@ -49,6 +49,7 @@ namespace GMS.Sdk.Core.Models
         public static readonly List<By> score = new() { By.XPath(".//span[contains(@role, 'img')]//img[contains(@src, 'ic_star_rate_14')]") };
         public static readonly List<By> userNbReviews = new() { By.XPath(".//div[contains(text(), 'avis')]") };
         public static readonly List<By> text = new() { By.XPath(".//div[contains(@class, 'MyEned')]") };
+        public static readonly List<By> plusButton = new() { By.XPath(".//button[contains(@jsaction, 'pane.review.expandReview')]") };
 
 
         // Review reply info

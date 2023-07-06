@@ -42,6 +42,10 @@
             DateUpdate = dateUpdate;
             ReviewReply = reviewReply;
         }
+
+        public bool Equals(DbBusinessReview other) {
+            return other.ReviewText == ReviewText && other.Score == Score && other.User.Name == User.Name && other.User.NbReviews == User.NbReviews && other.User.LocalGuide == User.LocalGuide && other.ReviewReplied == ReviewReplied;
+        }
         #endregion
     }
 }
