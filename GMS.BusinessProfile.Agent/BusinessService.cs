@@ -53,7 +53,7 @@ namespace GMS.Business.Agent
                             continue;
                         }
                         if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(driver.WebDriver.Url))) {
-                            using DbBusinessUrl businessUrl = new(profile.FirstGuid, driver.WebDriver.Url, DateTime.UtcNow, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(driver.WebDriver.Url), UrlState.UPDATED);
+                            using DbBusinessUrl businessUrl = new(profile.FirstGuid, driver.WebDriver.Url, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(driver.WebDriver.Url), UrlState.UPDATED);
                             db.CreateBusinessUrl(businessUrl);
                         }
                     }

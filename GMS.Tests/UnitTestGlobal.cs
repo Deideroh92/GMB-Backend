@@ -150,7 +150,7 @@ namespace GMS.Tests
             DbLib db = new();
             string url = "https://www.google.fr/maps/place/Lidl/@45.6945776,4.8226045,17z/data=!3m1!4b1!4m5!3m4!1s0x47f4e9aedb97e42b:0xdfb4d943672c4bd8!8m2!3d45.6945748!4d4.8247889?hl=fr";
             DateTime date = DateTime.Now;
-            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, date, "manually", date, ToolBox.ComputeMd5Hash(url));
+            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", date, ToolBox.ComputeMd5Hash(url),UrlState.NEW, date);
             db.CreateBusinessUrl(businessUrl);
         }
         #endregion
