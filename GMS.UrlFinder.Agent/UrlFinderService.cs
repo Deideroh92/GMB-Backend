@@ -3,6 +3,7 @@ using GMS.Sdk.Core.DbModels;
 using GMS.Sdk.Core.Models;
 using GMS.Url.Agent.Model;
 using OpenQA.Selenium;
+using Serilog;
 using System.Collections.ObjectModel;
 
 namespace GMS.Url.Agent
@@ -11,16 +12,20 @@ namespace GMS.Url.Agent
     /// Url Service.
     /// </summary>
     public class UrlFinderService {
+
         /// <summary>
         /// Start the Service.
         /// </summary>
         /// <param name="request"></param>
         public static void Start(UrlFinderRequest request) {
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.File("logs/log-{Date}.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
+            .CreateLogger();
+
             using DbLib dbLib = new();
             using SeleniumDriver driver = new();
 
             foreach (string location in request.Locations) {
-
                 ToolBox.BreakingHours();
 
                 try {
@@ -29,12 +34,11 @@ namespace GMS.Url.Agent
                     driver.GetToPage(url);
                     GetUrls(driver.WebDriver, textSearch, dbLib);
                 } catch (Exception e) {
-                    Console.WriteLine(e.Message);
-                    Console.WriteLine(e.StackTrace);
+                    Log.Error(e, "An exception occurred: {Message}");
                 }
             }
+            Log.CloseAndFlush();
         }
-
 
         /// <summary>
         /// Initiate the getting url process.
@@ -44,18 +48,22 @@ namespace GMS.Url.Agent
         /// <param name="dbLib"></param>
         private static void GetUrls(IWebDriver driver, string textSearch, DbLib dbLib) {
             ReadOnlyCollection<IWebElement>? businessList = ScrollIntoBusinessUrls(driver);
+
             if (businessList == null && ToolBox.FindElementSafe(driver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim() != null) {
                 ValidateUrl(driver.Url, dbLib, textSearch);
             }
 
-
             foreach (IWebElement business in businessList) {
-                string name = business.Text.Split('\n')[0].Replace("\r", "");
-                string? url = ToolBox.FindElementSafe(business, new List<By> { By.XPath(".//a[contains(@aria-label, '" + name + "')]") })?.GetAttribute("href").Replace("?authuser=0&hl=fr&rclk=1", "");
+                try {
+                    string name = business.Text.Split('\n')[0].Replace("\r", "");
+                    string? url = ToolBox.FindElementSafe(business, new List<By> { By.XPath(".//a[contains(@aria-label, '" + name + "')]") })?.GetAttribute("href").Replace("?authuser=0&hl=fr&rclk=1", "");
 
-                if (string.IsNullOrWhiteSpace(url))
-                    continue;
-                ValidateUrl(url, dbLib, textSearch);
+                    if (string.IsNullOrWhiteSpace(url))
+                        continue;
+                    ValidateUrl(url, dbLib, textSearch);
+                } catch (Exception) {
+                    throw new Exception("Couldn't get url from business url list");
+                }
             }
         }
 
@@ -66,13 +74,9 @@ namespace GMS.Url.Agent
         /// <param name="dbLib"></param>
         /// <param name="textSearch"></param>
         private static void ValidateUrl(string url, DbLib dbLib, string textSearch) {
-            try {
-                if (!dbLib.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(url))) {
-                    using DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, textSearch, DateTime.UtcNow, ToolBox.ComputeMd5Hash(url));
-                    dbLib.CreateBusinessUrl(businessUrl);
-                }
-            } catch (Exception ex) {
-                Console.WriteLine($"Erreur lors de la création de l'URL de l'entreprise : {ex.Message}");
+            if (!dbLib.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(url))) {
+                DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, textSearch, DateTime.UtcNow, ToolBox.ComputeMd5Hash(url));
+                dbLib.CreateBusinessUrl(businessUrl);
             }
         }
 
@@ -82,28 +86,32 @@ namespace GMS.Url.Agent
         /// <param name="driver"></param>
         /// <returns>A list of all businesses that we could gather.</returns>
         private static ReadOnlyCollection<IWebElement>? ScrollIntoBusinessUrls(IWebDriver driver) {
-            IWebElement? body = ToolBox.FindElementSafe(driver, XPathUrl.body);
-            ReadOnlyCollection<IWebElement>? businessList = ToolBox.FindElementsSafe(driver, XPathUrl.businessList);
+            try {
+                IWebElement? body = ToolBox.FindElementSafe(driver, XPathUrl.body);
+                ReadOnlyCollection<IWebElement>? businessList = ToolBox.FindElementsSafe(driver, XPathUrl.businessList);
 
-            if (body == null || businessList == null)
-                return null;
+                if (body == null || businessList == null)
+                    return null;
 
-            int? length;
-            const int waitTimeMilliseconds = 1000;
+                int? length;
+                const int waitTimeMilliseconds = 1000;
 
-            do {
-                length = businessList?.Count;
-                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
-                Thread.Sleep(waitTimeMilliseconds);
-                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
-                Thread.Sleep(waitTimeMilliseconds);
-                ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
-                Thread.Sleep(waitTimeMilliseconds);
-                businessList = ToolBox.FindElementsSafe(driver, XPathUrl.businessList);
+                do {
+                    length = businessList?.Count;
+                    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
+                    Thread.Sleep(waitTimeMilliseconds);
+                    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
+                    Thread.Sleep(waitTimeMilliseconds);
+                    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTo(0, arguments[0].scrollHeight)", body);
+                    Thread.Sleep(waitTimeMilliseconds);
+                    businessList = ToolBox.FindElementsSafe(driver, XPathUrl.businessList);
+                }
+                while (length != businessList?.Count);
+
+                return businessList;
+            } catch (Exception) {
+                throw new Exception("Couldn't scroll into business urls");
             }
-            while (length != businessList?.Count);
-
-            return businessList;
         }
     }
 }

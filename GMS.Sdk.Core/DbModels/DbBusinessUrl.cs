@@ -10,7 +10,7 @@
     }
     #endregion
 
-    public class DbBusinessUrl : IDisposable {
+    public class DbBusinessUrl {
         public long Id { get; set; }
         public string Guid { get; set; }
         public string Url { get; set; }
@@ -20,10 +20,7 @@
         public DateTime? DateUpdate { get; set; }
         public string UrlEncoded { get; set; }
 
-        private bool disposed = false;
-
         #region Local
-
         /// <summary>
         /// Constructor.
         /// </summary>
@@ -43,36 +40,6 @@
             DateUpdate = dateUpdate;
             UrlEncoded = urlEncoded;
         }
-
-        /// <summary>
-        /// Dispose method implementation.
-        /// </summary>
-        public void Dispose() {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Dispose method implementation.
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing) {
-            if (!disposed) {
-                if (disposing) {
-                    // Dispose managed resources here
-                }
-
-                // Dispose unmanaged resources here
-
-                disposed = true;
-            }
-        }
-
         #endregion
-
-        // Finalizer
-        ~DbBusinessUrl() {
-            Dispose(false);
-        }
     }
 }

@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMS.Tests", "GMS.Tests\GMS.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMS.Business.Agent", "GMS.BusinessProfile.Agent\GMS.Business.Agent.csproj", "{1503A1D7-A5DC-49C2-B2DB-F9A49D3DBA5A}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ConfigFolder", "ConfigFolder", "{EB2AFE91-8086-4E2A-8120-AD59FED1FCB8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
