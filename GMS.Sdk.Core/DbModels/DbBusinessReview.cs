@@ -29,7 +29,7 @@
         /// <param name="dateInsert"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="reviewReply"></param>
-        public DbBusinessReview(string idEtab, string idReview, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateInsert, DateTime? dateUpdate, DbBusinessReviewReply? reviewReply = null) {
+        public DbBusinessReview(string idEtab, string idReview, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null) {
             IdEtab = idEtab;
             IdReview = idReview;
             User = user;

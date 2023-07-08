@@ -56,7 +56,7 @@
         /// <param name="dateInsert"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="status"></param>
-        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber,  string? tel, string? website, DateTime? dateInsert, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, int processing = 0) {
+        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber,  string? tel, string? website, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, int processing = 0, DateTime? dateInsert = null) {
             IdEtab = idEtab;
             FirstGuid = firstGuid;
             Name = name;
@@ -72,8 +72,8 @@
             AddressType = addressType;
             Tel = tel;
             Website = website;
-            DateInsert = dateInsert ?? DateTime.UtcNow;
-            DateUpdate = dateUpdate ?? DateTime.UtcNow;
+            DateInsert = dateInsert;
+            DateUpdate = dateUpdate;
             Status = status;
             PictureUrl = pictureUrl;
             Processing = processing;

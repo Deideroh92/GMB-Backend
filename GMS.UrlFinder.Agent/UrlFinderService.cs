@@ -68,7 +68,7 @@ namespace GMS.Url.Agent
         private static void ValidateUrl(string url, DbLib dbLib, string textSearch) {
             try {
                 if (!dbLib.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(url))) {
-                    using DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, DateTime.UtcNow, textSearch, DateTime.UtcNow, ToolBox.ComputeMd5Hash(url));
+                    using DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, textSearch, DateTime.UtcNow, ToolBox.ComputeMd5Hash(url));
                     dbLib.CreateBusinessUrl(businessUrl);
                 }
             } catch (Exception ex) {

@@ -15,7 +15,7 @@
         /// <param name="score"></param>
         /// <param name="nbReviews"></param>
         /// <param name="dateInsert"></param>
-        public DbBusinessScore(string idEtab, float? score, int? nbReviews, DateTime? dateInsert) {
+        public DbBusinessScore(string idEtab, float? score, int? nbReviews, DateTime? dateInsert = null) {
             IdEtab = idEtab;
             Score = score;
             NbReviews = nbReviews;
@@ -28,7 +28,7 @@
         /// Checking if Business Score is valid.
         /// </summary>
         public void CheckValidity() {
-            if (Score != null && NbReviews == null || NbReviews != null && Score == null)
+            if ((Score != null && NbReviews == null) || (NbReviews != null && Score == null))
                 Score = null;
         }
         #endregion

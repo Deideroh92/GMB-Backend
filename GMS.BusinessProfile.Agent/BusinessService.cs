@@ -191,8 +191,8 @@ namespace GMS.Business.Agent
 
             idEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
             guid ??= Guid.NewGuid().ToString("N");
-            DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, tel, website, DateTime.UtcNow, DateTime.UtcNow, status, img);
-            DbBusinessScore? dbBusinessScore = new(idEtab, score, reviews, DateTime.UtcNow);
+            DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, tel, website, DateTime.UtcNow, status, img);
+            DbBusinessScore? dbBusinessScore = new(idEtab, score, reviews);
             return (dbBusinessProfile, dbBusinessScore);
         }
         #endregion
@@ -242,7 +242,7 @@ namespace GMS.Business.Agent
 
             bool replied = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText));
 
-            return new DbBusinessReview(idEtab, idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, DateTime.UtcNow);
+            return new DbBusinessReview(idEtab, idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow);
         }
 
 
