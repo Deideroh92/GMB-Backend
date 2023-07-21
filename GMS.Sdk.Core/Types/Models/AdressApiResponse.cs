@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace GMS.Sdk.Core.Models
+namespace GMS.Sdk.Core.Types.Models
 {
     public class AddressApiResponse
     {

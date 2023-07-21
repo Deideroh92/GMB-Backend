@@ -1,6 +1,6 @@
 ﻿using OpenQA.Selenium;
 
-namespace GMS.Sdk.Core.Models
+namespace GMS.Sdk.Core.Types.Models
 {
     public class XPathDriver
     {

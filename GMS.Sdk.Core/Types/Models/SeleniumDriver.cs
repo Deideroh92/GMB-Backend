@@ -5,10 +5,11 @@ using SeleniumExtras.WaitHelpers;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 
-namespace GMS.Sdk.Core.Models
+namespace GMS.Sdk.Core.Types.Models
 {
 
-    public class SeleniumDriver : IDisposable {
+    public class SeleniumDriver : IDisposable
+    {
         public IWebDriver WebDriver { get; set; }
 
         #region Local
@@ -17,14 +18,18 @@ namespace GMS.Sdk.Core.Models
         /// Create an instance of Selenium Driver.
         /// </summary>
         /// <exception cref="Exception"></exception>
-        public SeleniumDriver() {
-            try {
+        public SeleniumDriver(bool headless = true)
+        {
+            try
+            {
                 ChromeOptions chromeOptions = new();
-                chromeOptions.AddArguments("--headless=new");
+                //if(headless) chromeOptions.AddArguments("--headless=new");
                 chromeOptions.AddArguments("--lang=fr");
                 new DriverManager().SetUpDriver(new ChromeConfig());
                 WebDriver = new ChromeDriver(chromeOptions);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 throw new Exception("Failed initializing driver");
             }
         }
@@ -32,7 +37,8 @@ namespace GMS.Sdk.Core.Models
         /// <summary>
         /// Accepting the cookies from the google cookie page.
         /// </summary>
-        public void AcceptCookies() {
+        public void AcceptCookies()
+        {
 
             // Locating button and scrolling to it.
             ((IJavaScriptExecutor)WebDriver).ExecuteScript("arguments[0].scrollIntoView(true);", ToolBox.FindElementSafe(WebDriver, new List<By>(XPathDriver.acceptCookies)));
@@ -48,30 +54,38 @@ namespace GMS.Sdk.Core.Models
         /// Navigate to url.
         /// </summary>
         /// <param name="url"></param>
-        public void GetToPage(string url) {
-            try {
+        public void GetToPage(string url)
+        {
+            try
+            {
                 // Navigate to page
                 WebDriver.Navigate().GoToUrl(url);
                 Thread.Sleep(2000);
                 AcceptCookies();
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 System.Diagnostics.Debug.WriteLine("Couldn't get to page.");
             }
         }
 
-        public void Dispose() {
+        public void Dispose()
+        {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing) {
-            if (disposing) {
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
                 WebDriver?.Quit();
                 WebDriver?.Dispose();
             }
         }
 
-        ~SeleniumDriver() {
+        ~SeleniumDriver()
+        {
             Dispose(false);
         }
 

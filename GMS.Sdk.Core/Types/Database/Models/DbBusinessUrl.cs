@@ -1,16 +1,18 @@
-﻿namespace GMS.Sdk.Core.DbModels {
+﻿namespace GMS.Sdk.Core.Types.Database.Models
+{
     #region Enums
-    public enum UrlState {
+    public enum UrlState
+    {
         NEW,
         PROCESSING,
         UPDATED,
-        TEST,
         NO_CATEGORY,
         DELETED
     }
     #endregion
 
-    public class DbBusinessUrl {
+    public class DbBusinessUrl
+    {
         public long Id { get; set; }
         public string Guid { get; set; }
         public string Url { get; set; }
@@ -31,7 +33,8 @@
         /// <param name="textSearch"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="urlEncoded"></param>
-        public DbBusinessUrl(string guid, string url, string? textSearch, DateTime? dateUpdate, string urlEncoded, UrlState state = UrlState.NEW, DateTime? dateInsert = null) {
+        public DbBusinessUrl(string guid, string url, string? textSearch, DateTime? dateUpdate, string urlEncoded, UrlState state = UrlState.NEW, DateTime? dateInsert = null)
+        {
             Guid = guid;
             Url = url;
             DateInsert = dateInsert;

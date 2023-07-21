@@ -1,7 +1,9 @@
-﻿namespace GMS.Sdk.Core.DbModels {
+﻿namespace GMS.Sdk.Core.Types.Database.Models
+{
     #region Enums
 
-    public enum BusinessStatus {
+    public enum BusinessStatus
+    {
         OPEN,
         TEMPORARLY_CLOSED,
         CLOSED,
@@ -10,7 +12,8 @@
 
     #endregion
 
-    public class DbBusinessProfile {
+    public class DbBusinessProfile
+    {
         public long Id { get; set; }
         public string IdEtab { get; set; }
         public string FirstGuid { get; set; }
@@ -24,7 +27,7 @@
         public float? Lat { get; set; }
         public float? Lon { get; set; }
         public string? IdBan { get; set; }
-        public string? StreetNumber { get; set; } 
+        public string? StreetNumber { get; set; }
         public string? AddressType { get; set; }
         public string? Tel { get; set; }
         public string? Website { get; set; }
@@ -56,7 +59,8 @@
         /// <param name="dateInsert"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="status"></param>
-        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber,  string? tel, string? website, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, int processing = 0, DateTime? dateInsert = null) {
+        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber, string? tel, string? website, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, int processing = 0, DateTime? dateInsert = null)
+        {
             IdEtab = idEtab;
             FirstGuid = firstGuid;
             Name = name;
@@ -82,7 +86,8 @@
             CheckValidity();
         }
 
-        public void CheckValidity() {
+        public void CheckValidity()
+        {
             if (IdEtab == null)
                 throw new NullReferenceException("No IdEtab for this business");
             if (Name == null)

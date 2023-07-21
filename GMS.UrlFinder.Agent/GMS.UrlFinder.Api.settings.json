@@ -1,0 +1,59 @@
+{
+  "Serilog": {
+    "Using": [ "Serilog.Exceptions", "Serilog", "Serilog.Sinks.Console" ],
+    "MinimumLevel": {
+      "Default": "Debug",
+      "Override": {
+        "Microsoft": "Error",
+        "System": "Error"
+      }
+    },
+    "Enrich": [ "FromLogContext", "WithExceptionDetails", "WithThreadId" ],
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{ThreadId}] {EventType:x8} {Level:u3} {Caller}     {Message:lj}{NewLine}"
+        }
+      }
+    ]
+  },
+  "AppConfiguration": {
+    "appName": "GMS.UrlFinder.Agent",
+    "hosting": {
+      "k8s": true,
+      "baseUrl": "/url-finder-service/api/",
+      "replicaMin": 2,
+      "replicaMax": 3,
+      "nodeRoutingGroup": [ "vm" ],
+      "fileSystemMounting": false,
+      "resources": {
+        "requests": {
+          "cpu": "200m",
+          "ram": "200M"
+        },
+        "limits": {
+          "cpu": "300m",
+          "ram": "300M"
+        }
+      }
+    },
+    "corsOrigins": [ "https://api.vdm.fr", "https://apiv3.vdm.fr", "https://apiv3-test.vdm.fr", "https://api-test.vdm.fr", "https://vdmalnginxp1.vdm.local", "https://studiocanal-digitalfactory.vdm.fr", "https://snd-digitalfactory.vdm.fr", "https://fe-digitalfactory.vdm.fr", "https://test-digitalfactory.vdm.fr", "https://demo-digitalfactory.vdm.fr", "https://gaumont-digitalfactory.vdm.fr", "https://prebuildenv-digitalfactory.vdm.fr", "http://localhost:9514", "http://localhost:51215", "http://localhost:3000", "https://localhost:44360", "https://adfs.m6.fr" ],
+    "Settings": {
+      "platformId": 3,
+      "sessionDurationInHours": 12,
+      "metadataAddress": "https://adfs.m6.fr/FederationMetadata/2007-06/FederationMetadata.xml",
+      "wtrealm": "https://apiv3.vdm.fr/adfs-service/api/login"
+    }
+  },
+  "profiles": {
+    "GMS.UrlFinder.Agent": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:54639;http://localhost:54640"
+    }
+  }
+}

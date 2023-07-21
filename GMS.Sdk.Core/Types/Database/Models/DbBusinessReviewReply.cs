@@ -1,5 +1,7 @@
-﻿namespace GMS.Sdk.Core.DbModels {
-    public class DbBusinessReviewReply {
+﻿namespace GMS.Sdk.Core.Types.Database.Models
+{
+    public class DbBusinessReviewReply
+    {
         public long Id { get; set; }
         public string IdReview { get; set; }
         public string ReviewText { get; set; }
@@ -18,7 +20,8 @@
         /// <param name="reviewDate"></param>
         /// <param name="dateInsert"></param>
         /// <param name="dateUpdate"></param>
-        public DbBusinessReviewReply(string reviewText, string idReview, string? reviewGoogleDate, DateTime? reviewDate, DateTime? dateInsert, DateTime? dateUpdate) {
+        public DbBusinessReviewReply(string reviewText, string idReview, string? reviewGoogleDate, DateTime? reviewDate, DateTime? dateInsert, DateTime? dateUpdate)
+        {
             ReviewText = reviewText;
             IdReview = idReview;
             ReviewGoogleDate = reviewGoogleDate;

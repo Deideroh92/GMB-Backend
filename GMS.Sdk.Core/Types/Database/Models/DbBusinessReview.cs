@@ -1,5 +1,9 @@
-﻿namespace GMS.Sdk.Core.DbModels {
-    public class DbBusinessReview {
+﻿using GMS.Sdk.Core.Types.Models;
+
+namespace GMS.Sdk.Core.Types.Database.Models 
+{
+    public class DbBusinessReview
+    {
         public long Id { get; set; }
         public string IdEtab { get; set; }
         public string IdReview { get; set; }
@@ -29,7 +33,8 @@
         /// <param name="dateInsert"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="reviewReply"></param>
-        public DbBusinessReview(string idEtab, string idReview, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null) {
+        public DbBusinessReview(string idEtab, string idReview, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null)
+        {
             IdEtab = idEtab;
             IdReview = idReview;
             User = user;
@@ -43,7 +48,8 @@
             ReviewReply = reviewReply;
         }
 
-        public bool Equals(DbBusinessReview other) {
+        public bool Equals(DbBusinessReview other)
+        {
             return other.ReviewText == ReviewText && other.Score == Score && other.User.Name == User.Name && other.User.NbReviews == User.NbReviews && other.User.LocalGuide == User.LocalGuide && other.ReviewReplied == ReviewReplied;
         }
         #endregion

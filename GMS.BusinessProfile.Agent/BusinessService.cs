@@ -1,127 +1,30 @@
-﻿using GMS.Sdk.Core.DbModels;
-using GMS.Sdk.Core.Models;
-using OpenQA.Selenium;
+﻿using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Text.RegularExpressions;
 using SeleniumExtras.WaitHelpers;
 using GMS.Sdk.Core;
 using Serilog;
+using GMS.Sdk.Core.Types.Models;
+using GMS.Business.Api.Models;
+using GMS.Sdk.Core.Types.Database.Models;
+using System.Collections.Generic;
 
-namespace GMS.Business.Agent
+namespace GMS.Business.Api
 {
     /// <summary>
     /// Business Service.
     /// </summary>
     public class BusinessService {
-        public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
-
-        #region Local
-
-        /// <summary>
-        /// Start the Service.
-        /// </summary>
-        /// <param name="request"></param>
-        /// <param name="threadNumber"></param>
-        /// <exception cref="Exception"></exception>
-        public static async Task StartAsync(BusinessAgentRequest request, int? threadNumber = 0) {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
-
-            Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("logs/log-{Date}.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
-            .CreateLogger();
-
-            using DbLib db = new();
-            using SeleniumDriver driver = new();
-
-            int count = 0 ;
-
-            DateTime time = DateTime.UtcNow;
-
-            foreach (DbBusinessAgent business in request.BusinessList) {
-                try {
-
-                    ToolBox.BreakingHours();
-
-                    count++;
-
-                    // Get business profile infos from Google.
-                    (DbBusinessProfile? profile, DbBusinessScore? score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, business.Url, business.Guid, business.IdEtab);
-
-                    if (request.Operation == Operation.FILE) {
-                        if (profile == null) {
-                            using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber.ToString() + ".txt");
-                            operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
-                            continue;
-                        }
-                        if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(driver.WebDriver.Url))) {
-                            DbBusinessUrl businessUrl = new(profile.FirstGuid, driver.WebDriver.Url, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(driver.WebDriver.Url), UrlState.UPDATED);
-                            db.CreateBusinessUrl(businessUrl);
-                        }
-                    }
-                    
-                    // No business found at this url.
-                    if (profile == null) {
-                        if (request.Operation == Operation.URL_STATE && business.Guid != null)
-                            db.DeleteBusinessUrlByGuid(business.Guid);
-                        else {
-                            if (business.IdEtab != null) {
-                                db.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
-                                db.UpdateBusinessProfileProcessingState(business.IdEtab, 0);
-                            }
-                        }   
-                        continue;
-                    }
-                    
-                    // Update or insert Business Profile if exist or not.
-                    if (request.Operation == Operation.CATEGORY || db.CheckBusinessProfileExist(profile.IdEtab))
-                        db.UpdateBusinessProfile(profile);
-                    else
-                        db.CreateBusinessProfile(profile);
-
-                    // Insert Business Score if have one.
-                    if (score?.Score != null)
-                        db.CreateBusinessScore(score);
-                    
-                    // Getting reviews if option checked.s
-                    if (request.GetReviews && request.DateLimit != null && score?.Score != null)
-                        GetReviews(profile, request.DateLimit, db, driver);
-
-                    // Update Url state when finished.
-                    if (request.Operation == Operation.URL_STATE)
-                        db.UpdateBusinessUrlState(profile.FirstGuid, UrlState.UPDATED);
-
-                    // Update Business State when finished
-                    db.UpdateBusinessProfileProcessingState(profile.IdEtab, 0);
-
-                    if (request.Operation == Operation.FILE) {
-                        using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber.ToString() + ".txt");
-                        operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + profile.Name + "$$" + profile.GoogleAddress + "$$" + profile.IdEtab + "$$" + driver.WebDriver.Url);
-                    }
-                }
-                catch (Exception e) {
-                    Log.Error(e, "An exception occurred: {Message}");
-                }
-            }
-
-            Log.Information(DateTime.UtcNow.ToString("G") + " - Thread number " + threadNumber + " finished.");
-            Log.Information("Treated " + count + " businesses in " + (DateTime.UtcNow - time).ToString("g") + ".\n");
-            Log.CloseAndFlush();
-        }
-        #endregion
 
         #region Profile & Score
         /// <summary>
         /// Getting all business profile's infos.
         /// </summary>
         /// <param name="driver"></param>
-        /// <param name="url"></param>
-        /// <param name="guid"></param>
-        /// <param name="idEtab"></param>
+        /// <param name="request"></param>
         /// <returns>Business Profile and a Business Score if any</returns>
-        /// <exception cref="Exception"></exception>
-        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, string url, string? guid = null, string? idEtab = null) {
+        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, GetBusinessProfileRequest request) {
             // Initialization of all variables
             int? reviews = null;
             string? address = null;
@@ -135,9 +38,10 @@ namespace GMS.Business.Agent
             string? streetNumber = null;
             BusinessStatus status = BusinessStatus.OPEN;
 
-            driver.GetToPage(url);
+            driver.GetToPage(request.Url);
 
             try {
+                var test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text;
                 string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
                 string? googleAddress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)?.GetAttribute("aria-label")?.Replace("Adresse:", "")?.Trim();
                 string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test)?.GetAttribute("src")?.Trim();
@@ -156,6 +60,8 @@ namespace GMS.Business.Agent
 
                 score ??= parsedScore ?? float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)?.Text ?? "0");
 
+                if (score == 0 && float.TryParse((ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")).AsSpan(0, 3), out float parsedScore2))
+                    score = parsedScore2;
 
                 string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status)?.Text.Trim();
                 if (status_tmp != null) {
@@ -188,78 +94,65 @@ namespace GMS.Business.Agent
                     }
                 }
 
-                idEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
-                guid ??= Guid.NewGuid().ToString("N");
-                DbBusinessProfile dbBusinessProfile = new(idEtab, guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, tel, website, DateTime.UtcNow, status, img);
-                DbBusinessScore? dbBusinessScore = new(idEtab, score, reviews);
+                request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
+                request.Guid ??= Guid.NewGuid().ToString("N");
+                DbBusinessProfile dbBusinessProfile = new(request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, tel, website, DateTime.UtcNow, status, img);
+                DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
                 return (dbBusinessProfile, dbBusinessScore);
             }
-            catch (Exception) {
-                throw new Exception("Couldn't get business infos (profile or score)");
+            catch (Exception e) {
+                throw new Exception($"Couldn't get business infos (profile or score) with id etab = [{request.IdEtab}] and guid = [{request.Guid}] and url = [{request.Url}]", e);
             }
         }
         #endregion
 
         #region Reviews
         /// <summary>
-        /// Getting all reviews
+        /// Getting reviews for business.
         /// </summary>
-        /// <param name="reviewWebElement"></param>
         /// <param name="idEtab"></param>
         /// <param name="dateLimit"></param>
-        /// <returns>Business Review</returns>
-        /// <exception cref="Exception"></exception>
-        public static DbBusinessReview? GetBusinessReviewsInfosFromReviews(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit) {
+        /// <param name="driver"></param>
+        public static List<DbBusinessReview>? GetReviews(string idEtab, DateTime? dateLimit, SeleniumDriver driver) {
+
             try {
-                string idReview = reviewWebElement.GetAttribute("data-review-id")?.Trim() ?? throw new Exception("No review id");
-
-                string? reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate)?.Text?.Trim();
-                DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
-
-                if (reviewGoogleDate == null || (dateLimit.HasValue && reviewDate < dateLimit.Value))
-                    return null;
-
-                string userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName)?.GetAttribute("aria-label")?.Replace("Photo de", "").Trim() ?? "";
-
-                int reviewScore = ToolBox.FindElementsSafe(reviewWebElement, XPathReview.score).Count;
-
-                int userNbReviews = 1;
-                string? userNbReviewsText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)?.Text?.Replace("avis", "").Replace("·", "").Replace("Local Guide", "").Replace(" ", "").Trim();
-                if (!string.IsNullOrEmpty(userNbReviewsText) && int.TryParse(userNbReviewsText, out int parsedUserNbReviews)) {
-                    userNbReviews = parsedUserNbReviews;
-                }
-
-                string? reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
-                if (reviewText != null && reviewText.EndsWith(" Plus")) {
-                    try {
-                        var test = ToolBox.FindElementSafe(reviewWebElement, XPathReview.plusButton);
-                        test.Click();
-                        Thread.Sleep(1000);
-                        reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
-                    } catch {
-                        reviewText = reviewText.TrimEnd(" Plus".ToCharArray());
-                    }
-                }
-
-                bool localGuide = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)) && ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Contains('·');
-                GoogleUser user = new(userName, userNbReviews, localGuide);
-
-                bool replied = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText));
-
-                return new DbBusinessReview(idEtab, idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow);
-            } catch (Exception) {
-                throw new Exception("Couldn't get review info from a review element");
+                WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(2));
+                IWebElement toReviewPage = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage)));
+                toReviewPage.Click();
+            } catch (Exception e) {
+                throw new Exception("Couldn't get to review pages", e);
             }
+
+            Thread.Sleep(2000);
+
+            // Sorting reviews.
+            SortReviews(driver.WebDriver);
+
+            Thread.Sleep(1000);
+
+            // Getting reviews.
+            ReadOnlyCollection<IWebElement>? reviews = GetWebElements(driver.WebDriver, dateLimit);
+
+            List<DbBusinessReview>? businessReviews = null;
+            foreach (IWebElement review in reviews) {
+                try {
+                    DbBusinessReview? businessReview = GetReviewFromGooglePage(review, idEtab, dateLimit);
+                    if (businessReview == null)
+                        continue;
+                    businessReviews.Add(businessReview);
+                } catch (Exception e) {
+                    Log.Error($"Couldn't treat a review : {e.Message}", e);
+                }
+            }
+            return businessReviews;
         }
-
-
         /// <summary>
         /// Scroll to get all review list.
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="dateLimit"></param>
         /// <returns>Review list</returns>
-        public static ReadOnlyCollection<IWebElement>? GetReviewsFromGooglePage(IWebDriver driver, DateTime? dateLimit) {
+        private static ReadOnlyCollection<IWebElement>? GetWebElements(IWebDriver driver, DateTime? dateLimit) {
             try {
                 ReadOnlyCollection<IWebElement>? reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
 
@@ -297,18 +190,64 @@ namespace GMS.Business.Agent
                 if (e.Message.Contains("javascript error: Cannot read properties of null (reading 'parentNode')")) {
                     return null;
                 } else {
-                    throw new Exception("Error occurred while getting reviews from the Google page");
+                    throw new Exception($"Error getting reviews from the Google page : {e.Message}", e);
                 }
-            } 
+            }
         }
+        /// <summary>
+        /// Getting all reviews
+        /// </summary>
+        /// <param name="reviewWebElement"></param>
+        /// <param name="idEtab"></param>
+        /// <param name="dateLimit"></param>
+        /// <returns>Business Review</returns>
+        private static DbBusinessReview? GetReviewFromGooglePage(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit) {
+            try {
+                string idReview = reviewWebElement.GetAttribute("data-review-id")?.Trim() ?? throw new Exception("No review id");
 
+                string? reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate)?.Text?.Trim();
+                DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
 
+                if (reviewGoogleDate == null || (dateLimit.HasValue && reviewDate < dateLimit.Value))
+                    return null;
+
+                string userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName)?.GetAttribute("aria-label")?.Replace("Photo de", "").Trim() ?? "";
+
+                int reviewScore = ToolBox.FindElementsSafe(reviewWebElement, XPathReview.score).Count;
+
+                int userNbReviews = 1;
+                string? userNbReviewsText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)?.Text?.Replace("avis", "").Replace("·", "").Replace("Local Guide", "").Replace(" ", "").Trim();
+                if (!string.IsNullOrEmpty(userNbReviewsText) && int.TryParse(userNbReviewsText, out int parsedUserNbReviews)) {
+                    userNbReviews = parsedUserNbReviews;
+                }
+
+                string? reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
+                if (reviewText != null && reviewText.EndsWith("Plus")) {
+                    try {
+                        var test = ToolBox.FindElementSafe(reviewWebElement, XPathReview.plusButton);
+                        test.Click();
+                        Thread.Sleep(1000);
+                        reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
+                    } catch {
+                        reviewText = reviewText.TrimEnd("Plus".ToCharArray());
+                    }
+                }
+
+                bool localGuide = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)) && ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Contains('·');
+                GoogleUser user = new(userName, userNbReviews, localGuide);
+
+                bool replied = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText));
+
+                return new DbBusinessReview(idEtab, idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow);
+            } catch (Exception) {
+                throw new Exception("Couldn't get review info from a review element");
+            }
+        }
         /// <summary>
         /// Sort reviews in ascending date order.
         /// </summary>
         /// <param name="driver"></param>
-        /// <exception cref="Exception"></exception>
-        public static void SortReviews(IWebDriver driver) {
+        private static void SortReviews(IWebDriver driver) {
             try {
                 WebDriverWait wait = new(driver, TimeSpan.FromSeconds(5));
 
@@ -317,67 +256,10 @@ namespace GMS.Business.Agent
 
                 IWebElement sortButton2 = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.sortReviews2)));
                 sortButton2.Click();
-            } catch(Exception) {
-                throw new Exception("Couldn't sort reviews");
-            }
-        }
-
-        /// <summary>
-        /// Getting reviews for business.
-        /// </summary>
-        /// <param name="businessProfile"></param>
-        /// <param name="dateLimit"></param>
-        /// <param name="db"></param>
-        /// <param name="driver"></param>
-        /// <exception cref="Exception"></exception>
-        public static void GetReviews(DbBusinessProfile businessProfile, DateTime? dateLimit, DbLib db, SeleniumDriver driver) {
-
-            try
-            {
-                WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(2));
-                IWebElement toReviewPage = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage)));
-                toReviewPage.Click();
-            }
-            catch (Exception) {
-                throw new Exception("Couldn't get to review pages");
-            }
-
-            Thread.Sleep(2000);
-
-            // Sorting reviews.
-            SortReviews(driver.WebDriver);
-
-            Thread.Sleep(1000);
-
-            // Getting reviews.
-            ReadOnlyCollection<IWebElement>? reviews = GetReviewsFromGooglePage(driver.WebDriver, dateLimit);
-
-            if (reviews == null) {
-                return;
-            }
-
-            foreach (IWebElement review in reviews) {
-                DbBusinessReview? businessReview = GetBusinessReviewsInfosFromReviews(review, businessProfile.IdEtab, dateLimit);
-                if (businessReview == null)
-                    continue;
-                DbBusinessReview? dbBusinessReview = db.GetBusinessReview(businessProfile.IdEtab, businessReview.IdReview);
-
-                if (dbBusinessReview == null) {
-                    db.CreateBusinessReview(businessReview);
-                    continue;
-                }
-
-                if (dbBusinessReview.ReviewText == "") dbBusinessReview.ReviewText = null;
-
-                db.UpdateBusinessReview(businessReview);
-
-                /*if (!businessReview.Equals(dbBusinessReview)) {
-                    db.UpdateBusinessReview(businessReview);
-                    continue;
-                }*/
+            } catch(Exception e) {
+                throw new Exception("Couldn't sort reviews", e);
             }
         }
         #endregion
-        
     }
 }

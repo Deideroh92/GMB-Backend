@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GMS.BusinessProfile.Agent\GMS.Business.Agent.csproj" />
+    <ProjectReference Include="..\GMS.BusinessProfile.Agent\GMS.Business.Api.csproj" />
     <ProjectReference Include="..\GMS.Sdk.Core\GMS.Sdk.Core.csproj" />
-    <ProjectReference Include="..\GMS.UrlFinder.Agent\GMS.UrlFinder.Agent.csproj" />
+    <ProjectReference Include="..\GMS.UrlFinder.Agent\GMS.Url.Api.csproj" />
   </ItemGroup>
 
 </Project>

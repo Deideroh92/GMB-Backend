@@ -3,8 +3,9 @@ using System.Security.Cryptography;
 using System.Text;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
-using GMS.Sdk.Core.Models;
 using System.Security.Authentication;
+using GMS.Sdk.Core.Types.Models;
+using GMS.Sdk.Core.Types.Database.Models;
 
 namespace GMS.Sdk.Core
 {
@@ -185,22 +186,41 @@ namespace GMS.Sdk.Core
                     continue;
                 }
             }
-
             return null;
+        }
+
+        /// <summary>
+        /// Insert Api adress inside Business profile.
+        /// </summary>
+        /// <param name="business"></param>
+        /// <param name="address"></param>
+        /// <returns>Business with address updated</returns>
+        public static DbBusinessProfile InsertApiAddressInBusiness(DbBusinessProfile business, AddressApiResponse address) {
+            business.Lon = (float?)(address.Features[0]?.Geometry?.Coordinates[0]);
+            business.Lat = (float?)(address.Features[0]?.Geometry?.Coordinates[1]);
+            business.City = address.Features[0]?.Properties?.City;
+            business.PostCode = address.Features[0]?.Properties?.Postcode;
+            business.CityCode = address.Features[0]?.Properties?.CityCode;
+            business.Address = address.Features[0]?.Properties?.Street;
+            business.AddressType = address.Features[0]?.Properties?.PropertyType;
+            business.IdBan = address.Features[0]?.Properties?.Id;
+            business.StreetNumber = address.Features[0]?.Properties?.HouseNumber;
+
+            return business;
         }
 
 
         /// <summary>
-        /// Breaking hours, when the program needs to stop.
+        /// Breaking hours, when the program needs to pause.
         /// </summary>
         public static void BreakingHours() {
-            DateTime actualTime = DateTime.Now;
+            DateTime actualTime = DateTime.UtcNow;
 
             // Breaking hours
-            TimeSpan heureDebut = new(22, 0, 0); // 22h00
-            TimeSpan heureFin = new(1, 0, 0); // 3AM
+            TimeSpan heureDebut = new(1, 0, 0); // 1AM
+            TimeSpan heureFin = new(3, 0, 0); // 3AM
 
-            while (actualTime.TimeOfDay >= heureDebut || actualTime.TimeOfDay < heureFin) {
+            while (actualTime.TimeOfDay >= heureDebut && actualTime.TimeOfDay < heureFin) {
                 // Pausing program for 1 hour
                 Thread.Sleep(3600000);
                 actualTime = DateTime.Now;
