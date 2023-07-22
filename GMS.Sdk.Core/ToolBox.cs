@@ -70,7 +70,7 @@ namespace GMS.Sdk.Core
         /// Same as FindElement only returns null when not found instead of an exception.
         /// </summary>
         /// <param name="by">The search string for finding element</param>
-        /// <returns>Returns element or null if not found</returns>
+        /// <returns>Returns element or null if not found.</returns>
         public static IWebElement? FindElementSafe(IWebDriver driver, List<By> by)
         {
             foreach (By item in by)
