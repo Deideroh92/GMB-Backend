@@ -122,7 +122,6 @@ namespace GMB.Tests
             List<BusinessAgent> businessList = new();
             List<Task> tasks = new();
             using DbLib db = new();
-            int nbThreads = 1;
             int threadNumber = 0;
 
             int entries = 10;
@@ -178,12 +177,30 @@ namespace GMB.Tests
             using StreamWriter sw2 = File.AppendText(pathLogFile);
             sw2.WriteLine("\n\nStarting selenium process !\n\n");
 
-            foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads)) {
+            int maxConcurrentThreads = 10;
+            int batchSize = 100;
+            int totalChunks = (businessList.Count + batchSize - 1) / batchSize;
+            SemaphoreSlim semaphore = new(maxConcurrentThreads);
+
+            for (int chunkNumber = 0; chunkNumber < totalChunks; chunkNumber++)
+            {
                 threadNumber++;
+                await semaphore.WaitAsync(); // Wait until there's an available slot to run
                 Task newThread = Task.Run(async () =>
                 {
-                    BusinessAgentRequest request = new(operationType, getReviews, new List<BusinessAgent>(chunk), reviewsDate);
-                    await BusinessController.Scraper(request, threadNumber).ConfigureAwait(false);
+                    try
+                    {
+                        int startIndex = chunkNumber * batchSize;
+                        int endIndex = Math.Min(startIndex + batchSize, businessList.Count);
+
+                        List<BusinessAgent> chunk = businessList.GetRange(startIndex, endIndex - startIndex);
+
+                        BusinessAgentRequest request = new(operationType, getReviews, chunk, reviewsDate);
+                        await BusinessController.Scraper(request, threadNumber).ConfigureAwait(false);
+                    } finally
+                    {
+                        semaphore.Release(); // Release the slot when the task is done
+                    }
                 });
                 tasks.Add(newThread);
             }

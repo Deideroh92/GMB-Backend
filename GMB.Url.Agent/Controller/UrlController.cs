@@ -92,7 +92,7 @@ namespace GMB.Url.Api
                     urls = UrlService.GetUrlsFromGooglePage(driver, url);
                 }
                 catch (Exception e) {
-
+                    Log.Error(e, $"An exception occurred while searching for business urls with search: [{request.TextSearch + "+" + location}] : {e.Message}");
                 }
             }
             return urls;
