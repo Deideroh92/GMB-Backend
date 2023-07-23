@@ -14,6 +14,7 @@ namespace GMB.Business.Api.Controllers
     /// </summary>
     public class BusinessController {
         public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
+        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Url.Agent\logs";
 
         #region Scraper
 
@@ -26,7 +27,7 @@ namespace GMB.Business.Api.Controllers
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
             Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("logs/log-{Date}.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
+            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
             .CreateLogger();
 
             using DbLib db = new();

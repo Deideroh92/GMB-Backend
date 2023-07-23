@@ -4,6 +4,7 @@ using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
+using GMB.Url.Api;
 
 namespace GMB.Tests
 {
@@ -12,10 +13,6 @@ namespace GMB.Tests
 
         [TestMethod]
         public void Main() {
-            using DbLib db = new();
-
-            var test = db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash("https://www.google.com/maps/place/Sellola/@42.0937792,9.1015375,17z/data=!4m6!3m5!1s0x12da03913f99db3f:0xfe3aa5956dd1ba29!8m2!3d42.0937792!4d9.1015375!16s%2Fg%2F11hzpqbhwd?entry=ttu"));
-
             return;
         }
 

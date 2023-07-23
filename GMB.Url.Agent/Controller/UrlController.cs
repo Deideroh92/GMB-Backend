@@ -13,6 +13,8 @@ namespace GMB.Url.Api
     /// </summary>
     public class UrlController {
 
+        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Url.Agent\logs";
+
         /// <summary>
         /// Start the URL Scraper.
         /// </summary>
@@ -21,7 +23,7 @@ namespace GMB.Url.Api
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
             Log.Logger = new LoggerConfiguration()
-            .WriteTo.File("logs/log-{Date}.txt", rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
+            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
             .CreateLogger();
 
             using DbLib db = new();

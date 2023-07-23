@@ -10,6 +10,7 @@ using GMB.Business.Api.Models;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Url.Api.Models;
 using GMB.Business.Api.Controllers;
+using Serilog;
 
 namespace GMB.Tests
 {
@@ -18,7 +19,7 @@ namespace GMB.Tests
 
         public static readonly string pathUrlKnownFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
         public static readonly string pathUnknownBusinessFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\unknown_url.txt";
-        public static readonly string pathLogFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Logs\Business-Agent\log-" + DateTime.Today.ToString("MM-dd-yyyy") + ".txt";
+        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Tests\logs";
 
         #region Url
         /// <summary>
@@ -130,6 +131,10 @@ namespace GMB.Tests
             bool getReviews = true;
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
 
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
+            .CreateLogger();
+
             switch (operationType) {
                 case Operation.OTHER:
                     string? brand = null;
@@ -150,8 +155,7 @@ namespace GMB.Tests
                             BusinessAgent? business = db.GetBusinessByUrlEncoded(ToolBox.ComputeMd5Hash(url));
 
                             if (business == null) {
-                                using StreamWriter sw = File.AppendText(pathLogFile);
-                                sw.WriteLine(url + "\n");
+                                Log.Error(url);
                                 continue;
                             }
 
@@ -173,9 +177,6 @@ namespace GMB.Tests
 
                 default: break;
             }
-
-            using StreamWriter sw2 = File.AppendText(pathLogFile);
-            sw2.WriteLine("\n\nStarting selenium process !\n\n");
 
             int maxConcurrentThreads = 10;
             int batchSize = 100;

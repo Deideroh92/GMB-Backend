@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.Url.Api", "GMB.Url.Agen
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.Tests", "GMB.Tests\GMB.Tests.csproj", "{B57BBAAF-7F69-469C-AC3A-42E6082BC100}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.Business.Api", "GMB.BusinessProfile.Agent\GMB.Business.Api.csproj", "{1503A1D7-A5DC-49C2-B2DB-F9A49D3DBA5A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.Business.Api", "GMB.Business.Agent\GMB.Business.Api.csproj", "{1503A1D7-A5DC-49C2-B2DB-F9A49D3DBA5A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
