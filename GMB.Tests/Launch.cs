@@ -23,7 +23,7 @@ namespace GMB.Tests
 
         #region Url
         /// <summary>
-        /// Launch URL Scraper
+        /// Launch URL Scanner
         /// </summary>
         [TestMethod]
         public void ThreadsUrlScraper() {
@@ -45,7 +45,7 @@ namespace GMB.Tests
                     await semaphore.WaitAsync(); // Wait until there's an available slot to run
                     try
                     {
-                        UrlController.Scraper(request);
+                        UrlController.Scanner(request);
                     } finally
                     {
                         semaphore.Release(); // Release the slot when the task is done
@@ -113,10 +113,10 @@ namespace GMB.Tests
                 new BusinessAgent(null, url.ToLower(), "e38c646bf09ccde19bb7002ba4b5ba69")
             };
             BusinessAgentRequest request = new(opertationType, getReviews, business, reviewsDate);
-            await BusinessController.Scraper(request, 1);
+            await BusinessController.Scanner(request, 1);
         }
         /// <summary>
-        /// Starting Scraper.
+        /// Starting Scanner.
         /// </summary>
         [TestMethod]
         public async Task ThreadsBusinessScraper() {
@@ -125,10 +125,10 @@ namespace GMB.Tests
             using DbLib db = new();
             int threadNumber = 0;
 
-            int entries = 10;
+            int entries = 100;
             int processing = 9;
             Operation operationType = Operation.OTHER;
-            bool getReviews = true;
+            bool getReviews = false;
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
 
             Log.Logger = new LoggerConfiguration()
@@ -140,7 +140,7 @@ namespace GMB.Tests
                     string? brand = null;
                     string? category = null;
                     CategoryFamily? categoryFamily = null;
-                    bool isNetwork = true;
+                    bool isNetwork = false;
                     bool isIndependant = false;
                     GetBusinessListRequest request = new(entries, processing, brand, category, categoryFamily, isNetwork, isIndependant);
                     businessList = db.GetBusinessAgentList(request);
@@ -178,8 +178,8 @@ namespace GMB.Tests
                 default: break;
             }
 
-            int maxConcurrentThreads = 10;
-            int batchSize = 100;
+            int maxConcurrentThreads = 3;
+            int batchSize = 5;
             int totalChunks = (businessList.Count + batchSize - 1) / batchSize;
             SemaphoreSlim semaphore = new(maxConcurrentThreads);
 
@@ -197,7 +197,7 @@ namespace GMB.Tests
                         List<BusinessAgent> chunk = businessList.GetRange(startIndex, endIndex - startIndex);
 
                         BusinessAgentRequest request = new(operationType, getReviews, chunk, reviewsDate);
-                        await BusinessController.Scraper(request, threadNumber).ConfigureAwait(false);
+                        await BusinessController.Scanner(request, threadNumber).ConfigureAwait(false);
                     } finally
                     {
                         semaphore.Release(); // Release the slot when the task is done

@@ -19,4 +19,8 @@
     <ProjectReference Include="..\GMB.Sdk.Core\GMB.Sdk.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="logs\" />
+  </ItemGroup>
+
 </Project>

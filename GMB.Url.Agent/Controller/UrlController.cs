@@ -13,13 +13,23 @@ namespace GMB.Url.Api
     /// </summary>
     public class UrlController {
 
-        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Url.Agent\logs";
+        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Url.Agent\logs\log";
+        public static void LogTest()
+        {
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
+            .CreateLogger();
 
+            Log.Error("This is an error");
+            Log.Information("This is an info");
+        }
+
+        #region Scanner
         /// <summary>
-        /// Start the URL Scraper.
+        /// Start the URL Scanner.
         /// </summary>
         /// <param name="request"></param>
-        public static void Scraper(UrlRequest request) {
+        public static void Scanner(UrlRequest request) {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
             Log.Logger = new LoggerConfiguration()
@@ -60,6 +70,7 @@ namespace GMB.Url.Api
             }
             Log.CloseAndFlush();
         }
+        #endregion
 
         /// <summary>
         /// Create a BU.

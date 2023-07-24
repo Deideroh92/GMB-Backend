@@ -37,13 +37,13 @@ namespace GMB.Url.Api
             foreach (IWebElement business in businessList) {
                 try {
                     string name = business.Text.Split('\n')[0].Replace("\r", "");
-                    string? url = ToolBox.FindElementSafe(business, new List<By> { By.XPath(".//a[contains(@aria-label, \"" + name + "\")]") })?.GetAttribute("href").Replace("?authuser=0&hl=fr&rclk=1", "");
+                    string? url = ToolBox.FindElementSafe(business, new List<By> { By.XPath(".//a[contains(@aria-label, \"" + name.Replace('\"', '\'') + "\")]") })?.GetAttribute("href").Replace("?authuser=0&hl=fr&rclk=1", "");
 
                     if (string.IsNullOrWhiteSpace(url))
                         continue;
                     urls.Add(url);
                 } catch (Exception e) {
-                    Log.Error(e, "An exception occurred while collection a business url: {Message}");
+                    Log.Error(e, $"An exception occurred while collection a business url: {e.Message}");
                 }
             }
             return urls;

@@ -14,16 +14,25 @@ namespace GMB.Business.Api.Controllers
     /// </summary>
     public class BusinessController {
         public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
-        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Business.Agent\logs";
+        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Business.Agent\logs\log";
 
-        #region Scraper
+        public static void LogTest()
+        {
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
+            .CreateLogger();
 
+            Log.Error("This is an error");
+            Log.Information("This is an info");
+        }
+
+        #region Scanner
         /// <summary>
-        /// Start the Scraper.
+        /// Start the Scanner.
         /// </summary>
         /// <param name="request"></param>
         /// <param name="threadNumber"></param>
-        public static async Task Scraper(BusinessAgentRequest request, int? threadNumber = 0) {
+        public static async Task Scanner(BusinessAgentRequest request, int? threadNumber = 0) {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
             Log.Logger = new LoggerConfiguration()
@@ -47,6 +56,8 @@ namespace GMB.Business.Api.Controllers
 
                     // Get business profile infos from Google.
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest);
+
+                    continue;
 
                     if (request.Operation == Operation.FILE) {
                         if (profile == null) {

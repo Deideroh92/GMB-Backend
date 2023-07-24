@@ -5,6 +5,7 @@ using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Url.Api;
+using GMB.Business.Api.Controllers;
 
 namespace GMB.Tests
 {
@@ -13,6 +14,8 @@ namespace GMB.Tests
 
         [TestMethod]
         public void Main() {
+            UrlController.LogTest();
+            BusinessController.LogTest();
             return;
         }
 

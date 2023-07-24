@@ -8,7 +8,6 @@ using Serilog;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Business.Api.Models;
 using GMB.Sdk.Core.Types.Database.Models;
-using System.Collections.Generic;
 
 namespace GMB.Business.Api
 {
@@ -60,7 +59,7 @@ namespace GMB.Business.Api
 
                 score ??= parsedScore ?? float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)?.Text ?? "0");
 
-                if (score == 0 && float.TryParse((ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")).AsSpan(0, 3), out float parsedScore2))
+                if (score == 0 && ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score)?.GetAttribute("aria-label") is string ariaLabel && float.TryParse(ariaLabel.AsSpan(0, Math.Min(3, ariaLabel.Length)), out float parsedScore2))
                     score = parsedScore2;
 
                 string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status)?.Text.Trim();

@@ -1,6 +1,6 @@
 {
   "profiles": {
-    "GMB.BusinessProfile.Agent": {
+    "GMB.Business.Agent": {
       "commandName": "Project",
       "launchBrowser": true,
       "environmentVariables": {
