@@ -662,7 +662,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                return reader.Read();
+                if (reader.Read()) return true;
+                else return false;
             }
             catch (Exception e)
             {
@@ -684,12 +685,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_SCORE VALUES (@IdEtab, @Score, @NbReviews, @DateInsert)";
+                string insertCommand = "INSERT INTO BUSINESS_SCORE (ID_ETAB, SCORE, NB_REVIEWS) VALUES (@IdEtab, @Score, @NbReviews)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", GetValueOrDefault(businessScore.IdEtab));
                 cmd.Parameters.AddWithValue("@Score", GetValueOrDefault(businessScore.Score));
                 cmd.Parameters.AddWithValue("@NbReviews", GetValueOrDefault(businessScore.NbReviews));
-                cmd.Parameters.AddWithValue("@DateInsert", GetValueOrDefault(businessScore.DateInsert));
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
