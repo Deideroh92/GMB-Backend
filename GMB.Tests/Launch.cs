@@ -125,7 +125,7 @@ namespace GMB.Tests
             using DbLib db = new();
             int threadNumber = 0;
 
-            int entries = 100;
+            int entries = 20000;
             int processing = 9;
             Operation operationType = Operation.OTHER;
             bool getReviews = false;
@@ -178,30 +178,15 @@ namespace GMB.Tests
                 default: break;
             }
 
-            int maxConcurrentThreads = 3;
-            int batchSize = 5;
-            int totalChunks = (businessList.Count + batchSize - 1) / batchSize;
-            SemaphoreSlim semaphore = new(maxConcurrentThreads);
+            int nbThreads = 10;
 
-            for (int chunkNumber = 0; chunkNumber < totalChunks; chunkNumber++)
+            foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
             {
                 threadNumber++;
-                await semaphore.WaitAsync(); // Wait until there's an available slot to run
                 Task newThread = Task.Run(async () =>
                 {
-                    try
-                    {
-                        int startIndex = chunkNumber * batchSize;
-                        int endIndex = Math.Min(startIndex + batchSize, businessList.Count);
-
-                        List<BusinessAgent> chunk = businessList.GetRange(startIndex, endIndex - startIndex);
-
-                        BusinessAgentRequest request = new(operationType, getReviews, chunk, reviewsDate);
-                        await BusinessController.Scanner(request, threadNumber).ConfigureAwait(false);
-                    } finally
-                    {
-                        semaphore.Release(); // Release the slot when the task is done
-                    }
+                    BusinessAgentRequest request = new(operationType, getReviews, new List<BusinessAgent>(chunk), reviewsDate);
+                    await BusinessController.Scanner(request, threadNumber).ConfigureAwait(false);
                 });
                 tasks.Add(newThread);
             }
