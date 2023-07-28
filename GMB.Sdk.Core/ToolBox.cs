@@ -223,7 +223,7 @@ namespace GMB.Sdk.Core
             while (actualTime.TimeOfDay >= heureDebut && actualTime.TimeOfDay < heureFin) {
                 // Pausing program for 1 hour
                 Thread.Sleep(3600000);
-                actualTime = DateTime.Now;
+                actualTime = DateTime.UtcNow;
             }
         }
 
