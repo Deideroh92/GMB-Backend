@@ -99,26 +99,34 @@ namespace GMB.Business.Api.Controllers
                     if (request.GetReviews && request.DateLimit != null && score?.Score != null && !isHotel) {
                         List<DbBusinessReview>? reviews = BusinessService.GetReviews(profile.IdEtab, request.DateLimit, driver);
 
-                        foreach (DbBusinessReview review in reviews) {
-                            try {
-                                DbBusinessReview? dbBusinessReview = db.GetBusinessReview(profile.IdEtab, review.IdReview);
+                        if (reviews != null)
+                        {
+                            foreach (DbBusinessReview review in reviews)
+                            {
+                                try
+                                {
+                                    DbBusinessReview? dbBusinessReview = db.GetBusinessReview(profile.IdEtab, review.IdReview);
 
-                                if (dbBusinessReview == null) {
-                                    db.CreateBusinessReview(review);
-                                    continue;
-                                }
+                                    if (dbBusinessReview == null)
+                                    {
+                                        db.CreateBusinessReview(review);
+                                        continue;
+                                    }
 
-                                if (dbBusinessReview.ReviewText == "")
-                                    dbBusinessReview.ReviewText = null;
+                                    if (dbBusinessReview.ReviewText == "")
+                                        dbBusinessReview.ReviewText = null;
 
-                                db.UpdateBusinessReview(review);
-
-                                if (!review.Equals(dbBusinessReview)) {
                                     db.UpdateBusinessReview(review);
-                                    continue;
+
+                                    if (!review.Equals(dbBusinessReview))
+                                    {
+                                        db.UpdateBusinessReview(review);
+                                        continue;
+                                    }
+                                } catch (Exception e)
+                                {
+                                    Log.Error($"Couldn't treat a review : {e.Message}", e);
                                 }
-                            } catch (Exception e) {
-                                Log.Error($"Couldn't treat a review : {e.Message}", e);
                             }
                         }
                     }

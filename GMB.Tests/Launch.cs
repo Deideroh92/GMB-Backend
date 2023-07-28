@@ -27,15 +27,17 @@ namespace GMB.Tests
         /// </summary>
         [TestMethod]
         public void ThreadsUrlScraper() {
+            string[] categories = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "Categories.txt"));
             string[] textSearch = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "UrlTextSearch.txt"));
             string[] dept = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "DeptList.txt"));
             string[] idf = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "IleDeFrance.txt"));
             string[] cp = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "CpList.txt"));
-            
-            List<string> locations = new(dept);
+            string[] customLocations = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "CustomLocations.txt"));
+
+            List<string> locations = new(customLocations);
             List<Task> tasks = new();
 
-            int maxConcurrentThreads = 8;
+            int maxConcurrentThreads = 1;
             SemaphoreSlim semaphore = new(maxConcurrentThreads);
 
             foreach (string search in textSearch) {
