@@ -14,15 +14,6 @@ namespace GMB.Url.Api
     public class UrlController {
 
         private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Url.Agent\logs\log";
-        public static void LogTest()
-        {
-            Log.Logger = new LoggerConfiguration()
-            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
-            .CreateLogger();
-
-            Log.Error("This is an error");
-            Log.Information("This is an info");
-        }
 
         #region Scanner
         /// <summary>

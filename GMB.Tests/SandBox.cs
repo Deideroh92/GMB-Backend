@@ -4,8 +4,6 @@ using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
-using GMB.Url.Api;
-using GMB.Business.Api.Controllers;
 
 namespace GMB.Tests
 {
@@ -14,8 +12,6 @@ namespace GMB.Tests
 
         [TestMethod]
         public void Main() {
-            UrlController.LogTest();
-            BusinessController.LogTest();
             return;
         }
 
@@ -25,11 +21,6 @@ namespace GMB.Tests
             using SeleniumDriver driver = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
             driver.GetToPage(url);
-
-            if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test))) {
-                string value = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test).GetAttribute("src").Trim();
-                Console.WriteLine(value);
-            }
 
         }
 

@@ -19,6 +19,7 @@
         public string FirstGuid { get; set; }
         public string? Name { get; set; }
         public string? Category { get; set; }
+        public string? Geoloc { get; set; }
         public string? GoogleAddress { get; set; }
         public string? Address { get; set; }
         public string? PostCode { get; set; }
@@ -29,8 +30,10 @@
         public string? IdBan { get; set; }
         public string? StreetNumber { get; set; }
         public string? AddressType { get; set; }
+        public float? AddressScore { get; set; }
         public string? Tel { get; set; }
         public string? Website { get; set; }
+        public string? PlusCode { get; set; }
         public DateTime? DateInsert { get; set; }
         public DateTime? DateUpdate { get; set; }
         public BusinessStatus Status { get; set; }
@@ -59,12 +62,15 @@
         /// <param name="dateInsert"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="status"></param>
-        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber, string? tel, string? website, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, int processing = 0, DateTime? dateInsert = null)
+        /// <param name="addressScore"></param>
+        /// <param name="plusCode"></param>
+        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber, float? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
         {
             IdEtab = idEtab;
             FirstGuid = firstGuid;
             Name = name;
             Category = category;
+            Geoloc = geoloc;
             GoogleAddress = googleAddress;
             Address = address;
             PostCode = postCode;
@@ -82,6 +88,8 @@
             PictureUrl = pictureUrl;
             Processing = processing;
             StreetNumber = streetNumber;
+            AddressScore = addressScore;
+            PlusCode = plusCode;
 
             CheckValidity();
         }

@@ -35,6 +35,7 @@ namespace GMB.Business.Api
             string? idBan = null;
             string? addressType = null;
             string? streetNumber = null;
+            float? score = null;
             BusinessStatus status = BusinessStatus.OPEN;
 
             driver.GetToPage(request.Url);
@@ -43,12 +44,13 @@ namespace GMB.Business.Api
                 var test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text;
                 string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
                 string? googleAddress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)?.GetAttribute("aria-label")?.Replace("Adresse:", "")?.Trim();
-                string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test)?.GetAttribute("src")?.Trim();
+                string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.img)?.GetAttribute("src")?.Trim();
                 string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();
                 string? website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website)?.GetAttribute("href")?.Trim();
+                string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode).GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
                 float? parsedScore = null;
-                float? score = null;
-                string? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
+                float? addressScore = null;
+                string ? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
                 if (name == null)
                     return (null, null);
                 else
@@ -90,18 +92,32 @@ namespace GMB.Business.Api
                         addressType = addressResponse.Features[0]?.Properties?.PropertyType;
                         idBan = addressResponse.Features[0]?.Properties?.Id;
                         streetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
+                        addressScore = (float?)addressResponse.Features[0]?.Properties?.Score;
                     }
                 }
 
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
                 request.Guid ??= Guid.NewGuid().ToString("N");
-                DbBusinessProfile dbBusinessProfile = new(request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, tel, website, DateTime.UtcNow, status, img);
+                DbBusinessProfile dbBusinessProfile = new(request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, plusCode, DateTime.UtcNow, status, img);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
                 return (dbBusinessProfile, dbBusinessScore);
             }
             catch (Exception e) {
                 throw new Exception($"Couldn't get business infos (profile or score) with id etab = [{request.IdEtab}] and guid = [{request.Guid}] and url = [{request.Url}]", e);
             }
+        }
+        /// <summary>
+        /// Get Google Plus Code coordinates.
+        /// </summary>
+        /// <param name="driver"></param>
+        /// <param name="plusCode"></param>
+        /// <returns>Coordinates from Plus Code</returns>
+        public static string? GetCoordinatesFromPlusCode(SeleniumDriver driver, string plusCode)
+        {
+            driver.GetToPage("https://plus.codes/" + plusCode);
+            ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.expandCoordinates).Click();
+            Thread.Sleep(1000);
+            return ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.coordinates)?.Text;
         }
         #endregion
 

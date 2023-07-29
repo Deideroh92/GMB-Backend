@@ -16,16 +16,6 @@ namespace GMB.Business.Api.Controllers
         public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
         private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Business.Agent\logs\log";
 
-        public static void LogTest()
-        {
-            Log.Logger = new LoggerConfiguration()
-            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
-            .CreateLogger();
-
-            Log.Error("This is an error");
-            Log.Information("This is an info");
-        }
-
         #region Scanner
         /// <summary>
         /// Start the Scanner.
@@ -56,6 +46,12 @@ namespace GMB.Business.Api.Controllers
 
                     // Get business profile infos from Google.
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest);
+
+                    if (profile.PlusCode != null)
+                    {
+                        profile.Geoloc = BusinessService.GetCoordinatesFromPlusCode(driver, profile.PlusCode);
+                        driver.GetToPage(BPRequest.Url);
+                    }
 
                     if (request.Operation == Operation.FILE) {
                         if (profile == null) {

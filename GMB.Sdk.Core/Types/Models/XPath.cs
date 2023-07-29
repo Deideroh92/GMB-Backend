@@ -27,7 +27,12 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> score = new() { By.XPath("//span[contains(@aria-label, 'étoiles')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]") };
         public static readonly List<By> status = new() { By.XPath("//div[contains(@jsaction, 'pane.openhours')]") };
         public static readonly List<By> globalScore = new() { By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]") };
-        public static readonly List<By> test = new() { By.XPath("//img[contains(@decoding, 'async')]") };
+        public static readonly List<By> img = new() { By.XPath("//img[contains(@decoding, 'async')]") };
+        public static readonly List<By> plusCode = new() { By.XPath("//button[contains(@aria-label, 'Plus\u00A0code:')]"), By.XPath("//a[contains(@aria-label, 'Plus\u00A0code:')]") };
+
+        // Plus Code
+        public static readonly List<By> expandCoordinates = new() { By.XPath("//div[contains(@class, 'expand sprite-bg')]") };
+        public static readonly List<By> coordinates = new() { By.XPath("//div[contains(@class, 'latlng')]") };
 
         // Hotels
         public static readonly List<By> optionsOn = new() { By.XPath("//div[contains(@aria-label, 'est disponible')]") };

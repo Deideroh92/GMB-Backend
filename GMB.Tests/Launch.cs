@@ -127,7 +127,7 @@ namespace GMB.Tests
             using DbLib db = new();
             int threadNumber = 0;
 
-            int entries = 20000;
+            int entries = 10;
             int processing = 9;
             Operation operationType = Operation.OTHER;
             bool getReviews = false;
@@ -180,7 +180,7 @@ namespace GMB.Tests
                 default: break;
             }
 
-            int nbThreads = 10;
+            int nbThreads = 1;
 
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
             {
