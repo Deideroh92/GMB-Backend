@@ -22,7 +22,7 @@ namespace GMB.Sdk.Core.Types.Models
             try
             {
                 ChromeOptions chromeOptions = new();
-                //if(headless) chromeOptions.AddArguments("--headless=new");
+                if(headless) chromeOptions.AddArguments("--headless=new");
                 chromeOptions.AddArguments("--lang=fr");
                 new DriverManager().SetUpDriver(new ChromeConfig());
                 WebDriver = new ChromeDriver(chromeOptions);
