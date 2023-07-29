@@ -575,7 +575,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@AddressScore", GetValueOrDefault(businessProfile.AddressScore));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessProfile.DateUpdate));
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
-                cmd.Parameters.AddWithValue("@Geoloc", businessProfile.Geoloc);
+                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.ExecuteNonQuery();
             }
