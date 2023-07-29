@@ -31,8 +31,11 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> plusCode = new() { By.XPath("//button[contains(@aria-label, 'Plus\u00A0code:')]"), By.XPath("//a[contains(@aria-label, 'Plus\u00A0code:')]") };
 
         // Plus Code
-        public static readonly List<By> expandCoordinates = new() { By.XPath("//div[contains(@class, 'expand sprite-bg')]") };
+        public static readonly List<By> expand = new() { By.XPath("//div[contains(@class, 'expand sprite-bg')]") };
         public static readonly List<By> coordinates = new() { By.XPath("//div[contains(@class, 'latlng')]") };
+        public static readonly List<By> longPlusCode = new() { By.XPath("//div[contains(@class, 'detail full-code')]") };
+        public static readonly List<By> longPlusCodeArea = new() { By.XPath(".//span") };
+        public static readonly List<By> longPlusCodeLocal = new() { By.XPath("following-sibling::span") };
 
         // Hotels
         public static readonly List<By> optionsOn = new() { By.XPath("//div[contains(@aria-label, 'est disponible')]") };

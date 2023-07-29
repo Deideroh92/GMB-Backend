@@ -47,12 +47,6 @@ namespace GMB.Business.Api.Controllers
                     // Get business profile infos from Google.
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest);
 
-                    if (profile.PlusCode != null)
-                    {
-                        profile.Geoloc = BusinessService.GetCoordinatesFromPlusCode(driver, profile.PlusCode);
-                        driver.GetToPage(BPRequest.Url);
-                    }
-
                     if (request.Operation == Operation.FILE) {
                         if (profile == null) {
                             using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber.ToString() + ".txt");

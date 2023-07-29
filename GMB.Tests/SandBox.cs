@@ -17,11 +17,12 @@ namespace GMB.Tests
 
         [TestMethod]
         public void GetXPathfromPage() {
-            string url = "https://www.google.com/maps/place/BRED-Banque+Populaire/@48.8280761,2.2411834,15z/data=!4m10!1m2!2m1!1sbanque!3m6!1s0x47e67af2357c45ab:0x1b7baec714122e5b!8m2!3d48.8255006!4d2.2479565!15sCgZiYW5xdWWSAQRiYW5r4AEA!16s%2Fg%2F1wf37y2x";
+            string url = "https://plus.codes/8FW4R7P3+G4";
             using SeleniumDriver driver = new();
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
             driver.GetToPage(url);
-
+            ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.expand).Click();
+            Thread.Sleep(1000);
+            var test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.longPlusCode);
         }
 
         [TestMethod]

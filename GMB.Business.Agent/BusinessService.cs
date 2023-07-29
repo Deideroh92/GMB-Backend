@@ -36,18 +36,50 @@ namespace GMB.Business.Api
             string? addressType = null;
             string? streetNumber = null;
             float? score = null;
+            string? longPlusCode = null;
+            string? geoloc = null;
             BusinessStatus status = BusinessStatus.OPEN;
 
             driver.GetToPage(request.Url);
 
             try {
-                var test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text;
                 string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
                 string? googleAddress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)?.GetAttribute("aria-label")?.Replace("Adresse:", "")?.Trim();
                 string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.img)?.GetAttribute("src")?.Trim();
                 string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();
                 string? website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website)?.GetAttribute("href")?.Trim();
+
+                // Business Status
+                string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status)?.Text.Trim();
+                if (status_tmp != null)
+                {
+                    if (status_tmp.Contains("Fermé définitivement") || status_tmp.Contains("Définitivement fermé"))
+                        status = BusinessStatus.CLOSED;
+                    if (status_tmp.Contains("Fermé temporairement"))
+                        status = BusinessStatus.TEMPORARLY_CLOSED;
+                }
+
+                // Business nb reviews
+                if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews) is WebElement nbReviewsElement)
+                {
+                    string? label = nbReviewsElement.GetAttribute("aria-label")?.Replace("avis", "").Replace(" ", "").Trim();
+                    if (label == null && score != null)
+                        label = nbReviewsElement.ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim();
+                    if (label != null && int.TryParse(Regex.Replace(label, @"\s", ""), out int parsedReviews))
+                        reviews = parsedReviews;
+                }
+
+                #region Plus Code
                 string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
+
+                if (plusCode != null)
+                {
+                    (longPlusCode, geoloc) = GetCoordinatesFromPlusCode(driver, plusCode);
+                    driver.GetToPage(request.Url);
+                }
+                #endregion
+
+                #region Score
                 float? parsedScore = null;
                 float? addressScore = null;
                 string ? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
@@ -63,23 +95,9 @@ namespace GMB.Business.Api
 
                 if (score == 0 && ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score)?.GetAttribute("aria-label") is string ariaLabel && float.TryParse(ariaLabel.AsSpan(0, Math.Min(3, ariaLabel.Length)), out float parsedScore2))
                     score = parsedScore2;
+                #endregion
 
-                string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status)?.Text.Trim();
-                if (status_tmp != null) {
-                    if (status_tmp.Contains("Fermé définitivement") || status_tmp.Contains("Définitivement fermé"))
-                        status = BusinessStatus.CLOSED;
-                    if (status_tmp.Contains("Fermé temporairement"))
-                        status = BusinessStatus.TEMPORARLY_CLOSED;
-                }
-
-                if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews) is WebElement nbReviewsElement) {
-                    string? label = nbReviewsElement.GetAttribute("aria-label")?.Replace("avis", "").Replace(" ", "").Trim();
-                    if (label == null && score != null)
-                        label = nbReviewsElement.ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim();
-                    if (label != null && int.TryParse(Regex.Replace(label, @"\s", ""), out int parsedReviews))
-                        reviews = parsedReviews;
-                }
-
+                #region Address Api
                 if (googleAddress != null) {
                     AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
                     if (addressResponse != null) {
@@ -95,10 +113,11 @@ namespace GMB.Business.Api
                         addressScore = (float?)addressResponse.Features[0]?.Properties?.Score;
                     }
                 }
+                #endregion
 
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
                 request.Guid ??= Guid.NewGuid().ToString("N");
-                DbBusinessProfile dbBusinessProfile = new(request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, plusCode, DateTime.UtcNow, status, img);
+                DbBusinessProfile dbBusinessProfile = new(request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, geoloc);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
                 return (dbBusinessProfile, dbBusinessScore);
             }
@@ -112,12 +131,17 @@ namespace GMB.Business.Api
         /// <param name="driver"></param>
         /// <param name="plusCode"></param>
         /// <returns>Coordinates from Plus Code</returns>
-        public static string? GetCoordinatesFromPlusCode(SeleniumDriver driver, string plusCode)
+        public static (string?, string?) GetCoordinatesFromPlusCode(SeleniumDriver driver, string plusCode)
         {
-            driver.GetToPage("https://plus.codes/" + plusCode);
-            ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.expandCoordinates).Click();
-            Thread.Sleep(1000);
-            return ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.coordinates)?.Text;
+            try {
+                driver.GetToPage("https://plus.codes/" + plusCode);
+                ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.expand).Click();
+                Thread.Sleep(1000);
+                return (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.longPlusCode)?.Text, ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.coordinates)?.Text);
+            }
+            catch (Exception e) {
+                throw new Exception($"Couldn't get plus code infos for = [{plusCode}]", e);
+            }
         }
         #endregion
 
