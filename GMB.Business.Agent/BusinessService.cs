@@ -47,7 +47,7 @@ namespace GMB.Business.Api
                 string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.img)?.GetAttribute("src")?.Trim();
                 string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();
                 string? website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website)?.GetAttribute("href")?.Trim();
-                string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode).GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
+                string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
                 float? parsedScore = null;
                 float? addressScore = null;
                 string ? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
