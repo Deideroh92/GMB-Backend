@@ -407,7 +407,6 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                     " WHERE PROCESSING = @Processing" +
                     brand + 
                     categoryFilter +
-                    " AND STATUS != 'CLOSED'" +
                     " ORDER BY ID_ETAB ASC";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
