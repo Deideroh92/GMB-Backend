@@ -8,6 +8,7 @@ using Serilog;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Business.Api.Models;
 using GMB.Sdk.Core.Types.Database.Models;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace GMB.Business.Api
 {
@@ -38,6 +39,7 @@ namespace GMB.Business.Api
             float? score = null;
             string? longPlusCode = null;
             string? geoloc = null;
+            string? country = null;
             BusinessStatus status = BusinessStatus.OPEN;
 
             driver.GetToPage(request.Url);
@@ -74,7 +76,7 @@ namespace GMB.Business.Api
 
                 if (plusCode != null)
                 {
-                    (longPlusCode, geoloc) = GetCoordinatesFromPlusCode(driver, plusCode);
+                    (longPlusCode, geoloc, country) = GetCoordinatesFromPlusCode(driver, plusCode);
                     driver.GetToPage(request.Url);
                 }
                 #endregion
@@ -117,7 +119,7 @@ namespace GMB.Business.Api
 
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
                 request.Guid ??= Guid.NewGuid().ToString("N");
-                DbBusinessProfile dbBusinessProfile = new(request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, geoloc);
+                DbBusinessProfile dbBusinessProfile = new(request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, country, geoloc);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
                 return (dbBusinessProfile, dbBusinessScore);
             }
@@ -131,13 +133,17 @@ namespace GMB.Business.Api
         /// <param name="driver"></param>
         /// <param name="plusCode"></param>
         /// <returns>Coordinates from Plus Code</returns>
-        public static (string?, string?) GetCoordinatesFromPlusCode(SeleniumDriver driver, string plusCode)
+        public static (string?, string?, string?) GetCoordinatesFromPlusCode(SeleniumDriver driver, string plusCode)
         {
             try {
                 driver.GetToPage("https://plus.codes/" + plusCode);
                 ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.expand).Click();
                 Thread.Sleep(1000);
-                return (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.longPlusCode)?.Text, ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.coordinates)?.Text);
+                string? longPlusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.longPlusCode)?.Text;
+                string? geoloc = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.coordinates)?.Text;
+                string? country = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.shortPlusCodeLocality).GetAttribute("innerHTML");
+                country = country[(country.LastIndexOf(',') + 1)..].Trim();
+                return (longPlusCode, geoloc, country);
             }
             catch (Exception e) {
                 throw new Exception($"Couldn't get plus code infos for = [{plusCode}]", e);

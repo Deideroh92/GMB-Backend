@@ -329,7 +329,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_PROFILE (ID_ETAB, FIRST_GUID, NAME, CATEGORY, ADRESS, PLUS_CODE, TEL, WEBSITE, GEOLOC, STATUS, PROCESSING, URL_PICTURE, A_ADDRESS, A_POSTCODE, A_CITY, A_CITY_CODE, A_LAT, A_LON, A_BAN_ID, A_ADDRESS_TYPE, A_NUMBER, A_SCORE) VALUES (@IdEtab, @FirstGuid, @Name, @Category, @GoogleAddress, @PlusCode, @Tel, @Website, @Geoloc, @Status, @Processing, @UrlPicture, @Address, @PostCode, @City, @CityCode, @Lat, @Lon, @IdBan, @AddressType, @StreetNumber, @AddressScore)";
+                string insertCommand = "INSERT INTO BUSINESS_PROFILE (ID_ETAB, FIRST_GUID, NAME, CATEGORY, ADRESS, PLUS_CODE, TEL, WEBSITE, GEOLOC, STATUS, PROCESSING, URL_PICTURE, A_ADDRESS, A_POSTCODE, A_CITY, A_CITY_CODE, A_LAT, A_LON, A_BAN_ID, A_ADDRESS_TYPE, A_NUMBER, A_SCORE, A_COUNTRY) VALUES (@IdEtab, @FirstGuid, @Name, @Category, @GoogleAddress, @PlusCode, @Tel, @Website, @Geoloc, @Status, @Processing, @UrlPicture, @Address, @PostCode, @City, @CityCode, @Lat, @Lon, @IdBan, @AddressType, @StreetNumber, @AddressScore, @Country)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@FirstGuid", businessProfile.FirstGuid);
@@ -353,6 +353,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@AddressType", GetValueOrDefault(businessProfile.AddressType));
                 cmd.Parameters.AddWithValue("@StreetNumber", GetValueOrDefault(businessProfile.StreetNumber));
                 cmd.Parameters.AddWithValue("@AddressScore", GetValueOrDefault(businessProfile.AddressScore));
+                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
@@ -479,7 +480,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 while (reader.Read()) {
-                    DbBusinessProfile businessProfile = new(reader["ID_ETAB"].ToString()!, reader["FIRST_GUID"].ToString()!, reader["NAME"].ToString(),  reader["CATEGORY"].ToString(), reader["ADRESS"].ToString(), reader["A_ADDRESS"].ToString(), reader["A_POSTCODE"].ToString(), reader["A_CITY"].ToString(), reader["A_CITY_CODE"].ToString(), (float?)reader["A_LAT"], (float?)reader["A_LON"], reader["A_BAN_ID"].ToString(), reader["A_ADDRESS_TYPE"].ToString(), reader["A_NUMBER"].ToString(), (float?)reader["A_SCORE"], reader["TEL"].ToString(), reader["WEBSITE"].ToString(), reader["PLUS_CODE"].ToString(), DateTime.Parse(reader["DATE_UPDATE"].ToString()!), (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!), reader["URL_PICTURE"].ToString(), reader["GEOLOC"].ToString());
+                    DbBusinessProfile businessProfile = new(reader["ID_ETAB"].ToString()!, reader["FIRST_GUID"].ToString()!, reader["NAME"].ToString(),  reader["CATEGORY"].ToString(), reader["ADRESS"].ToString(), reader["A_ADDRESS"].ToString(), reader["A_POSTCODE"].ToString(), reader["A_CITY"].ToString(), reader["A_CITY_CODE"].ToString(), (float?)reader["A_LAT"], (float?)reader["A_LON"], reader["A_BAN_ID"].ToString(), reader["A_ADDRESS_TYPE"].ToString(), reader["A_NUMBER"].ToString(), (float?)reader["A_SCORE"], reader["TEL"].ToString(), reader["WEBSITE"].ToString(), reader["PLUS_CODE"].ToString(), DateTime.Parse(reader["DATE_UPDATE"].ToString()!), (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!), reader["URL_PICTURE"].ToString(), reader["A_COUNTRY"].ToString(), reader["GEOLOC"].ToString());
                     businessList.Add(businessProfile);
                 }
 
@@ -553,7 +554,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_Country = @Country WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
                 cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
@@ -575,6 +576,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessProfile.DateUpdate));
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
+                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Geoloc));
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.ExecuteNonQuery();
             }
@@ -589,11 +591,12 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// <param name="businessProfile"></param>
         public void UpdateBusinessProfileAddress(DbBusinessProfile businessProfile) {
             try {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET ADRESS = @GoogleAddress, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, A_SCORE = @AddressScore, DATE_UPDATE = @DateUpdate WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET ADRESS = @GoogleAddress, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, A_SCORE = @AddressScore, DATE_UPDATE = @DateUpdate, A_COUNTRY = @Country WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
                 cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(businessProfile.PlusCode));
                 cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(businessProfile.Address));
+                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Address));
                 cmd.Parameters.AddWithValue("@City", GetValueOrDefault(businessProfile.City));
                 cmd.Parameters.AddWithValue("@CityCode", GetValueOrDefault(businessProfile.CityCode));
                 cmd.Parameters.AddWithValue("@IdBan", GetValueOrDefault(businessProfile.IdBan));

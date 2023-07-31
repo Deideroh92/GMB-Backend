@@ -33,6 +33,8 @@ namespace GMB.Sdk.Core.Types.Models
         // Plus Code
         public static readonly List<By> expand = new() { By.XPath("//div[contains(@class, 'expand sprite-bg')]") };
         public static readonly List<By> coordinates = new() { By.XPath("//div[contains(@class, 'latlng')]") };
+        public static readonly List<By> shortPlusCode = new() { By.XPath("//div[@class = 'short-code']") };
+        public static readonly List<By> shortPlusCodeLocality = new() { By.XPath("//div[@class = 'locality']") };
         public static readonly List<By> longPlusCode = new() { By.XPath("//div[contains(@class, 'detail full-code')]") };
         public static readonly List<By> longPlusCodeArea = new() { By.XPath(".//span") };
         public static readonly List<By> longPlusCodeLocal = new() { By.XPath("following-sibling::span") };

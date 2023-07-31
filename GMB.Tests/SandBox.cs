@@ -4,6 +4,8 @@ using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
+using AngleSharp.Dom;
+using System.Diagnostics.Metrics;
 
 namespace GMB.Tests
 {
@@ -12,6 +14,8 @@ namespace GMB.Tests
 
         [TestMethod]
         public void Main() {
+            string test = "25 ru,,,e traversière,,,, 92100 Boulo,,,,gne-Billancourt, France";
+            test = test[(test.LastIndexOf(',') + 1)..].Trim();
             return;
         }
 
@@ -22,7 +26,7 @@ namespace GMB.Tests
             driver.GetToPage(url);
             ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.expand).Click();
             Thread.Sleep(1000);
-            var test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.longPlusCode);
+            var test2 = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.shortPlusCodeLocality).GetAttribute("innerHTML");
         }
 
         [TestMethod]

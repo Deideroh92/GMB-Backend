@@ -29,6 +29,7 @@
         public float? Lon { get; set; }
         public string? IdBan { get; set; }
         public string? StreetNumber { get; set; }
+        public string? Country { get; set; }
         public string? AddressType { get; set; }
         public float? AddressScore { get; set; }
         public string? Tel { get; set; }
@@ -64,7 +65,8 @@
         /// <param name="status"></param>
         /// <param name="addressScore"></param>
         /// <param name="plusCode"></param>
-        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber, float? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
+        /// <param name="country"></param>
+        public DbBusinessProfile(string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber, float? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
         {
             IdEtab = idEtab;
             FirstGuid = firstGuid;
@@ -90,6 +92,7 @@
             StreetNumber = streetNumber;
             AddressScore = addressScore;
             PlusCode = plusCode;
+            Country = Country;
 
             CheckValidity();
         }
