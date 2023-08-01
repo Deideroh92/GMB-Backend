@@ -179,7 +179,7 @@ namespace GMB.Business.Api
             // Getting reviews.
             ReadOnlyCollection<IWebElement>? reviews = GetWebElements(driver.WebDriver, dateLimit);
 
-            List<DbBusinessReview>? businessReviews = null;
+            List<DbBusinessReview>? businessReviews = new();
             foreach (IWebElement review in reviews) {
                 try {
                     DbBusinessReview? businessReview = GetReviewFromGooglePage(review, idEtab, dateLimit);

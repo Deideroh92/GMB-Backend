@@ -130,8 +130,8 @@ namespace GMB.Tests
             int entries = 10;
             int processing = 9;
             Operation operationType = Operation.OTHER;
-            bool getReviews = false;
-            DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
+            bool getReviews = true;
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-2);
 
             Log.Logger = new LoggerConfiguration()
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
@@ -142,7 +142,7 @@ namespace GMB.Tests
                     string? brand = null;
                     string? category = null;
                     CategoryFamily? categoryFamily = null;
-                    bool isNetwork = false;
+                    bool isNetwork = true;
                     bool isIndependant = false;
                     GetBusinessListRequest request = new(entries, processing, brand, category, categoryFamily, isNetwork, isIndependant);
                     businessList = db.GetBusinessAgentList(request);

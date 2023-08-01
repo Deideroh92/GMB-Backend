@@ -103,11 +103,6 @@ namespace GMB.Business.Api.Controllers
                                         continue;
                                     }
 
-                                    if (dbBusinessReview.ReviewText == "")
-                                        dbBusinessReview.ReviewText = null;
-
-                                    db.UpdateBusinessReview(review);
-
                                     if (!review.Equals(dbBusinessReview))
                                     {
                                         db.UpdateBusinessReview(review);

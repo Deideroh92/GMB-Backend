@@ -722,7 +722,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_REVIEWS VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateInsert, @DateUpdate, @Processing)";
+                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_DATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateUpdate, @Processing)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", GetValueOrDefault(businessReview.IdEtab));
                 cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(businessReview.IdReview));
@@ -734,7 +734,6 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@ReviewGoogleDate", GetValueOrDefault(businessReview.ReviewGoogleDate));
                 cmd.Parameters.AddWithValue("@ReviewDate", GetValueOrDefault(businessReview.ReviewDate));
                 cmd.Parameters.AddWithValue("@ReviewReplied", GetValueOrDefault(businessReview.ReviewReplied));
-                cmd.Parameters.AddWithValue("@DateInsert", GetValueOrDefault(businessReview.DateInsert));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessReview.DateUpdate));
                 cmd.Parameters.AddWithValue("@Processing", 0);
                 cmd.ExecuteNonQuery();
