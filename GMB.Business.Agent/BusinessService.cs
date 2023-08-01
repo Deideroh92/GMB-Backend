@@ -178,16 +178,22 @@ namespace GMB.Business.Api
 
             // Getting reviews.
             ReadOnlyCollection<IWebElement>? reviews = GetWebElements(driver.WebDriver, dateLimit);
-
             List<DbBusinessReview>? businessReviews = new();
-            foreach (IWebElement review in reviews) {
-                try {
-                    DbBusinessReview? businessReview = GetReviewFromGooglePage(review, idEtab, dateLimit);
-                    if (businessReview == null)
-                        continue;
-                    businessReviews.Add(businessReview);
-                } catch (Exception e) {
-                    Log.Error($"Couldn't treat a review : {e.Message}", e);
+
+            if (reviews != null)
+            {
+                foreach (IWebElement review in reviews)
+                {
+                    try
+                    {
+                        DbBusinessReview? businessReview = GetReviewFromGooglePage(review, idEtab, dateLimit);
+                        if (businessReview == null)
+                            continue;
+                        businessReviews.Add(businessReview);
+                    } catch (Exception e)
+                    {
+                        Log.Error($"Couldn't treat a review : {e.Message}. Error : {e.StackTrace}", e);
+                    }
                 }
             }
             return businessReviews;

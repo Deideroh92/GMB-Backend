@@ -131,7 +131,7 @@ namespace GMB.Tests
             int processing = 9;
             Operation operationType = Operation.OTHER;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-2);
+            DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
 
             Log.Logger = new LoggerConfiguration()
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
