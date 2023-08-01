@@ -51,6 +51,13 @@ namespace GMB.Business.Api
                 string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();
                 string? website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website)?.GetAttribute("href")?.Trim();
 
+                // Business Name
+                string? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
+                if (name == null)
+                    return (null, null);
+                else
+                    Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),\s-]+|\s{2,}", "");
+
                 // Business Status
                 string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status)?.Text.Trim();
                 if (status_tmp != null)
@@ -59,16 +66,6 @@ namespace GMB.Business.Api
                         status = BusinessStatus.CLOSED;
                     if (status_tmp.Contains("Fermé temporairement"))
                         status = BusinessStatus.TEMPORARLY_CLOSED;
-                }
-
-                // Business nb reviews
-                if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews) is WebElement nbReviewsElement)
-                {
-                    string? label = nbReviewsElement.GetAttribute("aria-label")?.Replace("avis", "").Replace(" ", "").Trim();
-                    if (label == null && score != null)
-                        label = nbReviewsElement.ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim();
-                    if (label != null && int.TryParse(Regex.Replace(label, @"\s", ""), out int parsedReviews))
-                        reviews = parsedReviews;
                 }
 
                 #region Plus Code
@@ -84,11 +81,6 @@ namespace GMB.Business.Api
                 #region Score
                 float? parsedScore = null;
                 float? addressScore = null;
-                string ? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
-                if (name == null)
-                    return (null, null);
-                else
-                    Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),\s-]+|\s{2,}", "");
 
                 if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null && float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim(), out float parsedScoreValue))
                     parsedScore = parsedScoreValue;
@@ -97,6 +89,15 @@ namespace GMB.Business.Api
 
                 if (score == 0 && ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score)?.GetAttribute("aria-label") is string ariaLabel && float.TryParse(ariaLabel.AsSpan(0, Math.Min(3, ariaLabel.Length)), out float parsedScore2))
                     score = parsedScore2;
+
+                if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews) is WebElement nbReviewsElement)
+                {
+                    string? label = nbReviewsElement.GetAttribute("aria-label")?.Replace("avis", "").Replace(" ", "").Trim();
+                    if (label == null && score != null)
+                        label = nbReviewsElement.ComputedAccessibleLabel.Replace("avis", "").Replace(" ", "").Trim();
+                    if (label != null && int.TryParse(Regex.Replace(label, @"\s", ""), out int parsedReviews))
+                        reviews = parsedReviews;
+                }
                 #endregion
 
                 #region Address Api
