@@ -576,7 +576,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessProfile.DateUpdate));
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
-                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Geoloc));
+                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.ExecuteNonQuery();
             }
@@ -596,7 +596,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
                 cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(businessProfile.PlusCode));
                 cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(businessProfile.Address));
-                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Address));
+                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
                 cmd.Parameters.AddWithValue("@City", GetValueOrDefault(businessProfile.City));
                 cmd.Parameters.AddWithValue("@CityCode", GetValueOrDefault(businessProfile.CityCode));
                 cmd.Parameters.AddWithValue("@IdBan", GetValueOrDefault(businessProfile.IdBan));
