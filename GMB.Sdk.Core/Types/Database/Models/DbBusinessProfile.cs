@@ -92,7 +92,7 @@
             StreetNumber = streetNumber;
             AddressScore = addressScore;
             PlusCode = plusCode;
-            Country = Country;
+            Country = country;
 
             CheckValidity();
         }
