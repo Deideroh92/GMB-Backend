@@ -127,10 +127,10 @@ namespace GMB.Tests
             using DbLib db = new();
             int threadNumber = 0;
 
-            int entries = 10;
-            int processing = 9;
+            int entries = 1000;
+            int processing = 1;
             Operation operationType = Operation.OTHER;
-            bool getReviews = true;
+            bool getReviews = false;
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
 
             Log.Logger = new LoggerConfiguration()
@@ -142,7 +142,7 @@ namespace GMB.Tests
                     string? brand = null;
                     string? category = null;
                     CategoryFamily? categoryFamily = null;
-                    bool isNetwork = true;
+                    bool isNetwork = false;
                     bool isIndependant = false;
                     GetBusinessListRequest request = new(entries, processing, brand, category, categoryFamily, isNetwork, isIndependant);
                     businessList = db.GetBusinessAgentList(request);
@@ -180,7 +180,7 @@ namespace GMB.Tests
                 default: break;
             }
 
-            int nbThreads = 1;
+            int nbThreads = 8;
 
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
             {

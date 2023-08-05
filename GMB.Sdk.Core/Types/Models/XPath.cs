@@ -42,6 +42,9 @@ namespace GMB.Sdk.Core.Types.Models
         // Hotels
         public static readonly List<By> optionsOn = new() { By.XPath("//div[contains(@aria-label, 'est disponible')]") };
         public static readonly List<By> hotelScore = new() { By.XPath("//div[contains(@jsan, 'fontDisplayLarge') and @class='fontDisplayLarge']") };
+
+        // ID Maps
+        public static readonly List<By> idMaps = new() { By.XPath("//script[contains(text(), 'https://search.google.com/local/reviews?placeid')]") };
     }
 
     public class XPathReview

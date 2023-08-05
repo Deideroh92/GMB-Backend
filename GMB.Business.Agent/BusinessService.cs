@@ -40,6 +40,7 @@ namespace GMB.Business.Api
             string? longPlusCode = null;
             string? geoloc = null;
             string? country = null;
+            string idMaps = null;
             BusinessStatus status = BusinessStatus.OPEN;
 
             driver.GetToPage(request.Url);
@@ -118,9 +119,20 @@ namespace GMB.Business.Api
                 }
                 #endregion
 
+                #region Id Maps
+                var script = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.idMaps).GetAttribute("innerHTML");
+                int index = script.IndexOf("reviews?placeid");
+
+                if (index != -1)
+                {
+                    string substring = script[(index + 22)..];
+                    idMaps = substring[..substring.IndexOf('\\')];
+                }
+                #endregion
+
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
                 request.Guid ??= Guid.NewGuid().ToString("N");
-                DbBusinessProfile dbBusinessProfile = new(request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, country, geoloc);
+                DbBusinessProfile dbBusinessProfile = new(idMaps, request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, country, geoloc);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
                 return (dbBusinessProfile, dbBusinessScore);
             }
@@ -218,6 +230,7 @@ namespace GMB.Business.Api
                 int reviewListLength = 0;
                 string? reviewGoogleDate;
                 DateTime realDate;
+                int index = 0;
 
                 while (reviewListLength != reviewList.Count) {
                     ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
@@ -236,7 +249,26 @@ namespace GMB.Business.Api
                             break;
                         }
                     }
+
+                    for (int i = index; i < reviewList.Count; i++)
+                    {
+                        IWebElement item = reviewList[i];
+                        string? reviewText = ToolBox.FindElementSafe(item, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
+                        if (reviewText != null && reviewText.EndsWith("Plus") && ToolBox.Exists(ToolBox.FindElementSafe(item, XPathReview.plusButton)))
+                        {
+                            try
+                            {
+                                ToolBox.FindElementSafe(item, XPathReview.plusButton).Click();
+                            } catch
+                            {
+                                continue;
+                            }
+                        }
+                        index++;
+                    }
+
                 }
+
                 return reviewList;
             } catch (Exception e) {
                 if (e.Message.Contains("javascript error: Cannot read properties of null (reading 'parentNode')")) {
@@ -274,16 +306,6 @@ namespace GMB.Business.Api
                 }
 
                 string? reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
-                if (reviewText != null && reviewText.EndsWith("Plus")) {
-                    try {
-                        var test = ToolBox.FindElementSafe(reviewWebElement, XPathReview.plusButton);
-                        test.Click();
-                        Thread.Sleep(1000);
-                        reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
-                    } catch {
-                        reviewText = reviewText.TrimEnd("Plus".ToCharArray());
-                    }
-                }
 
                 bool localGuide = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)) && ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Contains('·');
                 GoogleUser user = new(userName, userNbReviews, localGuide);
