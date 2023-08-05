@@ -30,7 +30,7 @@ namespace GMB.Tests
             string url = "https://www.google.com/maps/place/Opticien+Brest+%7C+Alain+Afflelou/@48.3882998,-4.4891174,17z/data=!3m1!4b1!4m6!3m5!1s0x4816b959cf3afcff:0x8b91c477e001d962!8m2!3d48.3882998!4d-4.4891174!16s%2Fg%2F1tgj86rm?entry=ttu";
             using SeleniumDriver driver = new();
             driver.GetToPage(url);
-            var test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.test).GetAttribute("innerHTML");
+            var test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.idMaps).GetAttribute("innerHTML");
             int index = test.IndexOf("reviews?placeid");
 
             if (index != -1)
