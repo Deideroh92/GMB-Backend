@@ -127,7 +127,7 @@ namespace GMB.Tests
             using DbLib db = new();
             int threadNumber = 0;
 
-            int entries = 1000;
+            int entries = 803;
             int processing = 1;
             Operation operationType = Operation.OTHER;
             bool getReviews = false;

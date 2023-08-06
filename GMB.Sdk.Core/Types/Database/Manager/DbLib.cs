@@ -557,7 +557,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET ID_MAPS = @IdMaps, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_Country = @Country WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@Name", GetValueOrDefault(businessProfile.IdMaps));
+                cmd.Parameters.AddWithValue("@IdMaps", GetValueOrDefault(businessProfile.IdMaps));
                 cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
                 cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
                 cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(businessProfile.Address));

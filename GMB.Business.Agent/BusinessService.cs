@@ -120,14 +120,18 @@ namespace GMB.Business.Api
                 #endregion
 
                 #region Id Maps
-                var script = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.idMaps).GetAttribute("innerHTML");
-                int index = script.IndexOf("reviews?placeid");
-
-                if (index != -1)
+                if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.idMaps)))
                 {
-                    string substring = script[(index + 22)..];
-                    idMaps = substring[..substring.IndexOf('\\')];
+                    var script = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.idMaps).GetAttribute("innerHTML");
+                    int index = script.IndexOf("reviews?placeid");
+
+                    if (index != -1)
+                    {
+                        string substring = script[(index + 22)..];
+                        idMaps = substring[..substring.IndexOf('\\')];
+                    }
                 }
+
                 #endregion
 
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
