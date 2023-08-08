@@ -7,6 +7,7 @@ using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Business.Api.Models;
 using OpenQA.Selenium;
 using GMB.Url.Api;
+using System.Diagnostics.Metrics;
 
 namespace GMB.Business.Api.Controllers
 {
@@ -88,6 +89,7 @@ namespace GMB.Business.Api.Controllers
 
                     // Getting reviews
                     if (request.GetReviews && request.DateLimit != null && score?.Score != null && !isHotel) {
+                        driver.GetToPage(BPRequest.Url);
                         List<DbBusinessReview>? reviews = BusinessService.GetReviews(profile.IdEtab, request.DateLimit, driver);
 
                         if (reviews != null)

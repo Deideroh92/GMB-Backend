@@ -68,16 +68,6 @@ namespace GMB.Business.Api
                         status = BusinessStatus.TEMPORARLY_CLOSED;
                 }
 
-                #region Plus Code
-                string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
-
-                if (plusCode != null)
-                {
-                    (longPlusCode, geoloc, country) = GetCoordinatesFromPlusCode(driver, plusCode);
-                    driver.GetToPage(request.Url);
-                }
-                #endregion
-
                 #region Score
                 float? parsedScore = null;
                 float? addressScore = null;
@@ -129,6 +119,15 @@ namespace GMB.Business.Api
                         string substring = scriptTag[(index + 22)..];
                         placeId = substring[..substring.IndexOf('\\')];
                     }
+                }
+                #endregion
+
+                #region Plus Code
+                string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
+
+                if (plusCode != null)
+                {
+                    (longPlusCode, geoloc, country) = GetCoordinatesFromPlusCode(driver, plusCode);
                 }
                 #endregion
 
