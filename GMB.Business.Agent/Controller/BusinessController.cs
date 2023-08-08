@@ -8,6 +8,9 @@ using GMB.Business.Api.Models;
 using OpenQA.Selenium;
 using GMB.Url.Api;
 using System.Diagnostics.Metrics;
+using GMB.Business.Api.API;
+using System.Linq;
+using AngleSharp.Dom;
 
 namespace GMB.Business.Api.Controllers
 {
@@ -47,7 +50,7 @@ namespace GMB.Business.Api.Controllers
                     GetBusinessProfileRequest BPRequest = new(business.Url, business.Guid, business.IdEtab);
 
                     // Get business profile infos from Google.
-                    (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest);
+                    (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest);
 
                     if (request.Operation == Operation.FILE) {
                         if (profile == null) {
@@ -90,7 +93,7 @@ namespace GMB.Business.Api.Controllers
                     // Getting reviews
                     if (request.GetReviews && request.DateLimit != null && score?.Score != null && !isHotel) {
                         driver.GetToPage(BPRequest.Url);
-                        List<DbBusinessReview>? reviews = BusinessService.GetReviews(profile.IdEtab, request.DateLimit, driver);
+                        List<DbBusinessReview>? reviews = BusinessServiceApi.GetReviews(profile.IdEtab, request.DateLimit, driver);
 
                         if (reviews != null)
                         {
@@ -153,7 +156,7 @@ namespace GMB.Business.Api.Controllers
                 using DbLib db = new();
                 using SeleniumDriver driver = new();
 
-                return await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url));
+                return await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url));
             } catch (Exception e) {
                 return (null, null);
             }
@@ -176,7 +179,7 @@ namespace GMB.Business.Api.Controllers
 
                 GetBusinessProfileRequest request = new(business.Url, business.Guid, business.IdEtab);
 
-                return await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
+                return await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
             } catch (Exception e) {
                 return (null, null);
             }
@@ -200,7 +203,7 @@ namespace GMB.Business.Api.Controllers
                 SeleniumDriver driver = new();
 
                 GetBusinessProfileRequest request = new(businessUrl.Url, businessUrl.Guid, null);
-                (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
+                (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
                 DbLib db = new();
 
                 // Update or insert Business Profile if exist or not.
@@ -215,6 +218,65 @@ namespace GMB.Business.Api.Controllers
             } catch (Exception e) {
                 Log.Error(e, $"An exception occurred while inserting new BU and BP with url = [{url}] : {e.Message}");
             }
+        }
+        /// <summary>
+        /// Find business by query (should be name + address) then insert it in DB if new.
+        /// </summary>
+        /// <param name="query"></param>
+        public static async
+        Task
+        CreateNewBusinessByQueryFromGoogleApi(string query)
+        {
+            string? placeId = await GoogleApi.GetPlaceId(query);
+            if (placeId == null)
+            {
+                return;
+            }
+            using DbLib db = new();
+            string idEtab = ToolBox.ComputeMd5Hash(placeId);
+
+            if (db.CheckBusinessProfileExist(idEtab))
+            { 
+                return;
+            }
+
+            PlaceDetailsResponse? placeDetails = await GoogleApi.GetGMB(placeId);
+            if (placeDetails == null || placeDetails.Result.Url == null)
+            { 
+                return;
+            }
+
+            DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(placeDetails.Result.Url));
+
+            businessUrl ??= UrlController.CreateUrl(placeDetails.Result.Url);
+
+            DbBusinessProfile? profile = new(
+                placeDetails.Result.PlaceId,
+                idEtab,
+                businessUrl.Guid,
+                placeDetails.Result.Name,
+                placeDetails.Result.Types?.FirstOrDefault(),
+                placeDetails.Result.FormattedAdress, placeDetails.Result.FormattedAdress,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("postal_code")).LongName,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("locality")).LongName,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("route")).LongName,
+                (float?)placeDetails.Result.Geometry.Location.Latitude,
+                (float?)placeDetails.Result.Geometry.Location.Longitude,
+                null,
+                null,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("street_number")).LongName,
+                null,
+                placeDetails.Result.FormattedPhoneNumber,
+                placeDetails.Result.Website,
+                placeDetails.Result.PlusCode.GlobalCode,
+                null,
+                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Result.BusinessStatus.ToString()),
+                null,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country")).LongName,
+                String.Join(placeDetails.Result.Geometry.Location.Latitude.ToString(),
+                placeDetails.Result.Geometry.Location.Longitude.ToString()));
+            ;
+            return;
         }
         #endregion
 
@@ -231,7 +293,7 @@ namespace GMB.Business.Api.Controllers
 
             driver.GetToPage(url);
             try {
-                return BusinessService.GetReviews(idEtab, dateLimit, driver);
+                return BusinessServiceApi.GetReviews(idEtab, dateLimit, driver);
             }
             catch (Exception e) {
                 return null;

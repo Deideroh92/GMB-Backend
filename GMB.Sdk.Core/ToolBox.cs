@@ -4,8 +4,8 @@ using System.Text;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
 using System.Security.Authentication;
-using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Models;
+using GMB.Sdk.Core.Types.Api;
 
 namespace GMB.Sdk.Core
 {

@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
 
-namespace GMB.Sdk.Core.Types.Models
+namespace GMB.Sdk.Core.Types.Api
 {
     public class AddressApiResponse
     {

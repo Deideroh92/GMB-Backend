@@ -6,6 +6,7 @@ using GMB.Sdk.Core.Types.Database.Models;
 using System.Text.RegularExpressions;
 using System.Linq;
 using System;
+using GMB.Sdk.Core.Types.Api;
 
 namespace GMB.Tests
 {

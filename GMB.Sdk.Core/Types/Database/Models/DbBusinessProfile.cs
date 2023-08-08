@@ -4,9 +4,9 @@
 
     public enum BusinessStatus
     {
-        OPEN,
-        TEMPORARLY_CLOSED,
-        CLOSED,
+        OPERATIONAL,
+        CLOSED_TEMPORARILY,
+        CLOSED_PERMANENTLY,
         DELETED
     }
 

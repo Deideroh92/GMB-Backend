@@ -5,12 +5,12 @@ using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Url.Api;
-using GMB.Business.Api;
 using GMB.Business.Api.Models;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Url.Api.Models;
 using GMB.Business.Api.Controllers;
 using Serilog;
+using GMB.Business.Api.API;
 
 namespace GMB.Tests
 {
@@ -92,7 +92,7 @@ namespace GMB.Tests
             foreach (BusinessAgent elem in businessList) {
                 try {
                     GetBusinessProfileRequest request = new(elem.Url, null, null);
-                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
+                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
                     var optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
                     List<string> optionsOnList = new();
                     foreach (IWebElement element in optionsOn) {
@@ -117,6 +117,18 @@ namespace GMB.Tests
             };
             BusinessAgentRequest request = new(opertationType, getReviews, business, reviewsDate);
             await BusinessController.Scanner(request, 1);
+        }
+        /// <summary>
+        /// Get google info by given url.
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task CreateNewBusinessByGoogleApi()
+        {
+            string query = "BRED-Banque Populaire 175 Bis Bd Jean Jaurès, 92100 Boulogne-Billancourt, France";
+            string query2 = "BRED-Banque Populaire 78 Bis Rte de la Reine, 92100 Boulogne-Billancourt, France";
+            string query3 = "CABUDZAJNDKL?AZFNZEALAZMFJDZAPDHAFZ";
+            await BusinessController.CreateNewBusinessByQueryFromGoogleApi(query);
         }
         /// <summary>
         /// Starting Scanner.

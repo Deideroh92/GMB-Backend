@@ -8,13 +8,18 @@ using Serilog;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Business.Api.Models;
 using GMB.Sdk.Core.Types.Database.Models;
+using System.Net.Http.Headers;
+using GMB.Sdk.Core.Types.Api;
 
-namespace GMB.Business.Api
+namespace GMB.Business.Api.API
 {
     /// <summary>
     /// Business Service.
     /// </summary>
-    public class BusinessService {
+    public class BusinessServiceApi
+    {
+
+        public static readonly string API_KEY = "AIzaSyCKhxq-6XXvHZ8bHqDnsYb9v-sbEMl4A6E";
 
         #region Profile & Score
         /// <summary>
@@ -23,7 +28,8 @@ namespace GMB.Business.Api
         /// <param name="driver"></param>
         /// <param name="request"></param>
         /// <returns>Business Profile and a Business Score if any</returns>
-        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, GetBusinessProfileRequest request) {
+        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, GetBusinessProfileRequest request, bool getPlusCode = true)
+        {
             // Initialization of all variables
             int? reviews = null;
             string? address = null;
@@ -40,11 +46,13 @@ namespace GMB.Business.Api
             string? geoloc = null;
             string? country = null;
             string? placeId = null;
-            BusinessStatus status = BusinessStatus.OPEN;
+            string? plusCode = null;
+            BusinessStatus status = BusinessStatus.OPERATIONAL;
 
             driver.GetToPage(request.Url);
 
-            try {
+            try
+            {
                 string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
                 string? googleAddress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)?.GetAttribute("aria-label")?.Replace("Adresse:", "")?.Trim();
                 string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.img)?.GetAttribute("src")?.Trim();
@@ -63,9 +71,9 @@ namespace GMB.Business.Api
                 if (status_tmp != null)
                 {
                     if (status_tmp.Contains("Fermé définitivement") || status_tmp.Contains("Définitivement fermé"))
-                        status = BusinessStatus.CLOSED;
+                        status = BusinessStatus.CLOSED_PERMANENTLY;
                     if (status_tmp.Contains("Fermé temporairement"))
-                        status = BusinessStatus.TEMPORARLY_CLOSED;
+                        status = BusinessStatus.CLOSED_TEMPORARILY;
                 }
 
                 #region Score
@@ -91,9 +99,11 @@ namespace GMB.Business.Api
                 #endregion
 
                 #region Address Api
-                if (googleAddress != null) {
+                if (googleAddress != null)
+                {
                     AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
-                    if (addressResponse != null) {
+                    if (addressResponse != null)
+                    {
                         lon = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[0]);
                         lat = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[1]);
                         city = addressResponse.Features[0]?.Properties?.City;
@@ -123,11 +133,14 @@ namespace GMB.Business.Api
                 #endregion
 
                 #region Plus Code
-                string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
-
-                if (plusCode != null)
+                if (getPlusCode)
                 {
-                    (longPlusCode, geoloc, country) = GetCoordinatesFromPlusCode(driver, plusCode);
+                    plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
+
+                    if (plusCode != null)
+                    {
+                        (longPlusCode, geoloc, country) = GetCoordinatesFromPlusCode(driver, plusCode);
+                    }
                 }
                 #endregion
 
@@ -137,7 +150,8 @@ namespace GMB.Business.Api
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
                 return (dbBusinessProfile, dbBusinessScore);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 throw new Exception($"Couldn't get business infos (profile or score) with id etab = [{request.IdEtab}] and guid = [{request.Guid}] and url = [{request.Url}]", e);
             }
         }
@@ -149,7 +163,8 @@ namespace GMB.Business.Api
         /// <returns>Coordinates from Plus Code</returns>
         public static (string?, string?, string?) GetCoordinatesFromPlusCode(SeleniumDriver driver, string plusCode)
         {
-            try {
+            try
+            {
                 driver.GetToPage("https://plus.codes/" + plusCode);
                 ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.expand).Click();
                 Thread.Sleep(1000);
@@ -159,7 +174,8 @@ namespace GMB.Business.Api
                 country = country[(country.LastIndexOf(',') + 1)..].Trim();
                 return (longPlusCode, geoloc, country);
             }
-            catch (Exception e) {
+            catch (Exception e)
+            {
                 throw new Exception($"Couldn't get plus code infos for = [{plusCode}]", e);
             }
         }
@@ -172,13 +188,17 @@ namespace GMB.Business.Api
         /// <param name="idEtab"></param>
         /// <param name="dateLimit"></param>
         /// <param name="driver"></param>
-        public static List<DbBusinessReview>? GetReviews(string idEtab, DateTime? dateLimit, SeleniumDriver driver) {
+        public static List<DbBusinessReview>? GetReviews(string idEtab, DateTime? dateLimit, SeleniumDriver driver)
+        {
 
-            try {
+            try
+            {
                 WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(2));
                 IWebElement toReviewPage = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage)));
                 toReviewPage.Click();
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 throw new Exception("Couldn't get to review pages", e);
             }
 
@@ -203,7 +223,8 @@ namespace GMB.Business.Api
                         if (businessReview == null)
                             continue;
                         businessReviews.Add(businessReview);
-                    } catch (Exception e)
+                    }
+                    catch (Exception e)
                     {
                         Log.Error($"Couldn't treat a review : {e.Message}. Error : {e.StackTrace}", e);
                     }
@@ -217,11 +238,14 @@ namespace GMB.Business.Api
         /// <param name="driver"></param>
         /// <param name="dateLimit"></param>
         /// <returns>Review list</returns>
-        private static ReadOnlyCollection<IWebElement>? GetWebElements(IWebDriver driver, DateTime? dateLimit) {
-            try {
+        private static ReadOnlyCollection<IWebElement>? GetWebElements(IWebDriver driver, DateTime? dateLimit)
+        {
+            try
+            {
                 ReadOnlyCollection<IWebElement>? reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
 
-                if (reviewList == null || reviewList.Count == 0) {
+                if (reviewList == null || reviewList.Count == 0)
+                {
                     return null;
                 }
 
@@ -233,20 +257,24 @@ namespace GMB.Business.Api
                 DateTime realDate;
                 int index = 0;
 
-                while (reviewListLength != reviewList.Count) {
+                while (reviewListLength != reviewList.Count)
+                {
                     ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
                     Thread.Sleep(2000);
                     reviewListLength = reviewList.Count;
                     reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
 
-                    if (reviewList == null) {
+                    if (reviewList == null)
+                    {
                         break;
                     }
 
                     reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Trim();
-                    if (reviewGoogleDate != null) {
+                    if (reviewGoogleDate != null)
+                    {
                         realDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
-                        if (realDate < dateLimit) {
+                        if (realDate < dateLimit)
+                        {
                             break;
                         }
                     }
@@ -260,7 +288,8 @@ namespace GMB.Business.Api
                             try
                             {
                                 ToolBox.FindElementSafe(item, XPathReview.plusButton).Click();
-                            } catch
+                            }
+                            catch
                             {
                                 continue;
                             }
@@ -271,10 +300,15 @@ namespace GMB.Business.Api
                 }
 
                 return reviewList;
-            } catch (Exception e) {
-                if (e.Message.Contains("javascript error: Cannot read properties of null (reading 'parentNode')")) {
+            }
+            catch (Exception e)
+            {
+                if (e.Message.Contains("javascript error: Cannot read properties of null (reading 'parentNode')"))
+                {
                     return null;
-                } else {
+                }
+                else
+                {
                     throw new Exception($"Error getting reviews from the Google page : {e.Message}", e);
                 }
             }
@@ -286,14 +320,16 @@ namespace GMB.Business.Api
         /// <param name="idEtab"></param>
         /// <param name="dateLimit"></param>
         /// <returns>Business Review</returns>
-        private static DbBusinessReview? GetReviewFromGooglePage(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit) {
-            try {
+        private static DbBusinessReview? GetReviewFromGooglePage(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit)
+        {
+            try
+            {
                 string idReview = reviewWebElement.GetAttribute("data-review-id")?.Trim() ?? throw new Exception("No review id");
 
                 string? reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate)?.Text?.Trim();
                 DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
 
-                if (reviewGoogleDate == null || (dateLimit.HasValue && reviewDate < dateLimit.Value))
+                if (reviewGoogleDate == null || dateLimit.HasValue && reviewDate < dateLimit.Value)
                     return null;
 
                 string userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName)?.GetAttribute("aria-label")?.Replace("Photo de", "").Trim() ?? "";
@@ -302,7 +338,8 @@ namespace GMB.Business.Api
 
                 int userNbReviews = 1;
                 string? userNbReviewsText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)?.Text?.Replace("avis", "").Replace("·", "").Replace("Local Guide", "").Replace(" ", "").Trim();
-                if (!string.IsNullOrEmpty(userNbReviewsText) && int.TryParse(userNbReviewsText, out int parsedUserNbReviews)) {
+                if (!string.IsNullOrEmpty(userNbReviewsText) && int.TryParse(userNbReviewsText, out int parsedUserNbReviews))
+                {
                     userNbReviews = parsedUserNbReviews;
                 }
 
@@ -314,7 +351,9 @@ namespace GMB.Business.Api
                 bool replied = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText));
 
                 return new DbBusinessReview(idEtab, idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow);
-            } catch (Exception) {
+            }
+            catch (Exception)
+            {
                 throw new Exception("Couldn't get review info from a review element");
             }
         }
@@ -322,8 +361,10 @@ namespace GMB.Business.Api
         /// Sort reviews in ascending date order.
         /// </summary>
         /// <param name="driver"></param>
-        private static void SortReviews(IWebDriver driver) {
-            try {
+        private static void SortReviews(IWebDriver driver)
+        {
+            try
+            {
                 WebDriverWait wait = new(driver, TimeSpan.FromSeconds(5));
 
                 IWebElement sortButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.sortReviews)));
@@ -331,7 +372,9 @@ namespace GMB.Business.Api
 
                 IWebElement sortButton2 = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.sortReviews2)));
                 sortButton2.Click();
-            } catch(Exception e) {
+            }
+            catch (Exception e)
+            {
                 throw new Exception("Couldn't sort reviews", e);
             }
         }
