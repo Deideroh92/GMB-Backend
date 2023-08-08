@@ -245,6 +245,29 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error getting BU guid with url encoded = [{urlEncoded}]", e);
             }
         }
+        /// <summary>
+        /// Get Business Url Guid by Url Encoded.
+        /// </summary>
+        /// <param name="urlEncoded"></param>
+        /// <returns>Guid</returns>
+        public DbBusinessUrl? GetBusinessUrlByUrlEncoded(string urlEncoded)
+        {
+            try
+            {
+                string selectCommand = "SELECT GUID, URL, URL_MD5 FROM vBUSINESS_URL WHERE URL_MD5 = @UrlEncoded";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@UrlEncoded", urlEncoded);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return new(reader.GetString(0), reader.GetString(1), null, reader.GetString(2));
+
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting BU guid with url encoded = [{urlEncoded}]", e);
+            }
+        }
         #endregion
 
         #region Update

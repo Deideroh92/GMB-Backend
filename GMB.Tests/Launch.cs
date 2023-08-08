@@ -17,7 +17,8 @@ namespace GMB.Tests
     [TestClass]
     public class Launch {
 
-        public static readonly string pathUrlKnownFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
+        public static readonly string pathUrlFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
+        public static readonly string pathUrlKnownFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\urlKnown.txt";
         public static readonly string pathUnknownBusinessFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\unknown_url.txt";
         private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Tests\logs";
 
@@ -117,6 +118,38 @@ namespace GMB.Tests
             BusinessAgentRequest request = new(opertationType, getReviews, business, reviewsDate);
             await BusinessController.Scanner(request, 1);
         }
+        /// <summary>
+        /// Starting Scanner.
+        /// </summary>
+        [TestMethod]
+        public void InsertNewBusinessByUrl()
+        {
+            string[]? urlList = File.ReadAllLines(pathUrlFile);
+            List<Task> tasks = new();
+
+            int maxConcurrentThreads = 1;
+            SemaphoreSlim semaphore = new(maxConcurrentThreads);
+
+            foreach (string url in urlList)
+            {
+                Task newThread = Task.Run(async () =>
+                {
+                    await semaphore.WaitAsync(); // Wait until there's an available slot to run
+                    try
+                    {
+                        BusinessController.CreateNewBusinessProfileByUrl(url);
+                    } finally
+                    {
+                        semaphore.Release(); // Release the slot when the task is done
+                    }
+                });
+                tasks.Add(newThread);
+            }
+
+            Task.WaitAll(tasks.ToArray());
+            return;
+        }
+
         /// <summary>
         /// Starting Scanner.
         /// </summary>

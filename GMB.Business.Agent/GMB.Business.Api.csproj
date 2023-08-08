@@ -17,6 +17,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GMB.Sdk.Core\GMB.Sdk.Core.csproj" />
+    <ProjectReference Include="..\GMB.Url.Agent\GMB.Url.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

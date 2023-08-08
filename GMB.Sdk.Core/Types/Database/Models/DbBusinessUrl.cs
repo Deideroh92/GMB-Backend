@@ -33,7 +33,7 @@
         /// <param name="textSearch"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="urlEncoded"></param>
-        public DbBusinessUrl(string guid, string url, string? textSearch, DateTime? dateUpdate, string urlEncoded, UrlState state = UrlState.NEW, DateTime? dateInsert = null)
+        public DbBusinessUrl(string guid, string url, string? textSearch, string urlEncoded, UrlState state = UrlState.NEW, DateTime? dateInsert = null, DateTime? dateUpdate = null)
         {
             Guid = guid;
             Url = url;

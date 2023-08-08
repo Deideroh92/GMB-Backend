@@ -51,7 +51,7 @@ namespace GMB.Url.Api
 
                     foreach(string urlToValidate in urls) {
                         if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(url))) {
-                            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, textSearch, null, ToolBox.ComputeMd5Hash(url));
+                            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, textSearch, ToolBox.ComputeMd5Hash(url));
                             db.CreateBusinessUrl(businessUrl);
                         }
                     }
@@ -68,11 +68,16 @@ namespace GMB.Url.Api
         /// </summary>
         /// <param name="url"></param>
         /// <param name="date"></param>
-        public static void CreateUrl(string url, DateTime? date = null) {
+        public static DbBusinessUrl? CreateUrl(string url, DateTime? date = null) {
             using DbLib db = new();
-
-            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", date, ToolBox.ComputeMd5Hash(url), UrlState.NEW, date);
-            db.CreateBusinessUrl(businessUrl);
+            string? urlEncoded = ToolBox.ComputeMd5Hash(url);
+            DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(urlEncoded);
+            if (businessUrl == null)
+            {
+                businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", ToolBox.ComputeMd5Hash(url), UrlState.NEW, null, date);
+                db.CreateBusinessUrl(businessUrl);
+            }
+            return businessUrl;
         }
         /// <summary>
         /// Get Urls from a request.

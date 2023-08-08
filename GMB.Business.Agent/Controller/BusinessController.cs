@@ -6,6 +6,7 @@ using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Business.Api.Models;
 using OpenQA.Selenium;
+using GMB.Url.Api;
 
 namespace GMB.Business.Api.Controllers
 {
@@ -54,7 +55,7 @@ namespace GMB.Business.Api.Controllers
                             continue;
                         }
                         if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(driver.WebDriver.Url))) {
-                            DbBusinessUrl businessUrl = new(profile.FirstGuid, driver.WebDriver.Url, "file", DateTime.UtcNow, ToolBox.ComputeMd5Hash(driver.WebDriver.Url), UrlState.UPDATED);
+                            DbBusinessUrl businessUrl = new(profile.FirstGuid, driver.WebDriver.Url, "file", ToolBox.ComputeMd5Hash(driver.WebDriver.Url), UrlState.UPDATED);
                             db.CreateBusinessUrl(businessUrl);
                         }
                     }
@@ -176,6 +177,41 @@ namespace GMB.Business.Api.Controllers
                 return await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
             } catch (Exception e) {
                 return (null, null);
+            }
+        }
+        /// <summary>
+        /// Create a new business url and business if it doesn't exist already.
+        /// </summary>
+        /// <param name="url"></param>
+        public static async void CreateNewBusinessProfileByUrl(string url)
+        {
+            Log.Logger = new LoggerConfiguration()
+            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
+            .CreateLogger();
+            try {
+                DbBusinessUrl? businessUrl = UrlController.CreateUrl(url);
+
+                if (businessUrl == null) { 
+                    return;
+                }
+
+                SeleniumDriver driver = new();
+
+                GetBusinessProfileRequest request = new(businessUrl.Url, businessUrl.Guid, null);
+                (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessService.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
+                DbLib db = new();
+
+                // Update or insert Business Profile if exist or not.
+                if (db.CheckBusinessProfileExist(profile.IdEtab))
+                    db.UpdateBusinessProfile(profile);
+                else
+                    db.CreateBusinessProfile(profile);
+
+                // Insert Business Score if have one.
+                if (score?.Score != null)
+                    db.CreateBusinessScore(score);
+            } catch (Exception e) {
+                Log.Error(e, $"An exception occurred while inserting new BU and BP with url = [{url}] : {e.Message}");
             }
         }
         #endregion
