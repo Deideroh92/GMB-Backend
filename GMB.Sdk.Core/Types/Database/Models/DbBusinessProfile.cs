@@ -16,7 +16,7 @@
     {
         public long Id { get; set; }
         public string IdEtab { get; set; }
-        public string? IdMaps { get; set; }
+        public string? PlaceId { get; set; }
         public string FirstGuid { get; set; }
         public string? Name { get; set; }
         public string? Category { get; set; }
@@ -47,7 +47,7 @@
         /// Constructor
         /// </summary>
         /// <param name="idEtab"></param>
-        /// <param name="idMaps"></param>
+        /// <param name="placeId"></param>
         /// <param name="firstGuid"></param>
         /// <param name="name"></param>
         /// <param name="category"></param>
@@ -68,10 +68,10 @@
         /// <param name="addressScore"></param>
         /// <param name="plusCode"></param>
         /// <param name="country"></param>
-        public DbBusinessProfile(string? idMaps, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber, float? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
+        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber, float? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
         {
             IdEtab = idEtab;
-            IdMaps = idMaps;
+            PlaceId = placeId;
             FirstGuid = firstGuid;
             Name = name;
             Category = category;

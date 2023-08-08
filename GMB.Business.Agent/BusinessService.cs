@@ -8,7 +8,6 @@ using Serilog;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Business.Api.Models;
 using GMB.Sdk.Core.Types.Database.Models;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace GMB.Business.Api
 {
@@ -40,7 +39,7 @@ namespace GMB.Business.Api
             string? longPlusCode = null;
             string? geoloc = null;
             string? country = null;
-            string idMaps = null;
+            string? placeId = null;
             BusinessStatus status = BusinessStatus.OPEN;
 
             driver.GetToPage(request.Url);
@@ -119,24 +118,23 @@ namespace GMB.Business.Api
                 }
                 #endregion
 
-                #region Id Maps
-                if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.idMaps)))
+                #region Place ID
+                if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.placeId)))
                 {
-                    var script = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.idMaps).GetAttribute("innerHTML");
-                    int index = script.IndexOf("reviews?placeid");
+                    var scriptTag = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.placeId)?.GetAttribute("innerHTML");
+                    int index = scriptTag.IndexOf("reviews?placeid");
 
                     if (index != -1)
                     {
-                        string substring = script[(index + 22)..];
-                        idMaps = substring[..substring.IndexOf('\\')];
+                        string substring = scriptTag[(index + 22)..];
+                        placeId = substring[..substring.IndexOf('\\')];
                     }
                 }
-
                 #endregion
 
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
                 request.Guid ??= Guid.NewGuid().ToString("N");
-                DbBusinessProfile dbBusinessProfile = new(idMaps, request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, country, geoloc);
+                DbBusinessProfile dbBusinessProfile = new(placeId, request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, country, geoloc);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
                 return (dbBusinessProfile, dbBusinessScore);
             }
