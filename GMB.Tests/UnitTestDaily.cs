@@ -27,7 +27,7 @@ namespace GMB.Tests
 
             // Mairie de Paris 1er
             url = "https://www.google.com/maps/place/Mairie+de+Paris/@48.8280552,2.1798986,12z/data=!4m10!1m2!2m1!1smairie+de+paris!3m6!1s0x47e66e23b4333db3:0xbc314dec89c4971!8m2!3d48.8641075!4d2.3421539!15sCg9tYWlyaWUgZGUgcGFyaXNaESIPbWFpcmllIGRlIHBhcmlzkgEJY2l0eV9oYWxsmgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVVEyYzA5MWNrbFJFQUXgAQA!16s%2Fg%2F11c6pn36ph?entry=ttu";
-            (profile, score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url, null, null));
+            (profile, score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url, null, null), null);
             Assert.IsNotNull(profile);
             Assert.IsTrue(profile.Name == "Mairie de Paris");
             Assert.IsTrue(profile.GoogleAddress == "40 Rue du Louvre, 75001 Paris");
@@ -39,7 +39,7 @@ namespace GMB.Tests
 
             // McDonald's Champs Elysées
             url = "https://www.google.com/maps/place/McDonald's/@48.8660941,2.2928945,14z/data=!3m1!5s0x47e66fcea0d27c15:0x4fb4c9dbeb3c5271!4m10!1m2!2m1!1smcdonald!3m6!1s0x47e66fea26bafdc7:0x21ea7aaf1fb2b3e3!8m2!3d48.8731057!4d2.2992183!15sCghtY2RvbmFsZCIDiAEBWgoiCG1jZG9uYWxkkgEUZmFzdF9mb29kX3Jlc3RhdXJhbnTgAQA!16s%2Fg%2F1hd_88rdh?entry=ttu";
-            (profile, score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url, null, null));
+            (profile, score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url, null, null), null);
             Assert.IsNotNull(profile);
             Assert.IsTrue(profile.Name == "McDonald's");
             Assert.IsTrue(profile.GoogleAddress == "Av. des Champs-Élysées 140, 75008 Paris");
@@ -52,7 +52,7 @@ namespace GMB.Tests
 
             // Banque de France Bastille
             url = "https://www.google.com/maps/place/Banque+de+France/@48.8592581,2.3115198,14z/data=!4m10!1m2!2m1!1sbanque+de+france!3m6!1s0x47e67201b2c7a491:0x8debf13abf947b93!8m2!3d48.8535035!4d2.3680957!15sChBiYW5xdWUgZGUgZnJhbmNlIgOIAQGSARVmaW5hbmNpYWxfaW5zdGl0dXRpb27gAQA!16s%2Fg%2F1tf1n45r?entry=ttu";
-            (profile, score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url, null, null));
+            (profile, score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url, null, null), null);
             Assert.IsNotNull(profile);
             Assert.IsTrue(profile.Name == "Banque de France");
             Assert.IsTrue(profile.GoogleAddress == "CS 41834, 3 bis Pl. de la Bastille, 75183 Paris");

@@ -201,7 +201,7 @@ namespace GMB.Business.Api.Controllers
                     return;
                 }
 
-                SeleniumDriver driver = new();
+                using SeleniumDriver driver = new();
 
                 GetBusinessProfileRequest request = new(businessUrl.Url, businessUrl.Guid, null);
                 (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
