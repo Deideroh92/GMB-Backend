@@ -450,7 +450,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             }
             catch (Exception e)
             {
-                throw new Exception($"Error getting BP agent list", e);
+                throw new Exception($"Error getting BA list", e);
             }
         }
         /// <summary>
@@ -518,7 +518,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="urlEncoded"></param>
         /// <returns>Business Agent or Null if not found</returns>
-        public BusinessAgent? GetBusinessByUrlEncoded(string urlEncoded)
+        public BusinessAgent? GetBusinessAgentByUrlEncoded(string urlEncoded)
         {
             try
             {
@@ -541,7 +541,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             }
             catch (Exception e)
             {
-                throw new Exception($"Error getting BP by url encoded = [{urlEncoded}]", e);
+                throw new Exception($"Error getting BA by url encoded = [{urlEncoded}]", e);
             }
         }
         /// <summary>
@@ -549,7 +549,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="idEtab"></param>
         /// <returns>Business or null</returns>
-        public BusinessAgent? GetBusinessByIdEtab(string idEtab) {
+        public BusinessAgent? GetBusinessAgentByIdEtab(string idEtab) {
             try {
                 string selectCommand = "SELECT FIRST_GUID, URL, ID_ETAB FROM vBUSINESS_PROFILE WHERE ID_ETAB = @IdEtab";
 
@@ -564,6 +564,33 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
                 return null;
             } catch (Exception e) {
+                throw new Exception($"Error getting BA by id etab = [{idEtab}]", e);
+            }
+        }
+        /// <summary>
+        /// Get Business by Id Etab.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        /// <returns>Business or null</returns>
+        public DbBusinessProfile? GetBusinessByIdEtab(string idEtab)
+        {
+            try
+            {
+                string selectCommand = "SELECT * FROM vBUSINESS_PROFILE WHERE ID_ETAB = @IdEtab";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", idEtab);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    DbBusinessProfile businessProfile = new(reader["PLACE_ID"].ToString()!, reader["ID_ETAB"].ToString()!, reader["FIRST_GUID"].ToString()!, reader["NAME"].ToString(), reader["CATEGORY"].ToString(), reader["ADRESS"].ToString(), reader["A_ADDRESS"].ToString(), reader["A_POSTCODE"].ToString(), reader["A_CITY"].ToString(), reader["A_CITY_CODE"].ToString(), (float?)reader["A_LAT"], (float?)reader["A_LON"], reader["A_BAN_ID"].ToString(), reader["A_ADDRESS_TYPE"].ToString(), reader["A_NUMBER"].ToString(), (float?)reader["A_SCORE"], reader["TEL"].ToString(), reader["WEBSITE"].ToString(), reader["PLUS_CODE"].ToString(), DateTime.Parse(reader["DATE_UPDATE"].ToString()!), (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!), reader["URL_PICTURE"].ToString(), reader["A_COUNTRY"].ToString(), reader["GEOLOC"].ToString());
+                    return businessProfile;
+                }
+
+                return null;
+            } catch (Exception e)
+            {
                 throw new Exception($"Error getting BP by id etab = [{idEtab}]", e);
             }
         }

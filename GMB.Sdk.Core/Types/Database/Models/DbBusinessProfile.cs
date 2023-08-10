@@ -12,7 +12,7 @@
 
     #endregion
 
-    public class DbBusinessProfile
+    public class DbBusinessProfile : IEquatable<DbBusinessProfile?>
     {
         public long Id { get; set; }
         public string IdEtab { get; set; }
@@ -106,6 +106,75 @@
                 throw new NullReferenceException("No IdEtab for this business");
             if (Name == null)
                 Status = BusinessStatus.DELETED;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as DbBusinessProfile);
+        }
+
+        public bool Equals(DbBusinessProfile? other)
+        {
+            return other is not null &&
+                   PlaceId == other.PlaceId &&
+                   Name == other.Name &&
+                   Category == other.Category &&
+                   Geoloc == other.Geoloc &&
+                   GoogleAddress == other.GoogleAddress &&
+                   Address == other.Address &&
+                   PostCode == other.PostCode &&
+                   City == other.City &&
+                   CityCode == other.CityCode &&
+                   Lat == other.Lat &&
+                   Lon == other.Lon &&
+                   IdBan == other.IdBan &&
+                   StreetNumber == other.StreetNumber &&
+                   Country == other.Country &&
+                   AddressType == other.AddressType &&
+                   AddressScore == other.AddressScore &&
+                   Tel == other.Tel &&
+                   Website == other.Website &&
+                   PlusCode == other.PlusCode &&
+                   Status == other.Status &&
+                   PictureUrl == other.PictureUrl;
+        }
+
+        public bool AdressEquals(DbBusinessProfile? other)
+        {
+            return other is not null && GoogleAddress == other.GoogleAddress;
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new();
+            hash.Add(Id);
+            hash.Add(IdEtab);
+            hash.Add(PlaceId);
+            hash.Add(FirstGuid);
+            hash.Add(Name);
+            hash.Add(Category);
+            hash.Add(Geoloc);
+            hash.Add(GoogleAddress);
+            hash.Add(Address);
+            hash.Add(PostCode);
+            hash.Add(City);
+            hash.Add(CityCode);
+            hash.Add(Lat);
+            hash.Add(Lon);
+            hash.Add(IdBan);
+            hash.Add(StreetNumber);
+            hash.Add(Country);
+            hash.Add(AddressType);
+            hash.Add(AddressScore);
+            hash.Add(Tel);
+            hash.Add(Website);
+            hash.Add(PlusCode);
+            hash.Add(DateInsert);
+            hash.Add(DateUpdate);
+            hash.Add(Status);
+            hash.Add(Processing);
+            hash.Add(PictureUrl);
+            return hash.ToHashCode();
         }
         #endregion
     }

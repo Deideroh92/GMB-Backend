@@ -28,7 +28,7 @@ namespace GMB.Business.Api.API
         /// <param name="driver"></param>
         /// <param name="request"></param>
         /// <returns>Business Profile and a Business Score if any</returns>
-        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, GetBusinessProfileRequest request, bool getPlusCode = true)
+        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, GetBusinessProfileRequest request, DbBusinessProfile? business, bool getPlusCode = true)
         {
             // Initialization of all variables
             int? reviews = null;
@@ -98,26 +98,6 @@ namespace GMB.Business.Api.API
                 }
                 #endregion
 
-                #region Address Api
-                if (googleAddress != null)
-                {
-                    AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
-                    if (addressResponse != null)
-                    {
-                        lon = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[0]);
-                        lat = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[1]);
-                        city = addressResponse.Features[0]?.Properties?.City;
-                        postCode = addressResponse.Features[0]?.Properties?.Postcode;
-                        cityCode = addressResponse.Features[0]?.Properties?.CityCode;
-                        address = addressResponse.Features[0]?.Properties?.Street;
-                        addressType = addressResponse.Features[0]?.Properties?.PropertyType;
-                        idBan = addressResponse.Features[0]?.Properties?.Id;
-                        streetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
-                        addressScore = (float?)addressResponse.Features[0]?.Properties?.Score;
-                    }
-                }
-                #endregion
-
                 #region Place ID
                 if (ToolBox.Exists(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.placeId)))
                 {
@@ -132,22 +112,50 @@ namespace GMB.Business.Api.API
                 }
                 #endregion
 
-                #region Plus Code
-                if (getPlusCode)
-                {
-                    plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
-
-                    if (plusCode != null)
-                    {
-                        (longPlusCode, geoloc, country) = GetCoordinatesFromPlusCode(driver, plusCode);
-                    }
-                }
-                #endregion
-
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
                 request.Guid ??= Guid.NewGuid().ToString("N");
                 DbBusinessProfile dbBusinessProfile = new(placeId, request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, country, geoloc);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
+
+                if(!dbBusinessProfile.AdressEquals(business))
+                {
+                    #region PlusCode
+                    if (getPlusCode)
+                    {
+                        plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
+
+                        if (plusCode != null)
+                        {
+                            (longPlusCode, geoloc, country) = GetCoordinatesFromPlusCode(driver, plusCode);
+                            dbBusinessProfile.PlusCode = longPlusCode;
+                            dbBusinessProfile.Geoloc = geoloc;
+                            dbBusinessProfile.Country = country;
+                        }
+                    }
+                    #endregion
+
+                    #region Address Api
+                    if (googleAddress != null)
+                    {
+                        AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
+                        if (addressResponse != null)
+                        {
+                            lon = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[0]);
+                            lat = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[1]);
+                            city = addressResponse.Features[0]?.Properties?.City;
+                            postCode = addressResponse.Features[0]?.Properties?.Postcode;
+                            cityCode = addressResponse.Features[0]?.Properties?.CityCode;
+                            address = addressResponse.Features[0]?.Properties?.Street;
+                            addressType = addressResponse.Features[0]?.Properties?.PropertyType;
+                            idBan = addressResponse.Features[0]?.Properties?.Id;
+                            streetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
+                            addressScore = (float?)addressResponse.Features[0]?.Properties?.Score;
+                        }
+                    }
+                    #endregion
+                }
+
+
                 return (dbBusinessProfile, dbBusinessScore);
             }
             catch (Exception e)

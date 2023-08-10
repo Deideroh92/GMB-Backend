@@ -41,21 +41,24 @@ namespace GMB.Business.Api.Controllers
 
             DateTime time = DateTime.UtcNow;
 
-            foreach (BusinessAgent business in request.BusinessList) {
+            foreach (BusinessAgent businessAgent in request.BusinessList) {
                 try {
-
                     ToolBox.BreakingHours();
 
                     count++;
-                    GetBusinessProfileRequest BPRequest = new(business.Url, business.Guid, business.IdEtab);
+                    GetBusinessProfileRequest BPRequest = new(businessAgent.Url, businessAgent.Guid, businessAgent.IdEtab);
+                    DbBusinessProfile? business = null;
+
+                    if (businessAgent.IdEtab != null)
+                        business = db.GetBusinessByIdEtab(businessAgent.IdEtab);
 
                     // Get business profile infos from Google.
-                    (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest);
+                    (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
 
                     if (request.Operation == Operation.FILE) {
                         if (profile == null) {
                             using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber.ToString() + ".txt");
-                            operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
+                            operationFileWritter.WriteLine(businessAgent.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
                             continue;
                         }
                         if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(driver.WebDriver.Url))) {
@@ -66,22 +69,21 @@ namespace GMB.Business.Api.Controllers
                     
                     // No business found at this url.
                     if (profile == null) {
-                        if (request.Operation == Operation.URL_STATE && business.Guid != null)
-                            db.DeleteBusinessUrlByGuid(business.Guid);
+                        if (request.Operation == Operation.URL_STATE && businessAgent.Guid != null)
+                            db.DeleteBusinessUrlByGuid(businessAgent.Guid);
                         else {
-                            if (business.IdEtab != null) {
-                                db.UpdateBusinessProfileStatus(business.IdEtab, BusinessStatus.DELETED);
-                                db.UpdateBusinessProfileProcessingState(business.IdEtab, 0);
+                            if (businessAgent.IdEtab != null) {
+                                db.UpdateBusinessProfileStatus(businessAgent.IdEtab, BusinessStatus.DELETED);
+                                db.UpdateBusinessProfileProcessingState(businessAgent.IdEtab, 0);
                             }
                         }   
                         continue;
                     }
-                    
-                    // Update or insert Business Profile if exist or not.
-                    if (request.Operation == Operation.OTHER || db.CheckBusinessProfileExist(profile.IdEtab))
-                        db.UpdateBusinessProfile(profile);
-                    else
+
+                    if (business == null)
                         db.CreateBusinessProfile(profile);
+                    if (business != null && !profile.Equals(business))
+                        db.UpdateBusinessProfile(profile);
 
                     // Insert Business Score if have one.
                     if (score?.Score != null)
@@ -131,11 +133,11 @@ namespace GMB.Business.Api.Controllers
 
                     if (request.Operation == Operation.FILE) {
                         using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile + threadNumber.ToString() + ".txt");
-                        operationFileWritter.WriteLine(business.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + profile.Name + "$$" + profile.GoogleAddress + "$$" + profile.IdEtab + "$$" + driver.WebDriver.Url);
+                        operationFileWritter.WriteLine(businessAgent.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + profile.Name + "$$" + profile.GoogleAddress + "$$" + profile.IdEtab + "$$" + driver.WebDriver.Url);
                     }
                 }
                 catch (Exception e) {
-                    Log.Error(e, $"An exception occurred on BP with id etab = [{business.IdEtab}], guid = [{business.Guid}], url = [{business.Url}] : {e.Message}");
+                    Log.Error(e, $"An exception occurred on BP with id etab = [{businessAgent.IdEtab}], guid = [{businessAgent.Guid}], url = [{businessAgent.Url}] : {e.Message}");
                 }
             }
 
@@ -151,12 +153,11 @@ namespace GMB.Business.Api.Controllers
         /// </summary>
         /// <param name="url"></param>
         /// <returns>Business Profile and Score as a Tuple</returns>
-        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetGoogleBusinessProfileAndScoreByUrl(string url) {
+        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> ScanGMBByUrl(string url) {
             try {
-                using DbLib db = new();
                 using SeleniumDriver driver = new();
 
-                return await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url));
+                return await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url), null);
             } catch (Exception e) {
                 return (null, null);
             }
@@ -166,12 +167,12 @@ namespace GMB.Business.Api.Controllers
         /// </summary>
         /// <param name="idEtab"></param>
         /// <returns>Business Profile and Score as a Tuple</returns>
-        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetGoogleBusinessProfileAndScoreByIdEtab(string idEtab) {
+        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> ScanGMBByIdEtab(string idEtab) {
             try {
                 using DbLib db = new();
                 using SeleniumDriver driver = new();
 
-                BusinessAgent? business = db.GetBusinessByIdEtab(idEtab);
+                BusinessAgent? business = db.GetBusinessAgentByIdEtab(idEtab);
 
                 if (business == null) {
                     return (null, null);
@@ -179,7 +180,7 @@ namespace GMB.Business.Api.Controllers
 
                 GetBusinessProfileRequest request = new(business.Url, business.Guid, business.IdEtab);
 
-                return await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
+                return await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
             } catch (Exception e) {
                 return (null, null);
             }
@@ -203,7 +204,7 @@ namespace GMB.Business.Api.Controllers
                 SeleniumDriver driver = new();
 
                 GetBusinessProfileRequest request = new(businessUrl.Url, businessUrl.Guid, null);
-                (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
+                (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
                 DbLib db = new();
 
                 // Update or insert Business Profile if exist or not.
@@ -223,9 +224,7 @@ namespace GMB.Business.Api.Controllers
         /// Find business by query (should be name + address) then insert it in DB if new.
         /// </summary>
         /// <param name="query"></param>
-        public static async
-        Task
-        CreateNewBusinessByQueryFromGoogleApi(string query)
+        public static async Task CreateNewBusinessByQueryFromGoogleApi(string query)
         {
             string? placeId = await GoogleApi.GetPlaceId(query);
             if (placeId == null)
@@ -273,8 +272,7 @@ namespace GMB.Business.Api.Controllers
                 (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Result.BusinessStatus.ToString()),
                 null,
                 placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country")).LongName,
-                String.Join(placeDetails.Result.Geometry.Location.Latitude.ToString(),
-                placeDetails.Result.Geometry.Location.Longitude.ToString()));
+                placeDetails.Result.Geometry.Location.Latitude.ToString() + ", " + placeDetails.Result.Geometry.Location.Longitude.ToString());
             ;
             return;
         }

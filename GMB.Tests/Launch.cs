@@ -92,7 +92,7 @@ namespace GMB.Tests
             foreach (BusinessAgent elem in businessList) {
                 try {
                     GetBusinessProfileRequest request = new(elem.Url, null, null);
-                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request);
+                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
                     var optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
                     List<string> optionsOnList = new();
                     foreach (IWebElement element in optionsOn) {
@@ -199,7 +199,7 @@ namespace GMB.Tests
 
                     if (isUrlKnownFile) {
                         foreach (string url in urlList) {
-                            BusinessAgent? business = db.GetBusinessByUrlEncoded(ToolBox.ComputeMd5Hash(url));
+                            BusinessAgent? business = db.GetBusinessAgentByUrlEncoded(ToolBox.ComputeMd5Hash(url));
 
                             if (business == null) {
                                 Log.Error(url);
