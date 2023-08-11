@@ -584,7 +584,31 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
                 if (reader.Read())
                 {
-                    DbBusinessProfile businessProfile = new(reader["PLACE_ID"].ToString()!, reader["ID_ETAB"].ToString()!, reader["FIRST_GUID"].ToString()!, reader["NAME"].ToString(), reader["CATEGORY"].ToString(), reader["ADRESS"].ToString(), reader["A_ADDRESS"].ToString(), reader["A_POSTCODE"].ToString(), reader["A_CITY"].ToString(), reader["A_CITY_CODE"].ToString(), (float?)reader["A_LAT"], (float?)reader["A_LON"], reader["A_BAN_ID"].ToString(), reader["A_ADDRESS_TYPE"].ToString(), reader["A_NUMBER"].ToString(), (float?)reader["A_SCORE"], reader["TEL"].ToString(), reader["WEBSITE"].ToString(), reader["PLUS_CODE"].ToString(), DateTime.Parse(reader["DATE_UPDATE"].ToString()!), (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!), reader["URL_PICTURE"].ToString(), reader["A_COUNTRY"].ToString(), reader["GEOLOC"].ToString());
+                    DbBusinessProfile businessProfile = new(
+                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
+                        reader["ID_ETAB"].ToString()!,
+                        reader["FIRST_GUID"].ToString()!,
+                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
+                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
+                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
+                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
+                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
+                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
+                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
+                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
+                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
+                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
+                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
+                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
+                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
+                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
+                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
+                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
+                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
+                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
+                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
+                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null);
                     return businessProfile;
                 }
 

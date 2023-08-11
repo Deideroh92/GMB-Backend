@@ -4,7 +4,11 @@
 
     public enum BusinessStatus
     {
+        OPEN,
         OPERATIONAL,
+        CLOSED,
+        TEMPORARILY_CLOSED,
+        PERMANENTLY_CLOSED,
         CLOSED_TEMPORARILY,
         CLOSED_PERMANENTLY,
         DELETED
@@ -26,13 +30,13 @@
         public string? PostCode { get; set; }
         public string? City { get; set; }
         public string? CityCode { get; set; }
-        public float? Lat { get; set; }
-        public float? Lon { get; set; }
+        public double? Lat { get; set; }
+        public double? Lon { get; set; }
         public string? IdBan { get; set; }
         public string? StreetNumber { get; set; }
         public string? Country { get; set; }
         public string? AddressType { get; set; }
-        public float? AddressScore { get; set; }
+        public double? AddressScore { get; set; }
         public string? Tel { get; set; }
         public string? Website { get; set; }
         public string? PlusCode { get; set; }
@@ -68,7 +72,7 @@
         /// <param name="addressScore"></param>
         /// <param name="plusCode"></param>
         /// <param name="country"></param>
-        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, float? lat, float? lon, string? idBan, string? addressType, string? streetNumber, float? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
+        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
         {
             IdEtab = idEtab;
             PlaceId = placeId;
@@ -131,7 +135,6 @@
                    StreetNumber == other.StreetNumber &&
                    Country == other.Country &&
                    AddressType == other.AddressType &&
-                   AddressScore == other.AddressScore &&
                    Tel == other.Tel &&
                    Website == other.Website &&
                    PlusCode == other.PlusCode &&

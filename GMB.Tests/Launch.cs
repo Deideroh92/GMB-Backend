@@ -35,13 +35,13 @@ namespace GMB.Tests
             string[] cp = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "CpList.txt"));
             string[] customLocations = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "CustomLocations.txt"));
 
-            List<string> locations = new(customLocations);
+            List<string> locations = new(cp);
             List<Task> tasks = new();
 
             int maxConcurrentThreads = 1;
             SemaphoreSlim semaphore = new(maxConcurrentThreads);
 
-            foreach (string search in textSearch) {
+            foreach (string search in categories) {
                 UrlRequest request = new(locations.Select(s => s.Replace(';', ' ').Replace(' ', '+')).ToList(), search.Trim().Replace(' ', '+'));
                 Task newThread = Task.Run(async () =>
                 {
@@ -172,10 +172,10 @@ namespace GMB.Tests
             using DbLib db = new();
             int threadNumber = 0;
 
-            int entries = 10;
+            int entries = 6;
             int processing = 1;
-            Operation operationType = Operation.OTHER;
-            bool getReviews = false;
+            Operation operationType = Operation.URL_STATE;
+            bool getReviews = true;
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
 
             Log.Logger = new LoggerConfiguration()

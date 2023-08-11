@@ -1,0 +1,54 @@
+{
+  "Serilog": {
+    "Using": [
+      "Serilog.Exceptions",
+      "Serilog",
+      "Serilog.Sinks.Console"
+    ],
+    "MinimumLevel": {
+      "Default": "Information",
+      "Override": {
+        "Microsoft": "Error",
+        "System": "Error"
+      }
+    },
+    "Enrich": [
+      "FromLogContext",
+      "WithExceptionDetails",
+      "WithThreadId"
+    ],
+    "WriteTo": [
+      {
+        "Name": "Console",
+        "Args": {
+          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{ThreadId}] {EventType:x8} {Level:u3} {Caller}     {Message:lj}{NewLine}"
+        }
+      }
+    ]
+  },
+  "AllowedHosts": "*",
+  "AppConfiguration": {
+    "appName": "GMB.Place.Api",
+    "hosting": {
+      "k8s": true,
+      "baseUrl": "/place-service/api/",
+      "replicaMin": 2,
+      "replicaMax": 4,
+      "nodeRoutingGroup": [ "vm" ],
+      "fileSystemMounting": false,
+      "resources": {
+        "requests": {
+          "cpu": "500m",
+          "ram": "500M"
+        },
+        "limits": {
+          "cpu": "1000m",
+          "ram": "1G"
+        }
+      }
+    },
+    "corsOrigins": ["http://localhost:3000"],
+    "Settings": {
+    }
+  }
+}

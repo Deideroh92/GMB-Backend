@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 using System.Security.Authentication;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Api;
+using System.Reflection;
+using System.Runtime.InteropServices;
 
 namespace GMB.Sdk.Core
 {
@@ -35,6 +37,15 @@ namespace GMB.Sdk.Core
             byte[] hash = md5.ComputeHash(input);
 
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
+        }
+
+        /// <summary>
+        /// Return the current exact executable root path (folder where is located exe)
+        /// </summary>
+        /// <returns></returns>
+        public static string GetExecutableRootPath()
+        {
+            return $"{(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "/" : "")}{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}";
         }
 
         /// <summary>

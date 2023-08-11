@@ -80,6 +80,8 @@ namespace GMB.Business.Api.Controllers
                         continue;
                     }
 
+                    business ??= db.GetBusinessByIdEtab(profile.IdEtab);
+
                     if (business == null)
                         db.CreateBusinessProfile(profile);
                     if (business != null && !profile.Equals(business))

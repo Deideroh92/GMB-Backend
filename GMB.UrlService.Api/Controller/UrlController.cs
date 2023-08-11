@@ -31,14 +31,7 @@ namespace GMB.Url.Api
             using SeleniumDriver driver = new();
             List<string>? urls = new();
 
-            string[]? locations = request.CustomLocations.ToArray() ?? null;
-
-            if (request.DeptSearch)
-                locations = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "DeptList.txt"));
-            if (request.CityCodeSearch)
-                locations = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "CpList.txt"));
-
-            foreach (string location in locations) {
+            foreach (string location in request.Locations) {
                 ToolBox.BreakingHours();
 
                 try {
@@ -87,14 +80,8 @@ namespace GMB.Url.Api
         public static List<string>? GetUrls(UrlRequest request) {
             using SeleniumDriver driver = new();
             List<string>? urls = new();
-            string[]? locations = request.CustomLocations.ToArray() ?? null;
 
-            if (request.DeptSearch)
-                locations = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "DeptList.txt"));
-            if (request.CityCodeSearch)
-                locations = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "CpList.txt"));
-
-            foreach (string location in locations) {
+            foreach (string location in request.Locations) {
                 try {
                     string textSearch = request.TextSearch + "+" + location;
                     string url = "https://www.google.com/maps/search/" + textSearch;
