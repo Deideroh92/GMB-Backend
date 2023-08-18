@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
 
-namespace GMB.Place.Api.Core
+namespace GMB.PlaceService.Api.Core
 {
     public class Startup
     {
@@ -26,6 +26,9 @@ namespace GMB.Place.Api.Core
             // Add controllers to handle API requests.
             services.AddControllers();
 
+            // Configure JWT authentication
+            var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Secret"]) ?? throw new InvalidOperationException("JWT secret key is missing or invalid.");
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -33,40 +36,32 @@ namespace GMB.Place.Api.Core
             })
             .AddJwtBearer(options =>
             {
-                options.RequireHttpsMetadata = false; // Change this in production
-                options.SaveToken = true;
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
-                    ValidIssuer = "vasano", // Replace with your JWT issuer
-                    ValidAudience = "vasano-api", // Replace with your JWT audience
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your-secret-key")) // Replace with your secret key
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "vasano",
+                    ValidAudience = "vasano-api",
+                    IssuerSigningKey = new SymmetricSecurityKey(key)
                 };
             });
 
-            services.AddAuthorization();
-
-            services.AddControllers();
-
-            services.AddHttpContextAccessor();
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowAll", builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyMethod()
+                           .AllowAnyHeader();
+                });
+            });
         }
 
         // Configure: Define how your application's request processing pipeline should be set up.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-            app.Use(async (context, next) =>
-            {
-                var endpoint = context.GetEndpoint();
-                if (endpoint != null)
-                {
-                    Log.Information($"Matched endpoint: {endpoint.DisplayName}");
-                } else
-                {
-                    Log.Information("No endpoint matched.");
-                }
-                await next();
-            });
 
             if (env.IsDevelopment())
             {
@@ -77,17 +72,26 @@ namespace GMB.Place.Api.Core
                 app.UseHsts();
             }
 
-            // Enable HTTPS redirection.
-            //app.UseHttpsRedirection();
-
-            // Serve static files (like HTML, CSS, JavaScript).
-            app.UseStaticFiles();
-
-            // Enable routing.
             app.UseRouting();
 
-            // Authenticate users (if needed).
+            // Use authentication
             app.UseAuthentication();
+
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+
+            app.Use((context, next) =>
+            {
+                if (context.Request.Method == "OPTIONS")
+                {
+                    context.Response.Headers.Add("Access-Control-Allow-Origin", "*");
+                    context.Response.Headers.Add("Access-Control-Allow-Headers", "*");
+                    context.Response.Headers.Add("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+                    context.Response.Headers.Add("Access-Control-Max-Age", "86400"); // 24 hours
+                    context.Response.StatusCode = 204;
+                    return context.Response.CompleteAsync();
+                }
+                return next();
+            });
 
             // Authorize users based on policies (if needed).
             app.UseAuthorization();
@@ -95,7 +99,7 @@ namespace GMB.Place.Api.Core
             // Define how endpoints should be matched and handled.
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers().RequireAuthorization(); // Example
+                endpoints.MapControllers(); // Example
             });
         }
     }

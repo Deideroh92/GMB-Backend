@@ -26,9 +26,12 @@
       }
     ]
   },
+  "Jwt": {
+    "Secret": "fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG"
+  },
   "AllowedHosts": "*",
   "AppConfiguration": {
-    "appName": "GMB.Place.Api",
+    "appName": "GMB.PlaceService.Api",
     "hosting": {
       "k8s": true,
       "baseUrl": "/place-service/api/",
@@ -47,7 +50,7 @@
         }
       }
     },
-    "corsOrigins": ["http://localhost:3000"],
+    "corsOrigins": [ "http://localhost:3000" ],
     "Settings": {
     }
   }

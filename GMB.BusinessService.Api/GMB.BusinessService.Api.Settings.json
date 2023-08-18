@@ -31,10 +31,10 @@
   },
   "AllowedHosts": "*",
   "AppConfiguration": {
-    "appName": "GMB.UserService.Api",
+    "appName": "GMB.BusinessService.Api",
     "hosting": {
       "k8s": true,
-      "baseUrl": "/api/user-service/",
+      "baseUrl": "/business-service/api/",
       "replicaMin": 2,
       "replicaMax": 4,
       "nodeRoutingGroup": [ "vm" ],
@@ -50,7 +50,7 @@
         }
       }
     },
-    "corsOrigins": ["http://localhost:3000"],
+    "corsOrigins": [ "http://localhost:3000" ],
     "Settings": {
     }
   }

@@ -7,17 +7,16 @@ using GMB.Url.Api;
 using GMB.Sdk.Core.Types.Api;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
-using GMB.Place.Api.API;
-using Microsoft.AspNetCore.Authorization;
+using GMB.PlaceService.Api.API;
 
-namespace GMB.Place.Api.Controllers
+namespace GMB.PlaceService.Api.Controller
 {
     /// <summary>
     /// Place Controller.
     /// Manage all operations about Google Place API.
     /// </summary>
     [ApiController]
-    [Route("place/api")]
+    [Route("api/place-service")]
     public sealed class PlaceController : ControllerBase
     {
         static readonly ILogger log = Log.ForContext(MethodBase.GetCurrentMethod().DeclaringType);
@@ -29,18 +28,18 @@ namespace GMB.Place.Api.Controllers
         /// <returns>GMB</returns>
         [HttpGet("find-business/{query}")]
         //[Authorize]
-        public async Task<DbBusinessProfile?> FindBusinessByQuery(string query)
+        public async Task<ActionResult<GetBusinessProfileResponse?>> FindBusinessByQuery(string query)
         {
             string? placeId = await PlaceApi.GetPlaceId(query);
             if (placeId == null)
-                return null;
+                return new GetBusinessProfileResponse(null);
 
             using DbLib db = new();
             string idEtab = ToolBox.ComputeMd5Hash(placeId);
 
             PlaceDetailsResponse? placeDetails = await PlaceApi.GetGMB(placeId);
             if (placeDetails == null || placeDetails.Result.Url == null)
-                return null;
+                return new GetBusinessProfileResponse(null);
 
             DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(placeDetails.Result.Url));
 
@@ -70,8 +69,8 @@ namespace GMB.Place.Api.Controllers
                 placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("postal_code")).LongName,
                 placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("locality")).LongName,
                 placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("route")).LongName,
-                (float?)placeDetails.Result.Geometry.Location.Latitude,
-                (float?)placeDetails.Result.Geometry.Location.Longitude,
+                placeDetails.Result.Geometry.Location.Latitude,
+                placeDetails.Result.Geometry.Location.Longitude,
                 idBan,
                 addressType,
                 placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("street_number")).LongName,
@@ -92,7 +91,7 @@ namespace GMB.Place.Api.Controllers
             if (business != null && !profile.Equals(business))
                 db.UpdateBusinessProfile(profile);
 
-            return profile;
+            return new GetBusinessProfileResponse(profile);
         }
         /// <summary>
         /// Get GMB from Google Api.
@@ -101,20 +100,20 @@ namespace GMB.Place.Api.Controllers
         /// <returns>GMB as described in API</returns>
         [HttpGet("place/{placeId}")]
         //[Authorize]
-        public async Task<PlaceDetailsResponse?> GetGMBByPlaceId(string placeId)
+        public async Task<ActionResult<GetPlaceDetailsResponse?>> GetGMBByPlaceId(string placeId)
         {
-            return await PlaceApi.GetGMB(placeId);
+            return new GetPlaceDetailsResponse(await PlaceApi.GetGMB(placeId));
         }
         /// <summary>
         /// Get GMB from Google Api.
-        /// </summary>
+        /// </summary>  
         /// <param name="query"></param>
         /// <returns>GMB as described in API</returns>
-        [HttpGet("place-id/{query}")]
+        [HttpPost("place-id")]
         //[Authorize]
-        public async Task<string?> GetPlaceIdByQuery(string query)
+        public async Task<ActionResult<GetPlaceIdResponse?>> GetPlaceIdByQuery([FromBody] string query)
         {
-            return await PlaceApi.GetPlaceId(query);
+            return new GetPlaceIdResponse(await PlaceApi.GetPlaceId(query));
         }
     }
 }

@@ -8,13 +8,14 @@ using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Api;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using GMB.Sdk.Core.Types.Models;
 
 namespace GMB.Sdk.Core
 {
     public class ToolBox
     {
 
-        #region classes
+        #region SubClasses
         public class GoogleDate
         {
 
@@ -37,6 +38,36 @@ namespace GMB.Sdk.Core
             byte[] hash = md5.ComputeHash(input);
 
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
+        }
+
+        public static DbBusinessProfile PlaceDetailsToBP(PlaceDetailsResponse placeDetails, string idEtab, string guid)
+        {
+            DbBusinessProfile? profile = new(
+                placeDetails.Result.PlaceId,
+                idEtab,
+                guid,
+                placeDetails.Result.Name,
+                placeDetails.Result.Types?.FirstOrDefault(),
+                placeDetails.Result.FormattedAdress,
+                placeDetails.Result.FormattedAdress,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("postal_code")).LongName,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("locality")).LongName,
+                null,
+                placeDetails.Result.Geometry.Location.Latitude,
+                placeDetails.Result.Geometry.Location.Longitude,
+                null,
+                null,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("street_number")).LongName,
+                null,
+                placeDetails.Result.FormattedPhoneNumber,
+                placeDetails.Result.Website,
+                placeDetails.Result.PlusCode.GlobalCode,
+                null,
+                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Result.BusinessStatus.ToString()),
+                null,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country")).LongName,
+                placeDetails.Result.Geometry.Location.Latitude.ToString() + " - " + placeDetails.Result.Geometry.Location.Longitude.ToString());
+            return profile;
         }
 
         /// <summary>
@@ -207,8 +238,8 @@ namespace GMB.Sdk.Core
         /// <param name="address"></param>
         /// <returns>Business with address updated</returns>
         public static DbBusinessProfile InsertApiAddressInBusiness(DbBusinessProfile business, AddressApiResponse address) {
-            business.Lon = (float?)(address.Features[0]?.Geometry?.Coordinates[0]);
-            business.Lat = (float?)(address.Features[0]?.Geometry?.Coordinates[1]);
+            business.Lon = (double?)address.Features[0]?.Geometry?.Coordinates[0];
+            business.Lat = (double?)address.Features[0]?.Geometry?.Coordinates[1];
             business.City = address.Features[0]?.Properties?.City;
             business.PostCode = address.Features[0]?.Properties?.Postcode;
             business.CityCode = address.Features[0]?.Properties?.CityCode;

@@ -2,8 +2,6 @@
 
 namespace GMB.Sdk.Core.Types.Models
 {
-    using System.Collections.Generic;
-    using Newtonsoft.Json;
 
     public class AddressComponent
     {

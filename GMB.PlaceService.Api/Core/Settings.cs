@@ -1,4 +1,4 @@
-﻿namespace GMB.Place.Api.Core
+﻿namespace GMB.PlaceService.Api.Core
 {
     public sealed class
     Settings

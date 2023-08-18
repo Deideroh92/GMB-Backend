@@ -1,6 +1,7 @@
-﻿using GMB.Sdk.Core.Types.Models;
+﻿using GMB.Sdk.Core;
+using GMB.Sdk.Core.Types.Models;
 
-namespace GMB.Place.Api.API
+namespace GMB.PlaceService.Api.API
 {
     /// <summary>
     /// Business Service.
@@ -19,7 +20,22 @@ namespace GMB.Place.Api.API
             try
             {
                 using HttpClient client = new();
-                HttpResponseMessage response = await client.GetAsync($"https://maps.googleapis.com/maps/api/place/details/json?place_id={placeId}&fields=name%2Crating%2Cformatted_phone_number%2Cbusiness_status%2Cgeometry%2Cplace_id%2Cplus_code%2Curl%2Caddress_components%2Cuser_ratings_total%2Cinternational_phone_number%2Cwebsite%2Cformatted_address%2Ctypes&key={API_KEY}&language={LANGUAGE}");
+                HttpResponseMessage response = await client.GetAsync($"https://maps.googleapis.com/maps/api/place/details/json?place_id={placeId}&fields=" +
+                    $"name" +
+                    $"%2Crating" +
+                    $"%2Cformatted_phone_number" +
+                    $"%2Cbusiness_status" +
+                    $"%2Cgeometry" +
+                    $"%2Cplace_id" +
+                    $"%2Cplus_code" +
+                    $"%2Curl" +
+                    $"%2Caddress_components" +
+                    $"%2Cuser_ratings_total" +
+                    $"%2Cinternational_phone_number" +
+                    $"%2Cwebsite" +
+                    $"%2Cformatted_address" +
+                    $"%2Ctypes" +
+                    $"&key={API_KEY}&language={LANGUAGE}");
 
                 if (response.IsSuccessStatusCode)
                 {

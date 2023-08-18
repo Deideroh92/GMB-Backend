@@ -5,25 +5,29 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Serilog;
 using System.Text;
 
-namespace GMB.UserService.Api.Core
+namespace GMB.BusinessService.Api.Core
 {
     public class Startup
     {
+        public IConfiguration Configuration { get; }
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
         }
 
-        public IConfiguration Configuration { get; }
-
+        // ConfigureServices: Add and configure services needed by your application.
         public void ConfigureServices(IServiceCollection services)
         {
+            // Add controllers to handle API requests.
             services.AddControllers();
 
             // Configure JWT authentication
-            var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Secret"]);
+            var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Secret"]) ?? throw new InvalidOperationException("JWT secret key is missing or invalid.");
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,18 +58,25 @@ namespace GMB.UserService.Api.Core
             });
         }
 
+        // Configure: Define how your application's request processing pipeline should be set up.
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+            } else
+            {
+                app.UseExceptionHandler("/Home/Error");
+                app.UseHsts();
             }
 
             app.UseRouting();
 
             // Use authentication
             app.UseAuthentication();
-            app.UseCors("AllowAll");
+
+            app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.Use((context, next) =>
             {
@@ -81,11 +92,13 @@ namespace GMB.UserService.Api.Core
                 return next();
             });
 
+            // Authorize users based on policies (if needed).
             app.UseAuthorization();
 
+            // Define how endpoints should be matched and handled.
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers(); // Example
             });
         }
     }

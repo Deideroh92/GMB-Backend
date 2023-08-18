@@ -36,8 +36,8 @@ namespace GMB.Business.Api.API
             string? postCode = null;
             string? city = null;
             string? cityCode = null;
-            float? lat = null;
-            float? lon = null;
+            double? lat = null;
+            double? lon = null;
             string? idBan = null;
             string? addressType = null;
             string? streetNumber = null;
@@ -140,8 +140,8 @@ namespace GMB.Business.Api.API
                         AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
                         if (addressResponse != null)
                         {
-                            lon = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[0]);
-                            lat = (float?)(addressResponse.Features[0]?.Geometry?.Coordinates[1]);
+                            lon = (double?)addressResponse.Features[0]?.Geometry?.Coordinates[0];
+                            lat = (double?)addressResponse.Features[0]?.Geometry?.Coordinates[1];
                             city = addressResponse.Features[0]?.Properties?.City;
                             postCode = addressResponse.Features[0]?.Properties?.Postcode;
                             cityCode = addressResponse.Features[0]?.Properties?.CityCode;

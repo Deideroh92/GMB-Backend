@@ -1,10 +1,9 @@
-﻿using GMB.Place.Api.Core;
-using Microsoft.AspNetCore.Hosting;
+﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 
-namespace GMB.Place.Api.Core
+namespace GMB.UserService.Api.Core
 {
     /// <summary>
     /// Main class.
@@ -15,8 +14,8 @@ namespace GMB.Place.Api.Core
         /// Set up the configuration.
         /// </summary>
         public static IConfiguration Configuration { get; } = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Place.Agent")
-            .AddJsonFile("GMB.Place.Api.settings.json", optional: false, reloadOnChange: true)
+            .SetBasePath(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.UserService.Api")
+            .AddJsonFile("GMB.UserService.Api.settings.json", optional: false, reloadOnChange: true)
             .AddEnvironmentVariables()
             .Build();
 
@@ -28,7 +27,11 @@ namespace GMB.Place.Api.Core
         public static IHostBuilder
         CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
-                    webBuilder.UseConfiguration(Configuration).ConfigureLogging(log => log.AddSerilog(Log.Logger)).UseStartup<Startup>().UseKestrel());
+                    webBuilder.UseConfiguration(Configuration).ConfigureLogging(log => log.AddSerilog(Log.Logger)).UseStartup<Startup>()
+                    .UseKestrel(options =>
+                    {
+                        options.ListenAnyIP(5001); // Specify the desired port
+                    }));
 
         /// <summary>
         /// Main method of the program.
