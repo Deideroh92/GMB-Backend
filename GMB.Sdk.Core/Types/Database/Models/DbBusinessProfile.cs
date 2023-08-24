@@ -1,0 +1,186 @@
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace GMB.Sdk.Core.Types.Database.Models
+{
+    #region Enums
+
+    public enum BusinessStatus
+    {
+        OPERATIONAL,
+        CLOSED_TEMPORARILY,
+        CLOSED_PERMANENTLY,
+        DELETED
+    }
+
+    #endregion
+
+    public class DbBusinessProfile : IEquatable<DbBusinessProfile?>
+    {
+        public long Id { get; set; }
+        public string IdEtab { get; set; }
+        public string? PlaceId { get; set; }
+        public string? FirstGuid { get; set; }
+        public string? Name { get; set; }
+        public string? Category { get; set; }
+        public string? Geoloc { get; set; }
+        public string? GoogleAddress { get; set; }
+        public string? Address { get; set; }
+        public string? PostCode { get; set; }
+        public string? City { get; set; }
+        public string? CityCode { get; set; }
+        public double? Lat { get; set; }
+        public double? Lon { get; set; }
+        public string? IdBan { get; set; }
+        public string? StreetNumber { get; set; }
+        public string? Country { get; set; }
+        public string? AddressType { get; set; }
+        public double? AddressScore { get; set; }
+        public string? Tel { get; set; }
+        public string? Website { get; set; }
+        public string? PlusCode { get; set; }
+        public DateTime? DateInsert { get; set; }
+        public DateTime? DateUpdate { get; set; }
+        public int Processing { get; set; }
+        public string? PictureUrl { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public BusinessStatus Status { get; set; }
+
+        #region Local
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="idEtab"></param>
+        /// <param name="placeId"></param>
+        /// <param name="firstGuid"></param>
+        /// <param name="name"></param>
+        /// <param name="category"></param>
+        /// <param name="googleAddress"></param>
+        /// <param name="address"></param>
+        /// <param name="postCode"></param>
+        /// <param name="city"></param>
+        /// <param name="cityCode"></param>
+        /// <param name="lat"></param>
+        /// <param name="lon"></param>
+        /// <param name="idBan"></param>
+        /// <param name="addressType"></param>
+        /// <param name="tel"></param>
+        /// <param name="website"></param>
+        /// <param name="dateInsert"></param>
+        /// <param name="dateUpdate"></param>
+        /// <param name="status"></param>
+        /// <param name="addressScore"></param>
+        /// <param name="plusCode"></param>
+        /// <param name="country"></param>
+        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
+        {
+            Id = -500;
+            IdEtab = idEtab;
+            PlaceId = placeId;
+            FirstGuid = firstGuid;
+            Name = name;
+            Category = category;
+            Geoloc = geoloc;
+            GoogleAddress = googleAddress;
+            Address = address;
+            PostCode = postCode;
+            City = city;
+            CityCode = cityCode;
+            Lat = lat;
+            Lon = lon;
+            IdBan = idBan;
+            AddressType = addressType;
+            Tel = tel;
+            Website = website;
+            DateInsert = dateInsert;
+            DateUpdate = dateUpdate;
+            Status = status;
+            PictureUrl = pictureUrl;
+            Processing = processing;
+            StreetNumber = streetNumber;
+            AddressScore = addressScore;
+            PlusCode = plusCode;
+            Country = country;
+
+            CheckValidity();
+        }
+
+        public void CheckValidity()
+        {
+            if (IdEtab == null)
+                throw new NullReferenceException("No IdEtab for this business");
+            if (Name == null)
+                Status = BusinessStatus.DELETED;
+        }
+
+        public override bool Equals(object? obj)
+        {
+            return Equals(obj as DbBusinessProfile);
+        }
+
+        public bool Equals(DbBusinessProfile? other)
+        {
+            return other is not null &&
+                   PlaceId == other.PlaceId &&
+                   Name == other.Name &&
+                   Category == other.Category &&
+                   Geoloc == other.Geoloc &&
+                   GoogleAddress == other.GoogleAddress &&
+                   Address == other.Address &&
+                   PostCode == other.PostCode &&
+                   City == other.City &&
+                   CityCode == other.CityCode &&
+                   Lat == other.Lat &&
+                   Lon == other.Lon &&
+                   IdBan == other.IdBan &&
+                   StreetNumber == other.StreetNumber &&
+                   Country == other.Country &&
+                   AddressType == other.AddressType &&
+                   Tel == other.Tel &&
+                   Website == other.Website &&
+                   PlusCode == other.PlusCode &&
+                   Status == other.Status &&
+                   PictureUrl == other.PictureUrl;
+        }
+
+        public bool AdressEquals(DbBusinessProfile? other)
+        {
+            return other is not null && GoogleAddress == other.GoogleAddress;
+        }
+
+        public override int GetHashCode()
+        {
+            HashCode hash = new();
+            hash.Add(Id);
+            hash.Add(IdEtab);
+            hash.Add(PlaceId);
+            hash.Add(FirstGuid);
+            hash.Add(Name);
+            hash.Add(Category);
+            hash.Add(Geoloc);
+            hash.Add(GoogleAddress);
+            hash.Add(Address);
+            hash.Add(PostCode);
+            hash.Add(City);
+            hash.Add(CityCode);
+            hash.Add(Lat);
+            hash.Add(Lon);
+            hash.Add(IdBan);
+            hash.Add(StreetNumber);
+            hash.Add(Country);
+            hash.Add(AddressType);
+            hash.Add(AddressScore);
+            hash.Add(Tel);
+            hash.Add(Website);
+            hash.Add(PlusCode);
+            hash.Add(DateInsert);
+            hash.Add(DateUpdate);
+            hash.Add(Status);
+            hash.Add(Processing);
+            hash.Add(PictureUrl);
+            return hash.ToHashCode();
+        }
+        #endregion
+    }
+}
