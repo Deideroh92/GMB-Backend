@@ -61,16 +61,23 @@ namespace GMB.Url.Api
         /// </summary>
         /// <param name="url"></param>
         /// <param name="date"></param>
-        public static DbBusinessUrl? CreateUrl(string url, DateTime? date = null) {
-            using DbLib db = new();
-            string? urlEncoded = ToolBox.ComputeMd5Hash(url);
-            DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(urlEncoded);
-            if (businessUrl == null)
+        public static DbBusinessUrl CreateUrl(string url, DateTime? date = null) {
+            try
             {
-                businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", ToolBox.ComputeMd5Hash(url), UrlState.NEW, null, date);
-                db.CreateBusinessUrl(businessUrl);
+                using DbLib db = new();
+                string? urlEncoded = ToolBox.ComputeMd5Hash(url);
+                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(urlEncoded);
+                if (businessUrl == null)
+                {
+                    businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", ToolBox.ComputeMd5Hash(url), UrlState.NEW, null, date);
+                    db.CreateBusinessUrl(businessUrl);
+                }
+                return businessUrl;
+            } catch (Exception e)
+            {
+                Log.Error(e, $"An exception occurred while creating business url: [{url}].");
+                throw new Exception();
             }
-            return businessUrl;
         }
         /// <summary>
         /// Get Urls from a request.

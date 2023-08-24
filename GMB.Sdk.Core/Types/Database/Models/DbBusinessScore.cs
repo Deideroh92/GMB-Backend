@@ -4,7 +4,7 @@
     {
         public long Id { get; set; }
         public string IdEtab { get; set; }
-        public float? Score { get; set; }
+        public double? Score { get; set; }
         public int? NbReviews { get; set; }
         public DateTime? DateInsert { get; set; }
 
@@ -17,7 +17,7 @@
         /// <param name="score"></param>
         /// <param name="nbReviews"></param>
         /// <param name="dateInsert"></param>
-        public DbBusinessScore(string idEtab, float? score, int? nbReviews, DateTime? dateInsert = null)
+        public DbBusinessScore(string idEtab, double? score, int? nbReviews, DateTime? dateInsert = null)
         {
             IdEtab = idEtab;
             Score = score;
@@ -32,8 +32,11 @@
         /// </summary>
         public void CheckValidity()
         {
-            if (Score != null && NbReviews == null || NbReviews != null && Score == null)
+            if (Score != null && (NbReviews == null || NbReviews == 0) || NbReviews != null && (Score == null || Score == 0))
+            {
                 Score = null;
+                NbReviews = null;
+            }  
         }
         #endregion
     }

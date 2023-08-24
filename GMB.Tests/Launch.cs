@@ -8,9 +8,9 @@ using GMB.Url.Api;
 using GMB.Business.Api.Models;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Url.Api.Models;
-using GMB.Business.Api.Controllers;
 using Serilog;
 using GMB.Business.Api.API;
+using GMB.BusinessService.Api.Controllers;
 
 namespace GMB.Tests
 {
@@ -103,66 +103,6 @@ namespace GMB.Tests
             }
         }
         /// <summary>
-        /// Get google info by given url.
-        /// </summary>
-        /// <returns></returns>
-        [TestMethod]
-        public async Task GetInfosByUrlAsync() {
-            string url = "https://www.google.com/maps/place/MONOPRIX/@46.3401195,2.6014815,17z/data=!4m16!1m9!3m8!1s0x47f0a7e780134f53:0x3dbab3dce9a2e639!2sMONOPRIX!8m2!3d46.3401195!4d2.6014815!9m1!1b1!16s%2Fg%2F1ts3kk0r!3m5!1s0x47f0a7e780134f53:0x3dbab3dce9a2e639!8m2!3d46.3401195!4d2.6014815!16s%2Fg%2F1ts3kk0r";
-            Operation opertationType = Operation.FILE;
-            bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-1);
-            List<BusinessAgent> business = new() {
-                new BusinessAgent(null, url.ToLower(), "e38c646bf09ccde19bb7002ba4b5ba69")
-            };
-            BusinessAgentRequest request = new(opertationType, getReviews, business, reviewsDate);
-            await BusinessController.Scanner(request, 1);
-        }
-        /// <summary>
-        /// Get google info by given url.
-        /// </summary>
-        /// <returns></returns>
-        [TestMethod]
-        public async Task CreateNewBusinessByGoogleApi()
-        {
-            string query = "BRED-Banque Populaire 175 Bis Bd Jean Jaurès, 92100 Boulogne-Billancourt, France";
-            string query2 = "BRED-Banque Populaire 78 Bis Rte de la Reine, 92100 Boulogne-Billancourt, France";
-            string query3 = "CABUDZAJNDKL?AZFNZEALAZMFJDZAPDHAFZ";
-            await BusinessController.CreateNewBusinessByQueryFromGoogleApi(query);
-        }
-        /// <summary>
-        /// Starting Scanner.
-        /// </summary>
-        [TestMethod]
-        public void InsertNewBusinessByUrl()
-        {
-            string[]? urlList = File.ReadAllLines(pathUrlFile);
-            List<Task> tasks = new();
-
-            int maxConcurrentThreads = 1;
-            SemaphoreSlim semaphore = new(maxConcurrentThreads);
-
-            foreach (string url in urlList)
-            {
-                Task newThread = Task.Run(async () =>
-                {
-                    await semaphore.WaitAsync(); // Wait until there's an available slot to run
-                    try
-                    {
-                        BusinessController.CreateNewBusinessProfileByUrl(url);
-                    } finally
-                    {
-                        semaphore.Release(); // Release the slot when the task is done
-                    }
-                });
-                tasks.Add(newThread);
-            }
-
-            Task.WaitAll(tasks.ToArray());
-            return;
-        }
-
-        /// <summary>
         /// Starting Scanner.
         /// </summary>
         [TestMethod]
@@ -177,6 +117,7 @@ namespace GMB.Tests
             Operation operationType = Operation.URL_STATE;
             bool getReviews = true;
             DateTime reviewsDate = DateTime.UtcNow.AddYears(-1);
+            BusinessController controller = new();
 
             Log.Logger = new LoggerConfiguration()
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
@@ -233,7 +174,7 @@ namespace GMB.Tests
                 Task newThread = Task.Run(async () =>
                 {
                     BusinessAgentRequest request = new(operationType, getReviews, new List<BusinessAgent>(chunk), reviewsDate);
-                    await BusinessController.Scanner(request, threadNumber).ConfigureAwait(false);
+                    await controller.Scanner(request).ConfigureAwait(false);
                 });
                 tasks.Add(newThread);
             }

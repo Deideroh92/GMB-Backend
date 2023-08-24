@@ -11,7 +11,6 @@ using GMB.Business.Api.API;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using GMB.Sdk.Core.Types.Api;
-using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace GMB.BusinessService.Api.Controllers
 {
@@ -31,7 +30,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="request"></param>
         [HttpPost("scanner/start")]
         [Authorize]
-        public async Task Scanner([FromBody] BusinessAgentRequest request) {
+        public async Task Scanner(BusinessAgentRequest request) {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
             Log.Logger = new LoggerConfiguration()
@@ -196,19 +195,12 @@ namespace GMB.BusinessService.Api.Controllers
         /// Create a new business url and business if it doesn't exist already.
         /// </summary>
         /// <param name="url"></param>
-        [HttpPost("scanner/gmb/url")]
-        [Authorize]
+        [HttpPost("bp/create/by-url")]
+        //[Authorize]
         public async void CreateNewBusinessProfileByUrl(string url)
         {
-            Log.Logger = new LoggerConfiguration()
-            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
-            .CreateLogger();
             try {
-                DbBusinessUrl? businessUrl = UrlController.CreateUrl(url);
-
-                if (businessUrl == null) { 
-                    return;
-                }
+                DbBusinessUrl businessUrl = UrlController.CreateUrl(url);
 
                 using SeleniumDriver driver = new();
 
@@ -232,33 +224,42 @@ namespace GMB.BusinessService.Api.Controllers
         /// <summary>
         /// Find business by query (should be name + address) then insert it in DB if new.
         /// </summary>
-        /// <param name="query"></param>
+        /// <param name="placeDetails"></param>
         [HttpPost("bp/create/by-place-details")]
         //[Authorize]
         public ActionResult<GenericResponse> CreateNewBusinessByPlaceDetails([FromBody] PlaceDetailsResponse placeDetails)
         {
-            if (placeDetails.Result.PlaceId == null || placeDetails.Result.Url == null)
-                return new GenericResponse();
+            try
+            {
+                if (placeDetails.Result.PlaceId == null)
+                    return GenericResponse.Fail(-1, "Place ID is missing.");
+                if (placeDetails.Result.Url == null)
+                    return GenericResponse.Fail(-2, "Unique URL is missing.");
 
-            using DbLib db = new();
-            string idEtab = ToolBox.ComputeMd5Hash(placeDetails.Result.PlaceId);
+                using DbLib db = new();
+                string idEtab = ToolBox.ComputeMd5Hash(placeDetails.Result.PlaceId);
 
-            DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(placeDetails.Result.Url));
+                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(placeDetails.Result.Url));
 
-            businessUrl ??= UrlController.CreateUrl(placeDetails.Result.Url);
+                businessUrl ??= UrlController.CreateUrl(placeDetails.Result.Url);
 
-            DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
+                DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
 
-            string message = "Business successfully created in DB!";
+                string message = "Business successfully created in DB!";
 
-            if (db.CheckBusinessProfileExist(idEtab)) {
-                message = "Business already in DB, updated successfully!";
-                db.UpdateBusinessProfile(profile);
+                if (db.CheckBusinessProfileExist(idEtab))
+                {
+                    message = "Business already in DB, updated successfully!";
+                    db.UpdateBusinessProfile(profile);
+                } else
+                    db.CreateBusinessProfile(profile);
+
+                return new GenericResponse(profile.Id, message);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception("Error creating business by place details.");
             }
-            else
-                db.CreateBusinessProfile(profile);
-
-            return new GenericResponse();
         }
         /// <summary>
         /// Create Business Profile.
@@ -266,13 +267,20 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="businessProfile"></param>
         [HttpPost("bp/create")]
         //[Authorize]
-        public IActionResult CreateNewBusiness([FromBody] DbBusinessProfile businessProfile)
+        public ActionResult<GenericResponse> CreateNewBusiness([FromBody] DbBusinessProfile businessProfile)
         {
-            using DbLib db = new();
+            try
+            {
+                using DbLib db = new();
+                db.CreateBusinessProfile(businessProfile);
 
-            db.CreateBusinessProfile(businessProfile);
+                return new GenericResponse(businessProfile.Id);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception("Error creating business.");
+            }
 
-            return new OkResult();
         }
         /// <summary>
         /// Create Business Score.
@@ -280,13 +288,18 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="businessScore"></param>
         [HttpPost("bs/create")]
         //[Authorize]
-        public IActionResult CreateNewBusinessScore([FromBody] DbBusinessScore businessScore)
+        public ActionResult<GenericResponse> CreateNewBusinessScore([FromBody] DbBusinessScore businessScore)
         {
-            using DbLib db = new();
-
-            db.CreateBusinessScore(businessScore);
-
-            return new OkResult();
+            try
+            {
+                using DbLib db = new();
+                db.CreateBusinessScore(businessScore);
+                return new GenericResponse(businessScore.Id);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception("Error creating business score.");
+            }
         }
         /// <summary>
         /// Get BP by idEtab.
@@ -296,11 +309,18 @@ namespace GMB.BusinessService.Api.Controllers
         //[Authorize]
         public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByIdEtab(string idEtab)
         {
-            using DbLib db = new();
-            DbBusinessProfile? businessProfile = db.GetBusinessByIdEtab(idEtab);
-            DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(idEtab);
+            try
+            {
+                using DbLib db = new();
+                DbBusinessProfile? businessProfile = db.GetBusinessByIdEtab(idEtab);
+                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(idEtab);
 
-            return new GetBusinessProfileResponse(businessProfile, businessScore);
+                return new GetBusinessProfileResponse(businessProfile, businessScore);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetBusinessProfileResponse.Exception("Error getting business profile by id etab.");
+            }
         }
         /// <summary>
         /// Get BP by placeId.
@@ -310,11 +330,18 @@ namespace GMB.BusinessService.Api.Controllers
         //[Authorize]
         public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByPlaceId(string placeId)
         {
-            using DbLib db = new();
-            DbBusinessProfile? businessProfile = db.GetBusinessByPlaceId(placeId);
-            DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
+            try
+            {
+                using DbLib db = new();
+                DbBusinessProfile? businessProfile = db.GetBusinessByPlaceId(placeId);
+                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
 
-            return new GetBusinessProfileResponse(businessProfile, businessScore);
+                return new GetBusinessProfileResponse(businessProfile, businessScore);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetBusinessProfileResponse.Exception("Error getting business profile by place id.");
+            }
         }
         /// <summary>
         /// Update BP.
@@ -322,12 +349,19 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="businessProfile"></param>
         [HttpPut("bp/update")]
         //[Authorize]
-        public IActionResult UpdateBusinessProfile(DbBusinessProfile businessProfile)
+        public ActionResult<GenericResponse> UpdateBusinessProfile([FromBody] DbBusinessProfile businessProfile)
         {
-            using DbLib db = new();
-            db.UpdateBusinessProfile(businessProfile);
+            try
+            {
+                using DbLib db = new();
+                db.UpdateBusinessProfile(businessProfile);
 
-            return new OkResult();
+                return new GenericResponse(businessProfile.Id);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception("Error updating business profile.");
+            }
         }
         /// <summary>
         /// Get BP by url.
@@ -337,16 +371,24 @@ namespace GMB.BusinessService.Api.Controllers
         //[Authorize]
         public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByUrl([FromBody] string url)
         {
-            using DbLib db = new();
-            DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(url));
+            try
+            {
+                using DbLib db = new();
+                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(url));
 
-            if (businessUrl == null)
-                return new GetBusinessProfileResponse(null, null);
+                if (businessUrl == null)
+                    return new GetBusinessProfileResponse(null, null);
 
-            DbBusinessProfile? businessProfile = db.GetBusinessByGuid(businessUrl.Guid);
-            DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
+                DbBusinessProfile? businessProfile = db.GetBusinessByGuid(businessUrl.Guid);
+                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
 
-            return new GetBusinessProfileResponse(businessProfile, businessScore);
+                return new GetBusinessProfileResponse(businessProfile, businessScore);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetBusinessProfileResponse.Exception("Error getting business profile by url.");
+
+            }
         }
         #endregion
 

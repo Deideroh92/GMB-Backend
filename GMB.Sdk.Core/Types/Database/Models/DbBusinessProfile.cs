@@ -1,14 +1,13 @@
-﻿namespace GMB.Sdk.Core.Types.Database.Models
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
+
+namespace GMB.Sdk.Core.Types.Database.Models
 {
     #region Enums
 
     public enum BusinessStatus
     {
-        OPEN,
         OPERATIONAL,
-        CLOSED,
-        TEMPORARILY_CLOSED,
-        PERMANENTLY_CLOSED,
         CLOSED_TEMPORARILY,
         CLOSED_PERMANENTLY,
         DELETED
@@ -21,7 +20,7 @@
         public long Id { get; set; }
         public string IdEtab { get; set; }
         public string? PlaceId { get; set; }
-        public string FirstGuid { get; set; }
+        public string? FirstGuid { get; set; }
         public string? Name { get; set; }
         public string? Category { get; set; }
         public string? Geoloc { get; set; }
@@ -42,9 +41,11 @@
         public string? PlusCode { get; set; }
         public DateTime? DateInsert { get; set; }
         public DateTime? DateUpdate { get; set; }
-        public BusinessStatus Status { get; set; }
         public int Processing { get; set; }
         public string? PictureUrl { get; set; }
+
+        [JsonConverter(typeof(StringEnumConverter))]
+        public BusinessStatus Status { get; set; }
 
         #region Local
         /// <summary>

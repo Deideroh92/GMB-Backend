@@ -4,7 +4,6 @@ using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Api;
-using GMB.Business.Api.API;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -15,11 +14,6 @@ namespace GMB.Tests
 
         [TestMethod]
         public async Task Main() {
-            using SeleniumDriver driver = new();
-            string url = "https://www.google.com/maps/place/L+'oeuf+de+Seyssel+-+Grossiste+aupr%C3%A8s+des+professionnels+en+Savoie+et+Haute-Savoie/data=!4m7!3m6!1s0x478b7bc48ede25bd:0x6edc947e50220b28!8m2!3d45.9489915!4d5.853033!16s%2Fg%2F11fl0xr2jv!19sChIJvSXejsR7i0cRKAsiUH6U3G4";
-            DbBusinessScore? score;
-            DbBusinessProfile? profile;
-            (profile, score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url, null, null), null);
             return;
         }
 

@@ -28,18 +28,18 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB</returns>
         [HttpGet("find-business/{query}")]
         //[Authorize]
-        public async Task<ActionResult<GetBusinessProfileResponse?>> FindBusinessByQuery(string query)
+        public async Task<ActionResult<GetBusinessProfileResponse>> FindBusinessByQuery(string query)
         {
             string? placeId = await PlaceApi.GetPlaceId(query);
             if (placeId == null)
-                return new GetBusinessProfileResponse(null);
+                return GetBusinessProfileResponse.Fail(-1, "No place Id provided.");
 
             using DbLib db = new();
             string idEtab = ToolBox.ComputeMd5Hash(placeId);
 
             PlaceDetailsResponse? placeDetails = await PlaceApi.GetGMB(placeId);
             if (placeDetails == null || placeDetails.Result.Url == null)
-                return new GetBusinessProfileResponse(null);
+                return new GetBusinessProfileResponse(null, null);
 
             DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(placeDetails.Result.Url));
 
@@ -85,13 +85,18 @@ namespace GMB.PlaceService.Api.Controller
                 placeDetails.Result.Geometry.Location.Latitude.ToString() + ", " + placeDetails.Result.Geometry.Location.Longitude.ToString());
 
             DbBusinessProfile? business = db.GetBusinessByIdEtab(idEtab);
+            DbBusinessScore? businessScore = null;
+
+            if (business != null)
+                businessScore = db.GetBusinessScoreByIdEtab(business.IdEtab);
 
             if (business == null)
                 db.CreateBusinessProfile(profile);
+
             if (business != null && !profile.Equals(business))
                 db.UpdateBusinessProfile(profile);
 
-            return new GetBusinessProfileResponse(profile);
+            return new GetBusinessProfileResponse(profile, businessScore);
         }
         /// <summary>
         /// Get GMB from Google Api.

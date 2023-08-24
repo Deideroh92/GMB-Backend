@@ -24,7 +24,7 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> nbReviews = new() { By.XPath("//button[contains(@jsaction, 'pane.rating.moreReviews')]"), By.XPath("//span[contains(@arial-label, 'avis')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]") };
         public static readonly List<By> tel = new() { By.XPath("//button[contains(@aria-label, 'Numéro de téléphone:')]") };
         public static readonly List<By> website = new() { By.XPath("//button[contains(@aria-label, 'Site Web:')]"), By.XPath("//a[contains(@aria-label, 'Site Web:')]") };
-        public static readonly List<By> score = new() { By.XPath("//span[contains(@aria-label, 'étoiles')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]") };
+        public static readonly List<By> score = new() { By.XPath("//span[contains(@aria-label, 'étoiles') and contains(@role, 'img')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]") };
         public static readonly List<By> status = new() { By.XPath("//div[contains(@jsaction, 'pane.openhours')]") };
         public static readonly List<By> globalScore = new() { By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]") };
         public static readonly List<By> img = new() { By.XPath("//img[contains(@decoding, 'async')]") };

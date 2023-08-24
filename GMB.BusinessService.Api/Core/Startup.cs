@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
 using System.Text;
 
 namespace GMB.BusinessService.Api.Core
@@ -23,7 +22,7 @@ namespace GMB.BusinessService.Api.Core
         public void ConfigureServices(IServiceCollection services)
         {
             // Add controllers to handle API requests.
-            services.AddControllers();
+            services.AddControllers().AddNewtonsoftJson();
 
             // Configure JWT authentication
             var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Secret"]) ?? throw new InvalidOperationException("JWT secret key is missing or invalid.");
@@ -61,15 +60,6 @@ namespace GMB.BusinessService.Api.Core
         // Configure: Define how your application's request processing pipeline should be set up.
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-            } else
-            {
-                app.UseExceptionHandler("/Home/Error");
-                app.UseHsts();
-            }
 
             app.UseRouting();
 

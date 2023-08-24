@@ -8,7 +8,6 @@ using Serilog;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Business.Api.Models;
 using GMB.Sdk.Core.Types.Database.Models;
-using System.Net.Http.Headers;
 using GMB.Sdk.Core.Types.Api;
 
 namespace GMB.Business.Api.API
@@ -41,7 +40,7 @@ namespace GMB.Business.Api.API
             string? idBan = null;
             string? addressType = null;
             string? streetNumber = null;
-            float? score = null;
+            double? score = null;
             string? longPlusCode = null;
             string? geoloc = null;
             string? country = null;
@@ -160,7 +159,7 @@ namespace GMB.Business.Api.API
             }
             catch (Exception e)
             {
-                throw new Exception($"Couldn't get business infos (profile or score) with id etab = [{request.IdEtab}] and guid = [{request.Guid}] and url = [{request.Url}]", e);
+                throw new Exception($"Couldn't get business infos (profile or score).", e);
             }
         }
         /// <summary>
