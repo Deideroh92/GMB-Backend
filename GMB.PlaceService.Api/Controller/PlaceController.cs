@@ -82,6 +82,7 @@ namespace GMB.PlaceService.Api.Controller
                 (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Result.BusinessStatus.ToString()),
                 null,
                 placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country")).LongName,
+                placeDetails.Result.Url,
                 placeDetails.Result.Geometry.Location.Latitude.ToString() + ", " + placeDetails.Result.Geometry.Location.Longitude.ToString());
 
             DbBusinessProfile? business = db.GetBusinessByIdEtab(idEtab);

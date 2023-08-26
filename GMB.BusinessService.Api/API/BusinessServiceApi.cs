@@ -31,21 +31,10 @@ namespace GMB.Business.Api.API
         {
             // Initialization of all variables
             int? reviews = null;
-            string? address = null;
-            string? postCode = null;
-            string? city = null;
-            string? cityCode = null;
-            double? lat = null;
-            double? lon = null;
-            string? idBan = null;
-            string? addressType = null;
-            string? streetNumber = null;
             double? score = null;
-            string? longPlusCode = null;
             string? geoloc = null;
             string? country = null;
             string? placeId = null;
-            string? plusCode = null;
             BusinessStatus status = BusinessStatus.OPERATIONAL;
 
             driver.GetToPage(request.Url);
@@ -76,15 +65,14 @@ namespace GMB.Business.Api.API
                 }
 
                 #region Score
-                float? parsedScore = null;
-                float? addressScore = null;
+                double? parsedScore = null;
 
-                if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null && float.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim(), out float parsedScoreValue))
+                if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null && double.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim(), out double parsedScoreValue))
                     parsedScore = parsedScoreValue;
 
-                score ??= parsedScore ?? float.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)?.Text ?? "0");
+                score ??= parsedScore ?? double.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)?.Text ?? "0");
 
-                if (score == 0 && ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score)?.GetAttribute("aria-label") is string ariaLabel && float.TryParse(ariaLabel.AsSpan(0, Math.Min(3, ariaLabel.Length)), out float parsedScore2))
+                if (score == 0 && ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score)?.GetAttribute("aria-label") is string ariaLabel && double.TryParse(ariaLabel.AsSpan(0, Math.Min(3, ariaLabel.Length)), out double parsedScore2))
                     score = parsedScore2;
 
                 if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.nbReviews) is WebElement nbReviewsElement)
@@ -113,7 +101,7 @@ namespace GMB.Business.Api.API
 
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
                 request.Guid ??= Guid.NewGuid().ToString("N");
-                DbBusinessProfile dbBusinessProfile = new(placeId, request.IdEtab, request.Guid, name, category, googleAddress, address, postCode, city, cityCode, lat, lon, idBan, addressType, streetNumber, addressScore, tel, website, longPlusCode ?? plusCode, DateTime.UtcNow, status, img, country, geoloc);
+                DbBusinessProfile dbBusinessProfile = new(placeId, request.IdEtab, request.Guid, name, category, googleAddress, business?.Address, business?.PostCode, business?.City, business?.CityCode, business?.Lat, business?.Lon, business?.IdBan, business?.AddressType, business?.StreetNumber, business?.AddressScore, tel, website, business?.PlusCode, DateTime.UtcNow, status, img, country, null, geoloc);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
 
                 if(!dbBusinessProfile.AdressEquals(business))
@@ -121,15 +109,10 @@ namespace GMB.Business.Api.API
                     #region PlusCode
                     if (getPlusCode)
                     {
-                        plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
+                        string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
 
                         if (plusCode != null)
-                        {
-                            (longPlusCode, geoloc, country) = GetCoordinatesFromPlusCode(driver, plusCode);
-                            dbBusinessProfile.PlusCode = longPlusCode;
-                            dbBusinessProfile.Geoloc = geoloc;
-                            dbBusinessProfile.Country = country;
-                        }
+                            (dbBusinessProfile.PlusCode, dbBusinessProfile.Geoloc, dbBusinessProfile.Country) = GetCoordinatesFromPlusCode(driver, plusCode);
                     }
                     #endregion
 
@@ -139,21 +122,20 @@ namespace GMB.Business.Api.API
                         AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
                         if (addressResponse != null)
                         {
-                            lon = (double?)addressResponse.Features[0]?.Geometry?.Coordinates[0];
-                            lat = (double?)addressResponse.Features[0]?.Geometry?.Coordinates[1];
-                            city = addressResponse.Features[0]?.Properties?.City;
-                            postCode = addressResponse.Features[0]?.Properties?.Postcode;
-                            cityCode = addressResponse.Features[0]?.Properties?.CityCode;
-                            address = addressResponse.Features[0]?.Properties?.Street;
-                            addressType = addressResponse.Features[0]?.Properties?.PropertyType;
-                            idBan = addressResponse.Features[0]?.Properties?.Id;
-                            streetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
-                            addressScore = (float?)addressResponse.Features[0]?.Properties?.Score;
+                            dbBusinessProfile.Lon = (double?)addressResponse.Features[0]?.Geometry?.Coordinates[0];
+                            dbBusinessProfile.Lat = (double?)addressResponse.Features[0]?.Geometry?.Coordinates[1];
+                            dbBusinessProfile.City = addressResponse.Features[0]?.Properties?.City;
+                            dbBusinessProfile.PostCode = addressResponse.Features[0]?.Properties?.Postcode;
+                            dbBusinessProfile.CityCode = addressResponse.Features[0]?.Properties?.CityCode;
+                            dbBusinessProfile.Address = addressResponse.Features[0]?.Properties?.Street;
+                            dbBusinessProfile.AddressType = addressResponse.Features[0]?.Properties?.PropertyType;
+                            dbBusinessProfile.IdBan = addressResponse.Features[0]?.Properties?.Id;
+                            dbBusinessProfile.StreetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
+                            dbBusinessProfile.AddressScore = (float?)addressResponse.Features[0]?.Properties?.Score;
                         }
                     }
                     #endregion
                 }
-
 
                 return (dbBusinessProfile, dbBusinessScore);
             }
@@ -357,7 +339,7 @@ namespace GMB.Business.Api.API
 
                 bool replied = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText));
 
-                return new DbBusinessReview(idEtab, idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow);
+                return new DbBusinessReview(idEtab, ToolBox.ComputeMd5Hash(idEtab + idReview), idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow);
             }
             catch (Exception)
             {

@@ -236,24 +236,25 @@ namespace GMB.BusinessService.Api.Controllers
                 if (placeDetails.Result.Url == null)
                     return GenericResponse.Fail(-2, "Unique URL is missing.");
 
-                using DbLib db = new();
-                string idEtab = ToolBox.ComputeMd5Hash(placeDetails.Result.PlaceId);
-
-                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(placeDetails.Result.Url));
-
-                businessUrl ??= UrlController.CreateUrl(placeDetails.Result.Url);
-
-                DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
-
                 string message = "Business successfully created in DB!";
 
-                if (db.CheckBusinessProfileExist(idEtab))
+                using DbLib db = new();
+                string idEtab = ToolBox.ComputeMd5Hash(placeDetails.Result.PlaceId);
+                DbBusinessProfile? dbBusinessProfile = db.GetBusinessByIdEtab(idEtab);
+                DbBusinessProfile? profile;
+
+                // Update business if exist
+                if (dbBusinessProfile != null)
                 {
                     message = "Business already in DB, updated successfully!";
-                    db.UpdateBusinessProfile(profile);
-                } else
+                    profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, dbBusinessProfile.FirstGuid);
+                    db.UpdateBusinessProfileFromPlaceDetails(profile);
+                } else // No existing business profile
+                {
+                    DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Result.Url);
+                    profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
                     db.CreateBusinessProfile(profile);
-
+                };
                 return new GenericResponse(profile.Id, message);
             } catch (Exception e)
             {

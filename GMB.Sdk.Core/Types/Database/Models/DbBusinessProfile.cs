@@ -20,7 +20,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public long Id { get; set; }
         public string IdEtab { get; set; }
         public string? PlaceId { get; set; }
-        public string? FirstGuid { get; set; }
+        public string FirstGuid { get; set; }
         public string? Name { get; set; }
         public string? Category { get; set; }
         public string? Geoloc { get; set; }
@@ -37,12 +37,14 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public string? AddressType { get; set; }
         public double? AddressScore { get; set; }
         public string? Tel { get; set; }
+        public string? TelInt { get; set; }
         public string? Website { get; set; }
         public string? PlusCode { get; set; }
         public DateTime? DateInsert { get; set; }
         public DateTime? DateUpdate { get; set; }
         public int Processing { get; set; }
         public string? PictureUrl { get; set; }
+        public string? PlaceUrl { get; set; }
 
         [JsonConverter(typeof(StringEnumConverter))]
         public BusinessStatus Status { get; set; }
@@ -73,7 +75,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
         /// <param name="addressScore"></param>
         /// <param name="plusCode"></param>
         /// <param name="country"></param>
-        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? geoloc = null, int processing = 0, DateTime? dateInsert = null)
+        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? urlPlace, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null)
         {
             Id = -500;
             IdEtab = idEtab;
@@ -102,8 +104,11 @@ namespace GMB.Sdk.Core.Types.Database.Models
             AddressScore = addressScore;
             PlusCode = plusCode;
             Country = country;
+            PlaceUrl = urlPlace;
+            TelInt = telInt;
 
             CheckValidity();
+            TelInt = telInt;
         }
 
         public void CheckValidity()

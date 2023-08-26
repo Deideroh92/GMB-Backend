@@ -66,7 +66,12 @@ namespace GMB.Sdk.Core
                 (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Result.BusinessStatus.ToString()),
                 null,
                 placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country")).LongName,
-                placeDetails.Result.Geometry.Location.Latitude.ToString() + " - " + placeDetails.Result.Geometry.Location.Longitude.ToString());
+                placeDetails.Result.Url,
+                placeDetails.Result.Geometry.Location.Latitude.ToString() + " - " + placeDetails.Result.Geometry.Location.Longitude.ToString(),
+                0,
+                null,
+                placeDetails.Result.InternationalPhoneNumber
+                );
             return profile;
         }
 
