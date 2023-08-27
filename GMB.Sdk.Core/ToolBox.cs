@@ -40,39 +40,63 @@ namespace GMB.Sdk.Core
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
 
-        public static DbBusinessProfile PlaceDetailsToBP(PlaceDetailsResponse placeDetails, string idEtab, string guid)
+        public static DbBusinessProfile PlaceDetailsToBP(PlaceDetails placeDetails, string idEtab, string guid)
         {
             DbBusinessProfile? profile = new(
-                placeDetails.Result.PlaceId,
+                placeDetails.PlaceId,
                 idEtab,
                 guid,
-                placeDetails.Result.Name,
-                placeDetails.Result.Types?.FirstOrDefault(),
-                placeDetails.Result.FormattedAdress,
-                placeDetails.Result.FormattedAdress,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("postal_code")).LongName,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("locality")).LongName,
+                placeDetails.Name,
+                placeDetails.FirstType,
+                placeDetails.Address,
+                placeDetails.Address,
+                placeDetails.PostalCode,
+                placeDetails.City,
                 null,
-                placeDetails.Result.Geometry.Location.Latitude,
-                placeDetails.Result.Geometry.Location.Longitude,
+                placeDetails.Lat,
+                placeDetails.Long,
                 null,
                 null,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("street_number")).LongName,
+                placeDetails.StreetNumber,
                 null,
-                placeDetails.Result.FormattedPhoneNumber,
-                placeDetails.Result.Website,
-                placeDetails.Result.PlusCode.GlobalCode,
+                placeDetails.Phone,
+                placeDetails.Website,
+                placeDetails.PlusCode,
                 null,
-                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Result.BusinessStatus.ToString()),
+                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Status!),
                 null,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country")).LongName,
-                placeDetails.Result.Url,
-                placeDetails.Result.Geometry.Location.Latitude.ToString() + " - " + placeDetails.Result.Geometry.Location.Longitude.ToString(),
+                placeDetails.Country,
+                placeDetails.Url,
+                placeDetails.Lat + " - " + placeDetails.Long,
                 0,
                 null,
-                placeDetails.Result.InternationalPhoneNumber
+                placeDetails.PhoneInternational
                 );
             return profile;
+        }
+
+        public static PlaceDetails PlaceDetailsResponseToPlaceDetails(PlaceDetailsResponse placeDetails)
+        {
+            return new(
+                placeDetails.Result.PlaceId!,
+                placeDetails.Result.Name!,
+                placeDetails.Result.Types?.FirstOrDefault(),
+                placeDetails.Result.FormattedAdress,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("street_number")).LongName,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("postal_code")).LongName,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("locality")).LongName,
+                placeDetails.Result.Geometry.Location.Latitude,
+                placeDetails.Result.Geometry.Location.Longitude,
+                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country")).LongName,
+                placeDetails.Result.FormattedPhoneNumber,
+                placeDetails.Result.InternationalPhoneNumber,
+                placeDetails.Result.Website,
+                placeDetails.Result.PlusCode.GlobalCode,
+                placeDetails.Result.Url,
+                placeDetails.Result.BusinessStatus.ToString(),
+                placeDetails.Result.Rating,
+                placeDetails.Result.UserRatingsTotal
+                );
         }
 
         /// <summary>

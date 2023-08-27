@@ -1,7 +1,6 @@
 ﻿using System.Data.SqlClient;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
-using Microsoft.VisualBasic;
 
 namespace GMB.Sdk.Core.Types.Database.Manager
 {
@@ -799,6 +798,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
                 cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
                 cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
@@ -829,38 +829,36 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             }
         }
         /// <summary>
-        /// Update Business profile.
+        /// Update Business profile with place Details.
         /// </summary>
-        /// <param name="businessProfile"></param>
-        public void UpdateBusinessProfileFromPlaceDetails(DbBusinessProfile businessProfile)
+        /// <param name="placeDetails"></param>
+        public void UpdateBusinessProfileFromPlaceDetails(PlaceDetails placeDetails)
         {
             try
             {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_LON = @Lon, A_LAT = @Lat, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, TEL_INT = @TelInt, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, A_COUNTRY = @Country, URL_PLACE = @Place_URL WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
-                cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
-                cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(businessProfile.Address));
-                cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(businessProfile.PlusCode));
-                cmd.Parameters.AddWithValue("@City", GetValueOrDefault(businessProfile.City));
-                cmd.Parameters.AddWithValue("@CityCode", GetValueOrDefault(businessProfile.CityCode));
-                cmd.Parameters.AddWithValue("@Lon", GetValueOrDefault(businessProfile.Lon));
-                cmd.Parameters.AddWithValue("@Lat", GetValueOrDefault(businessProfile.Lat));
-                cmd.Parameters.AddWithValue("@PostCode", GetValueOrDefault(businessProfile.PostCode));
-                cmd.Parameters.AddWithValue("@Category", GetValueOrDefault(businessProfile.Category));
-                cmd.Parameters.AddWithValue("@StreetNumber", GetValueOrDefault(businessProfile.StreetNumber));
-                cmd.Parameters.AddWithValue("@Tel", GetValueOrDefault(businessProfile.Tel));
-                cmd.Parameters.AddWithValue("@Website", GetValueOrDefault(businessProfile.Website));
-                cmd.Parameters.AddWithValue("@DateUpdate", businessProfile.DateUpdate ?? DateTime.UtcNow);
-                cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
-                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
-                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
-                cmd.Parameters.AddWithValue("@PlaceUrl", GetValueOrDefault(businessProfile.PlaceUrl));
-                cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(businessProfile.TelInt));
+                cmd.Parameters.AddWithValue("@Name", placeDetails.Name);
+                cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(placeDetails.Address));
+                cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(placeDetails.Address));
+                cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(placeDetails.PlusCode));
+                cmd.Parameters.AddWithValue("@City", GetValueOrDefault(placeDetails.City));
+                cmd.Parameters.AddWithValue("@Lon", GetValueOrDefault(placeDetails.Long));
+                cmd.Parameters.AddWithValue("@Lat", GetValueOrDefault(placeDetails.Lat));
+                cmd.Parameters.AddWithValue("@PostCode", GetValueOrDefault(placeDetails.PostalCode));
+                cmd.Parameters.AddWithValue("@StreetNumber", GetValueOrDefault(placeDetails.StreetNumber));
+                cmd.Parameters.AddWithValue("@Tel", GetValueOrDefault(placeDetails.Phone));
+                cmd.Parameters.AddWithValue("@Website", GetValueOrDefault(placeDetails.Website));
+                cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@Status", placeDetails.Status);
+                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(placeDetails.Lat) + "," + GetValueOrDefault(placeDetails.Long));
+                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(placeDetails.Country));
+                cmd.Parameters.AddWithValue("@PlaceUrl", GetValueOrDefault(placeDetails.Url));
+                cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(placeDetails.PhoneInternational));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
-                throw new Exception($"Error updating BP from place details with id_etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
+                throw new Exception($"Error updating BP from place details with place ID = [{placeDetails.PlaceId}]", e);
             }
         }
         /// <summary>
@@ -1083,65 +1081,6 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             catch (Exception e)
             {
                 throw new Exception($"Error getting BR with id etab = [{idEtab}] and id review = [{idReview}]", e);
-            }
-        }
-        public List<DbBusinessReview> GetBusinessReviewTemp()
-        {
-            try
-            {
-                List<DbBusinessReview> businessReviewsList = new();
-                string selectCommand = "SELECT ID_ETAB, REVIEW_ID FROM BUSINESS_REVIEWS where date_update < '2023-08-25 19:29:00'";
-                using SqlCommand cmd = new(selectCommand, Connection);
-                using SqlDataReader reader = cmd.ExecuteReader();
-
-                while (reader.Read())
-                {
-                    businessReviewsList.Add(new DbBusinessReview(reader.GetString(0), reader.GetString(1), "dsqdsq", new GoogleUser(null, null), 2, null, null, null, false, null));
-                }
-
-                return businessReviewsList;
-
-            } catch (Exception e)
-            {
-                throw new Exception($"Error getting BR", e);
-            }
-        }
-
-        public List<DbBusinessReview> UpdateBr(string id, string newId)
-        {
-            try
-            {
-                List<DbBusinessReview> businessReviewsList = new();
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET REVIEW_ID = @newId, DATE_UPDATE = @DateUpdate WHERE REVIEW_ID = @id";
-                using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@id", id);
-                cmd.Parameters.AddWithValue("@newId", newId);
-                cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
-                cmd.ExecuteNonQuery();
-
-                return businessReviewsList;
-
-            } catch (Exception e)
-            {
-                throw new Exception($"Error updating BR with idEtab = [{id}]", e);
-            }
-        }
-        public List<DbBusinessReview> UpdateBr2(string id, string newId)
-        {
-            try
-            {
-                List<DbBusinessReview> businessReviewsList = new();
-                string selectCommand = "UPDATE BUSINESS_REVIEW_FEELING SET REVIEW_ID = @newId WHERE REVIEW_ID = @id";
-                using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@id", id);
-                cmd.Parameters.AddWithValue("@newId", newId);
-                cmd.ExecuteNonQuery();
-
-                return businessReviewsList;
-
-            } catch (Exception e)
-            {
-                throw new Exception($"Error updating BR with review id = [{id}]", e);
             }
         }
         #endregion Get

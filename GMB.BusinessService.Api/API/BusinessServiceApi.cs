@@ -42,6 +42,10 @@ namespace GMB.Business.Api.API
             try
             {
                 string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
+
+                if (category == null && ToolBox.FindElementSafe(driver.WebDriver, new() { By.XPath("//div[text() = 'VÉRIFIER LA DISPONIBILITÉ']") })?.Text == "VÉRIFIER LA DISPONIBILITÉ")
+                    category = "Hébergement";
+
                 string? googleAddress = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.adress)?.GetAttribute("aria-label")?.Replace("Adresse:", "")?.Trim();
                 string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.img)?.GetAttribute("src")?.Trim();
                 string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();

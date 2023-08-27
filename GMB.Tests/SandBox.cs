@@ -18,31 +18,9 @@ namespace GMB.Tests
         public async Task Main()
         {
             SeleniumDriver driver = new();
-            GetBusinessProfileRequest request = new("https://www.google.com/maps/place/Brice+B%C3%A9net+-+Immobilier+N%C3%A9zignan+L'Ev%C3%AAque+-+Capifrance/data=!4m7!3m6!1s0x12b1154408e2af27:0x20bb06f5fabdb25c!8m2!3d43.4246239!4d3.4122255!16s%2Fg%2F11qnkm17pp!19sChIJJ6_iCEQVsRIRXLK9-vUGuyA", null, null);
-            await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+            GetBusinessProfileRequest request = new("https://www.google.com/maps/place/Manuela+JIMENEZ+-+Hypnoth%C3%A9rapeute+-+Amn%C3%A9ville/@49.2196698,6.0649712,17z/data=!3m1!4b1!4m6!3m5!1s0x479529491bb86fef:0xf2886c5c2f7dd62e!8m2!3d49.2196698!4d6.0649712!16s%2Fg%2F11p63c281n?entry=ttu", null, null);
+            (DbBusinessProfile? business, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
 
-            return;
-        }
-
-        [TestMethod]
-        public async Task BR() {
-            DbLib db = new();
-            List<DbBusinessReview> businessReviews = db.GetBusinessReviewTemp();
-            List<Task> tasks = new();
-
-            foreach (var chunk in businessReviews.Chunk(businessReviews.Count / 1))
-            {
-                Task newThread = Task.Run(() =>
-                {
-                    foreach (DbBusinessReview br in new List<DbBusinessReview>(chunk))
-                    {
-                        db.UpdateBr(br.IdReview, ToolBox.ComputeMd5Hash(br.IdEtab + br.IdReview));
-                        db.UpdateBr2(br.IdReview, ToolBox.ComputeMd5Hash(br.IdEtab + br.IdReview));
-                    }
-                });
-                tasks.Add(newThread);
-            }
-            await Task.WhenAll(tasks);
             return;
         }
 

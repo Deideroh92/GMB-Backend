@@ -32,72 +32,50 @@ namespace GMB.PlaceService.Api.Controller
         {
             string? placeId = await PlaceApi.GetPlaceId(query);
             if (placeId == null)
-                return GetBusinessProfileResponse.Fail(-1, "No place Id provided.");
-
-            using DbLib db = new();
-            string idEtab = ToolBox.ComputeMd5Hash(placeId);
-
-            PlaceDetailsResponse? placeDetails = await PlaceApi.GetGMB(placeId);
-            if (placeDetails == null || placeDetails.Result.Url == null)
                 return new GetBusinessProfileResponse(null, null);
 
-            DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(placeDetails.Result.Url));
+            PlaceDetails? placeDetails = await PlaceApi.GetGMB(placeId);
+            if (placeDetails == null || placeDetails.Url == null)
+                return new GetBusinessProfileResponse(null, null);
 
-            businessUrl ??= UrlController.CreateUrl(placeDetails.Result.Url);
+            using DbLib db = new();
 
-            string? idBan = null;
-            string? addressType = null;
-
-            if (placeDetails.Result.FormattedAdress != null)
-            {
-                AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(placeDetails.Result.FormattedAdress);
-                if (addressResponse != null)
-                {
-                    addressType = addressResponse.Features[0]?.Properties?.PropertyType;
-                    idBan = addressResponse.Features[0]?.Properties?.Id;
-                }
-            }
-
-            DbBusinessProfile? profile = new(
-                placeDetails.Result.PlaceId,
-                idEtab,
-                businessUrl.Guid,
-                placeDetails.Result.Name,
-                placeDetails.Result.Types?.FirstOrDefault(),
-                placeDetails.Result.FormattedAdress,
-                placeDetails.Result.FormattedAdress,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("postal_code")).LongName,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("locality")).LongName,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("route")).LongName,
-                placeDetails.Result.Geometry.Location.Latitude,
-                placeDetails.Result.Geometry.Location.Longitude,
-                idBan,
-                addressType,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("street_number")).LongName,
-                null,
-                placeDetails.Result.FormattedPhoneNumber,
-                placeDetails.Result.Website,
-                placeDetails.Result.PlusCode.GlobalCode,
-                null,
-                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Result.BusinessStatus.ToString()),
-                null,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country")).LongName,
-                placeDetails.Result.Url,
-                placeDetails.Result.Geometry.Location.Latitude.ToString() + ", " + placeDetails.Result.Geometry.Location.Longitude.ToString());
+            string idEtab = ToolBox.ComputeMd5Hash(placeId);
 
             DbBusinessProfile? business = db.GetBusinessByIdEtab(idEtab);
-            DbBusinessScore? businessScore = null;
 
-            if (business != null)
-                businessScore = db.GetBusinessScoreByIdEtab(business.IdEtab);
-
+            // New business
             if (business == null)
+            {
+                DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Url);
+                DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
+
+                if (placeDetails.Address != null)
+                {
+                    AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(placeDetails.Address);
+                    if (addressResponse != null)
+                    {
+                        profile.AddressType = addressResponse.Features[0]?.Properties?.PropertyType;
+                        profile.AddressScore = addressResponse.Features[0]?.Properties?.Score;
+                        profile.IdBan = addressResponse.Features[0]?.Properties?.Id;
+                        profile.StreetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
+                        profile.CityCode = addressResponse.Features[0]?.Properties?.CityCode;
+                    }
+                }
+
+                DbBusinessScore businessScore = new(profile.IdEtab, placeDetails.Rating, placeDetails.UserRatingsTotal);
+
                 db.CreateBusinessProfile(profile);
+                db.CreateBusinessScore(businessScore);
 
-            if (business != null && !profile.Equals(business))
-                db.UpdateBusinessProfile(profile);
+                return new GetBusinessProfileResponse(profile, businessScore);
+            } else
+            {
+                db.UpdateBusinessProfileFromPlaceDetails(placeDetails);
+                return new GetBusinessProfileResponse(business, db.GetBusinessScoreByIdEtab(business.IdEtab));
+            }
 
-            return new GetBusinessProfileResponse(profile, businessScore);
+            
         }
         /// <summary>
         /// Get GMB from Google Api.
@@ -106,9 +84,16 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB as described in API</returns>
         [HttpGet("place/{placeId}")]
         //[Authorize]
-        public async Task<ActionResult<GetPlaceDetailsResponse?>> GetGMBByPlaceId(string placeId)
+        public async Task<ActionResult<GetPlaceDetails>> GetGMBByPlaceId(string placeId)
         {
-            return new GetPlaceDetailsResponse(await PlaceApi.GetGMB(placeId));
+            try
+            {
+                PlaceDetails? placeDetails = await PlaceApi.GetGMB(placeId);
+                return new GetPlaceDetails(placeDetails);
+            } catch (Exception ex)
+            {
+                return GetPlaceDetails.Exception(ex.Message);
+            }
         }
         /// <summary>
         /// Get GMB from Google Api.
@@ -117,9 +102,17 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB as described in API</returns>
         [HttpPost("place-id")]
         //[Authorize]
-        public async Task<ActionResult<GetPlaceIdResponse?>> GetPlaceIdByQuery([FromBody] string query)
+        public async Task<ActionResult<GetPlaceIdResponse>> GetPlaceIdByQuery([FromBody] string query)
         {
-            return new GetPlaceIdResponse(await PlaceApi.GetPlaceId(query));
+            try
+            {
+                string? placeId = await PlaceApi.GetPlaceId(query);
+                return new GetPlaceIdResponse(placeId);
+            } catch (Exception ex)
+            {
+                return GetPlaceIdResponse.Exception(ex.Message);
+            }
+            
         }
     }
 }

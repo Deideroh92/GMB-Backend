@@ -15,7 +15,7 @@ namespace GMB.PlaceService.Api.API
         /// Get Business info by Place Id from Google API
         /// </summary>
         /// <param name="placeId"></param>
-        public static async Task<PlaceDetailsResponse?> GetGMB(string placeId)
+        public static async Task<PlaceDetails?> GetGMB(string placeId)
         {
             try
             {
@@ -41,7 +41,8 @@ namespace GMB.PlaceService.Api.API
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
                     PlaceDetailsResponse? placeDetailsResponse = PlaceDetailsResponse.FromJson(responseBody);
-                    return placeDetailsResponse;
+                    if (placeDetailsResponse != null )
+                        return ToolBox.PlaceDetailsResponseToPlaceDetails(placeDetailsResponse);
                 }
 
                 return null;

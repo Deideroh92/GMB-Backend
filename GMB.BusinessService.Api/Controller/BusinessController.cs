@@ -94,11 +94,8 @@ namespace GMB.BusinessService.Api.Controllers
                     if (score?.Score != null)
                         db.CreateBusinessScore(score);
 
-                    // Check if it's an hotel.
-                    bool isHotel = ToolBox.FindElementSafe(driver.WebDriver, new() { By.XPath("//div[text() = 'VÉRIFIER LA DISPONIBILITÉ']") })?.Text == "VÉRIFIER LA DISPONIBILITÉ";
-
                     // Getting reviews
-                    if (request.GetReviews && request.DateLimit != null && score?.Score != null && !isHotel) {
+                    if (request.GetReviews && request.DateLimit != null && score?.Score != null && profile.Category != "Hébergement") {
                         driver.GetToPage(BPRequest.Url);
                         List<DbBusinessReview>? reviews = BusinessServiceApi.GetReviews(profile.IdEtab, request.DateLimit, driver);
 
@@ -227,35 +224,32 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="placeDetails"></param>
         [HttpPost("bp/create/by-place-details")]
         //[Authorize]
-        public ActionResult<GenericResponse> CreateNewBusinessByPlaceDetails([FromBody] PlaceDetailsResponse placeDetails)
+        public ActionResult<GenericResponse> CreateNewBusinessByPlaceDetails([FromBody] PlaceDetails placeDetails)
         {
             try
             {
-                if (placeDetails.Result.PlaceId == null)
+                if (placeDetails.PlaceId == null)
                     return GenericResponse.Fail(-1, "Place ID is missing.");
-                if (placeDetails.Result.Url == null)
+                if (placeDetails.Url == null)
                     return GenericResponse.Fail(-2, "Unique URL is missing.");
 
                 string message = "Business successfully created in DB!";
 
                 using DbLib db = new();
-                string idEtab = ToolBox.ComputeMd5Hash(placeDetails.Result.PlaceId);
+                string idEtab = ToolBox.ComputeMd5Hash(placeDetails.PlaceId);
                 DbBusinessProfile? dbBusinessProfile = db.GetBusinessByIdEtab(idEtab);
-                DbBusinessProfile? profile;
+                
 
                 // Update business if exist
                 if (dbBusinessProfile != null)
+                    db.UpdateBusinessProfileFromPlaceDetails(placeDetails);
+                else // No existing business profile
                 {
-                    message = "Business already in DB, updated successfully!";
-                    profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, dbBusinessProfile.FirstGuid);
-                    db.UpdateBusinessProfileFromPlaceDetails(profile);
-                } else // No existing business profile
-                {
-                    DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Result.Url);
-                    profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
+                    DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Url);
+                    DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
                     db.CreateBusinessProfile(profile);
                 };
-                return new GenericResponse(profile.Id, message);
+                return new GenericResponse(0, message);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
