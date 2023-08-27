@@ -167,9 +167,9 @@ namespace GMB.Business.Api.API
                 country = country[(country.LastIndexOf(',') + 1)..].Trim();
                 return (longPlusCode, geoloc, country);
             }
-            catch (Exception e)
+            catch
             {
-                throw new Exception($"Couldn't get plus code infos for = [{plusCode}]", e);
+                return (plusCode, null, null);
             }
         }
         #endregion
