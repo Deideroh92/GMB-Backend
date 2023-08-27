@@ -832,13 +832,13 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// Update Business profile with place Details.
         /// </summary>
         /// <param name="placeDetails"></param>
-        public void UpdateBusinessProfileFromPlaceDetails(PlaceDetails placeDetails)
+        public void UpdateBusinessProfileFromPlaceDetails(PlaceDetails placeDetails, string idEtab)
         {
             try
             {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_LON = @Lon, A_LAT = @Lat, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, TEL_INT = @TelInt, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, A_COUNTRY = @Country, URL_PLACE = @Place_URL WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
+                cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.Parameters.AddWithValue("@Name", placeDetails.Name);
                 cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(placeDetails.Address));
                 cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(placeDetails.Address));
@@ -1007,7 +1007,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 {
                     DbBusinessScore businessScore = new(
                         reader["ID_ETAB"].ToString()!,
-                        (reader["SCORE"] != DBNull.Value) ? (float)(double)reader["SCORE"] : (float?)null,
+                        (reader["SCORE"] != DBNull.Value) ? (double)reader["SCORE"] : null,
                         (reader["NB_REVIEWS"] != DBNull.Value) ? (int?)reader["NB_REVIEWS"] : null,
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null);
                     return businessScore;

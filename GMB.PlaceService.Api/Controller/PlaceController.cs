@@ -71,7 +71,7 @@ namespace GMB.PlaceService.Api.Controller
                 return new GetBusinessProfileResponse(profile, businessScore);
             } else
             {
-                db.UpdateBusinessProfileFromPlaceDetails(placeDetails);
+                db.UpdateBusinessProfileFromPlaceDetails(placeDetails, business.IdEtab);
                 return new GetBusinessProfileResponse(business, db.GetBusinessScoreByIdEtab(business.IdEtab));
             }
 

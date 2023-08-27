@@ -242,7 +242,7 @@ namespace GMB.BusinessService.Api.Controllers
 
                 // Update business if exist
                 if (dbBusinessProfile != null)
-                    db.UpdateBusinessProfileFromPlaceDetails(placeDetails);
+                    db.UpdateBusinessProfileFromPlaceDetails(placeDetails, dbBusinessProfile.IdEtab);
                 else // No existing business profile
                 {
                     DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Url);
