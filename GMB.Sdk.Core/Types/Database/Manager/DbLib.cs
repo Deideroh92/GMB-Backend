@@ -1034,10 +1034,10 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_DATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateUpdate, @Processing)";
+                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_DATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId)";
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@IdEtab", GetValueOrDefault(businessReview.IdEtab));
-                cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(businessReview.IdReview));
+                cmd.Parameters.AddWithValue("@IdEtab", businessReview.IdEtab);
+                cmd.Parameters.AddWithValue("@IdReview", businessReview.IdReview);
                 cmd.Parameters.AddWithValue("@UserName", GetValueOrDefault(businessReview.User.Name));
                 cmd.Parameters.AddWithValue("@UserStatus", GetValueOrDefault(businessReview.User.LocalGuide));
                 cmd.Parameters.AddWithValue("@Score", GetValueOrDefault(businessReview.Score));
@@ -1047,6 +1047,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@ReviewDate", GetValueOrDefault(businessReview.ReviewDate));
                 cmd.Parameters.AddWithValue("@ReviewReplied", GetValueOrDefault(businessReview.ReviewReplied));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessReview.DateUpdate));
+                cmd.Parameters.AddWithValue("@GoogleReviewId", businessReview.GoogleReviewId);
                 cmd.Parameters.AddWithValue("@Processing", 0);
                 cmd.ExecuteNonQuery();
             }
@@ -1096,7 +1097,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate, REVIEW_DATE = @ReviewDate WHERE ID_ETAB = @IdEtab AND REVIEW_ID = @IdReview";
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate, REVIEW_DATE = @ReviewDate WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@UserName", GetValueOrDefault(review.User.Name));
                 cmd.Parameters.AddWithValue("@UserStatus", GetValueOrDefault(review.User.LocalGuide));
@@ -1107,7 +1108,6 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(review.DateUpdate));
                 cmd.Parameters.AddWithValue("@ReviewGoogleDate", GetValueOrDefault(review.ReviewGoogleDate));
                 cmd.Parameters.AddWithValue("@ReviewDate", GetValueOrDefault(review.ReviewDate));
-                cmd.Parameters.AddWithValue("@IdEtab", GetValueOrDefault(review.IdEtab));
                 cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
                 cmd.ExecuteNonQuery();
             }
