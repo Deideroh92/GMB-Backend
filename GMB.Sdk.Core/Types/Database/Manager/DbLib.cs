@@ -1076,7 +1076,10 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
 
                 if (reader.Read())
-                    return new DbBusinessReview(idEtab, idReview, reader.GetString(6), new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0), reader.IsDBNull(3) ? null : reader.GetInt32(3), reader.IsDBNull(1) ? false : reader.GetString(1) == "1"), reader.GetInt32(2), reader.IsDBNull(4) ? null : reader.GetString(4), null, null, reader.GetBoolean(5), null, null);
+                {
+                    var test = reader.GetBoolean(5);
+                    return new DbBusinessReview(idEtab, idReview, reader.GetString(6), new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0), reader.IsDBNull(3) ? null : reader.GetInt32(3), reader.GetBoolean(1)), reader.GetInt32(2), reader.IsDBNull(4) ? null : reader.GetString(4), null, null, reader.GetBoolean(5), null, null);
+                }
                 else
                     return null;
 
