@@ -8,7 +8,7 @@ namespace GMB.PlaceService.Api.API
     /// </summary>
     public class PlaceApi {
 
-        public static readonly string API_KEY = "AIzaSyCHUy9kawuZ69nHW-XvzkzdvnZQ_FcRhk0";
+        public static readonly string API_KEY = "AIzaSyBxTQaKxPyZ815_maffoRKjLqs40olcQhw";
         public static readonly string LANGUAGE = "fr";
 
         /// <summary>

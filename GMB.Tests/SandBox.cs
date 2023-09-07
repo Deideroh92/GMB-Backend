@@ -8,6 +8,7 @@ using System.Security.Cryptography;
 using System.Text;
 using GMB.Business.Api.API;
 using GMB.Business.Api.Models;
+using GMB.BusinessService.Api.Controllers;
 
 namespace GMB.Tests
 {
@@ -15,10 +16,18 @@ namespace GMB.Tests
     public class SandBox {
 
         [TestMethod]
-        public async Task Main()
+        public void Main()
+        {
+            BusinessController br = new();
+            br.GetKpi();
+
+            return;
+        }
+        [TestMethod]
+        public async Task GetBusinessInfos()
         {
             SeleniumDriver driver = new();
-            GetBusinessProfileRequest request = new("https://www.google.com/maps/place/Manuela+JIMENEZ+-+Hypnoth%C3%A9rapeute+-+Amn%C3%A9ville/@49.2196698,6.0649712,17z/data=!3m1!4b1!4m6!3m5!1s0x479529491bb86fef:0xf2886c5c2f7dd62e!8m2!3d49.2196698!4d6.0649712!16s%2Fg%2F11p63c281n?entry=ttu", null, null);
+            GetBusinessProfileRequest request = new("https://www.google.com/maps/place/BRED-Banque+Populaire/@48.8280758,2.2411834,15z/data=!4m12!1m2!2m1!1sbred+boulogne+billancourt!3m8!1s0x47e67af2357c45ab:0x1b7baec714122e5b!8m2!3d48.8254931!4d2.247925!9m1!1b1!15sChlicmVkIGJvdWxvZ25lIGJpbGxhbmNvdXJ0kgEEYmFua-ABAA!16s%2Fg%2F1wf37y2x?entry=ttu", null, null);
             (DbBusinessProfile? business, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
 
             return;

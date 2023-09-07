@@ -26,7 +26,7 @@ namespace GMB.Sdk.Core.Types.Api
         /// <summary>
         /// Used to return any Id (for creation or other).
         /// </summary>
-        public long ObjectId { get; set; }
+        public long? ObjectId { get; set; }
 
         /// <summary>
         /// DO NOT USE THIS CONSTRUCTOR!
@@ -134,7 +134,7 @@ namespace GMB.Sdk.Core.Types.Api
         /// <param name="objectId"></param>
         /// <param name="message"></param>
         public
-        GenericResponse(long objectId, string? message = null)
+        GenericResponse(long? objectId = null, string? message = null)
         {
             this.ObjectId = objectId;
             this.Message = message.Trim();

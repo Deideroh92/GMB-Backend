@@ -124,6 +124,7 @@ namespace GMB.Sdk.Core
             if (mapper.TryGetValue(googleDate, out string? value) && int.TryParse(value, out int jsonValue))
             {
                 DateTime currentDate = DateTime.UtcNow;
+                
 
                 if (googleDate.Contains("moi"))
                     return currentDate.AddMonths(-jsonValue);
@@ -133,6 +134,8 @@ namespace GMB.Sdk.Core
                     return currentDate.AddDays(-jsonValue);
                 if (googleDate.Contains("jour"))
                     return currentDate.AddDays(-jsonValue);
+                if (googleDate.Contains("heure"))
+                    return currentDate.AddHours(-jsonValue);
             }
 
             return DateTime.UtcNow;

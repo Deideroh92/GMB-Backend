@@ -13,6 +13,8 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public string? ReviewText { get; set; }
         public string? ReviewGoogleDate { get; set; }
         public DateTime? ReviewDate { get; set; }
+        public DateTime? ReviewReplyDate { get; set; }
+        public string? ReviewReplyGoogleDate { get; set; }
         public bool ReviewReplied { get; set; }
         public DateTime? DateInsert { get; set; }
         public DateTime? DateUpdate { get; set; }
@@ -34,7 +36,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
         /// <param name="dateInsert"></param>
         /// <param name="dateUpdate"></param>
         /// <param name="reviewReply"></param>
-        public DbBusinessReview(string idEtab, string idReview, string googleReviewId, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null)
+        public DbBusinessReview(string idEtab, string idReview, string googleReviewId, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DateTime? reviewReplyDate, string? reviewReplyGoogleDate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null)
         {
             IdEtab = idEtab;
             GoogleReviewId = googleReviewId;
@@ -48,6 +50,8 @@ namespace GMB.Sdk.Core.Types.Database.Models
             DateInsert = dateInsert;
             DateUpdate = dateUpdate;
             ReviewReply = reviewReply;
+            ReviewReplyDate = reviewReplyDate;
+            ReviewReplyGoogleDate = reviewReplyGoogleDate;
         }
 
         public bool Equals(DbBusinessReview other)
