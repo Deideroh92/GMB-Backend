@@ -64,8 +64,8 @@ namespace GMB.BusinessService.Api.Controllers
                             operationFileWritter.WriteLine(businessAgent.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
                             continue;
                         }
-                        if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(driver.WebDriver.Url))) {
-                            DbBusinessUrl businessUrl = new(profile.FirstGuid, driver.WebDriver.Url, "file", ToolBox.ComputeMd5Hash(driver.WebDriver.Url), UrlState.UPDATED);
+                        if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(BPRequest.Url))) {
+                            DbBusinessUrl businessUrl = new(profile.FirstGuid, BPRequest.Url, "file", ToolBox.ComputeMd5Hash(BPRequest.Url), UrlState.UPDATED);
                             db.CreateBusinessUrl(businessUrl);
                         }
                     }

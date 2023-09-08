@@ -112,11 +112,11 @@ namespace GMB.Tests
             using DbLib db = new();
             int threadNumber = 0;
 
-            int entries = 45000;
+            int entries = 40000;
             int processing = 1;
             Operation operationType = Operation.OTHER;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-3);
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-12);
             BusinessController controller = new();
 
             Log.Logger = new LoggerConfiguration()
@@ -136,7 +136,7 @@ namespace GMB.Tests
                 case Operation.FILE:
                     bool isUrlKnownFile = false;
                     bool isUrlFile = true;
-                    string[]? urlList = File.ReadAllLines(pathUrlKnownFile);
+                    string[]? urlList = File.ReadAllLines(pathUrlFile);
 
                     if (isUrlKnownFile) {
                         foreach (string url in urlList) {

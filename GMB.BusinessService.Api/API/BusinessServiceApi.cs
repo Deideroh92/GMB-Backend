@@ -39,8 +39,18 @@ namespace GMB.Business.Api.API
 
             driver.GetToPage(request.Url);
 
+            WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
+
             try
             {
+                // Business Name
+                wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[@role='main' and @aria-label]")));
+                string ? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
+                if (name == null)
+                    return (null, null);
+                else
+                    Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),\s-]+|\s{2,}", "");
+
                 string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
 
                 if (category == null && ToolBox.FindElementSafe(driver.WebDriver, new() { By.XPath("//div[text() = 'VÉRIFIER LA DISPONIBILITÉ']") })?.Text == "VÉRIFIER LA DISPONIBILITÉ")
@@ -50,13 +60,6 @@ namespace GMB.Business.Api.API
                 string? img = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.img)?.GetAttribute("src")?.Trim();
                 string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();
                 string? website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website)?.GetAttribute("href")?.Trim();
-
-                // Business Name
-                string? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
-                if (name == null)
-                    return (null, null);
-                else
-                    Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),\s-]+|\s{2,}", "");
 
                 // Business Status
                 string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status)?.Text.Trim();
@@ -186,8 +189,8 @@ namespace GMB.Business.Api.API
 
             try
             {
-                WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(2));
-                IWebElement toReviewPage = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver.WebDriver, XPathReview.toReviewsPage)));
+                WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
+                IWebElement toReviewPage = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[@role='tab' and contains(@aria-label, 'Avis')]")));
                 toReviewPage.Click();
             }
             catch (Exception e)
