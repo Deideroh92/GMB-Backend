@@ -76,6 +76,32 @@ namespace GMB.Tests
         /// Exporting Hotels info.
         /// </summary>
         [TestMethod]
+        public void SetProcessingFromIdEtabFile()
+        {
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\urls.txt";
+            using DbLib db = new();
+
+            List<string> values = new();
+
+            using (StreamReader reader = new(filePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string? line = reader.ReadLine();
+                    if (line != null)
+                        values.Add(line);
+                }
+            }
+
+            foreach (string idEtab in values)
+            {
+                db.UpdateBusinessProfileProcessingState(idEtab, 1);
+            }
+        }
+        /// <summary>
+        /// Exporting Hotels info.
+        /// </summary>
+        [TestMethod]
         public async Task ExportHotelAsync() {
 
             // CONFIG

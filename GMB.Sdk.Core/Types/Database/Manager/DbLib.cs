@@ -112,6 +112,25 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw;
             }
         }
+        /// <summary>
+        /// Get Brand total.
+        /// </summary>
+        /// <returns>Total or null</returns>
+        public int? GetBrandTotal()
+        {
+            try
+            {
+                string selectCommand = "SELECT COUNT(1), MARQUE FROM MARQUES_SECTEURS GROUP BY MARQUE";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting brand total", e);
+            }
+        }
         #endregion
 
         #region Users
@@ -785,6 +804,46 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error getting BP by url = [{guid}]", e);
             }
         }
+        /// <summary>
+        /// Get Business Profile total.
+        /// </summary>
+        /// <returns>Total or null</returns>
+        public int? GetBPTotal()
+        {
+            try
+            {
+                string selectCommand = "SELECT COUNT(1) FROM vBUSINESS_PROFILE";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting business profile total", e);
+            }
+        }
+        /// <summary>
+        /// Get Business Profile Network total.
+        /// </summary>
+        /// <returns>Total or null</returns>
+        public int? GetBPNetworkTotal()
+        {
+            try
+            {
+                string selectCommand = "SELECT COUNT(1) FROM vBUSINESS_PROFILE_RESEAU";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting business profile network total", e);
+            }
+        }
         #endregion
 
         #region Update
@@ -1034,7 +1093,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_DATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId)";
+                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_DATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId, @ReviewReplyGoogleDate, @ReviewReplyDate)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessReview.IdEtab);
                 cmd.Parameters.AddWithValue("@IdReview", businessReview.IdReview);
@@ -1049,6 +1108,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessReview.DateUpdate));
                 cmd.Parameters.AddWithValue("@GoogleReviewId", businessReview.GoogleReviewId);
                 cmd.Parameters.AddWithValue("@Processing", 0);
+                cmd.Parameters.AddWithValue("@ReviewReplyGoogleDate", GetValueOrDefault(businessReview.ReviewReplyGoogleDate));
+                cmd.Parameters.AddWithValue("@ReviewReplyDate", GetValueOrDefault(businessReview.ReviewReplyDate));
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
@@ -1077,16 +1138,68 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
                 if (reader.Read())
                 {
-                    var test = reader.GetBoolean(5);
-                    return new DbBusinessReview(idEtab, idReview, reader.GetString(6), new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0), reader.IsDBNull(3) ? null : reader.GetInt32(3), reader.GetBoolean(1)), reader.GetInt32(2), reader.IsDBNull(4) ? null : reader.GetString(4), null, null, reader.GetBoolean(5), null, null);
-                }
-                else
+                    return new DbBusinessReview(idEtab,
+                        idReview,
+                        reader.GetString(6),
+                        new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0),
+                            reader.IsDBNull(3) ? null : reader.GetInt32(3),
+                            reader.IsDBNull(1) ? false : reader.GetBoolean(1)),
+                        reader.GetInt32(2),
+                        reader.IsDBNull(4) ? null : reader.GetString(4),
+                        null,
+                        null,
+                        reader.GetBoolean(5),
+                        null,
+                        null,
+                        null);
+
+                } else
                     return null;
 
             }
             catch (Exception e)
             {
                 throw new Exception($"Error getting BR with id etab = [{idEtab}] and id review = [{idReview}]", e);
+            }
+        }
+        /// <summary>
+        /// Get Business Review total.
+        /// </summary>
+        /// <returns>Total or null</returns>
+        public int? GetBRTotal()
+        {
+            try
+            {
+                string selectCommand = "SELECT COUNT(1) FROM vBUSINESS_REVIEWS";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting business review total", e);
+            }
+        }
+        /// <summary>
+        /// Get Business Review Feelings total.
+        /// </summary>
+        /// <returns>Total or null</returns>
+        public int? GetBRFeelingsTotal()
+        {
+            try
+            {
+                string selectCommand = "SELECT COUNT(1) FROM BUSINESS_REVIEW_FEELING";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting business reviews feelings total", e);
             }
         }
         #endregion Get
@@ -1100,7 +1213,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate, REVIEW_DATE = @ReviewDate WHERE REVIEW_ID = @IdReview";
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@UserName", GetValueOrDefault(review.User.Name));
                 cmd.Parameters.AddWithValue("@UserStatus", GetValueOrDefault(review.User.LocalGuide));
@@ -1109,8 +1222,6 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Review", GetValueOrDefault(review.ReviewText));
                 cmd.Parameters.AddWithValue("@ReviewAnswered", GetValueOrDefault(review.ReviewReplied));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(review.DateUpdate));
-                cmd.Parameters.AddWithValue("@ReviewGoogleDate", GetValueOrDefault(review.ReviewGoogleDate));
-                cmd.Parameters.AddWithValue("@ReviewDate", GetValueOrDefault(review.ReviewDate));
                 cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
                 cmd.ExecuteNonQuery();
             }

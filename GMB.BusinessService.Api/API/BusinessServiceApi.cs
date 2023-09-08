@@ -346,7 +346,15 @@ namespace GMB.Business.Api.API
 
                 bool replied = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyText));
 
-                return new DbBusinessReview(idEtab, ToolBox.ComputeMd5Hash(idEtab + idReview), idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow);
+                string? reviewReplyGoogleDate = null;
+                DateTime? reviewReplyDate = null;
+                if (replied && ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyGoogleDate)))
+                {
+                    reviewReplyGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyGoogleDate).Text;
+                    reviewReplyDate = ToolBox.ComputeDateFromGoogleDate(reviewReplyGoogleDate);
+                }
+
+                return new DbBusinessReview(idEtab, ToolBox.ComputeMd5Hash(idEtab + idReview), idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, reviewReplyDate, reviewReplyGoogleDate);
             }
             catch (Exception)
             {

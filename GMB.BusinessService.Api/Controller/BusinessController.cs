@@ -5,7 +5,6 @@ using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Business.Api.Models;
-using OpenQA.Selenium;
 using GMB.Url.Api;
 using GMB.Business.Api.API;
 using Microsoft.AspNetCore.Mvc;
@@ -85,14 +84,14 @@ namespace GMB.BusinessService.Api.Controllers
 
                     business ??= db.GetBusinessByIdEtab(profile.IdEtab);
 
-                    if (business == null)
+                    /*if (business == null)
                         db.CreateBusinessProfile(profile);
                     if (business != null && !profile.Equals(business))
                         db.UpdateBusinessProfile(profile);
 
                     // Insert Business Score if have one.
                     if (score?.Score != null)
-                        db.CreateBusinessScore(score);
+                        db.CreateBusinessScore(score);*/
 
                     // Getting reviews
                     if (request.GetReviews && request.DateLimit != null && score?.Score != null && profile.Category != "Hébergement") {
@@ -233,8 +232,6 @@ namespace GMB.BusinessService.Api.Controllers
                 if (placeDetails.Url == null)
                     return GenericResponse.Fail(-2, "Unique URL is missing.");
 
-                string message = "Business successfully created in DB!";
-
                 using DbLib db = new();
                 string idEtab = ToolBox.ComputeMd5Hash(placeDetails.PlaceId);
                 DbBusinessProfile? dbBusinessProfile = db.GetBusinessByIdEtab(idEtab);
@@ -242,14 +239,17 @@ namespace GMB.BusinessService.Api.Controllers
 
                 // Update business if exist
                 if (dbBusinessProfile != null)
+                {
                     db.UpdateBusinessProfileFromPlaceDetails(placeDetails, dbBusinessProfile.IdEtab);
+                    return new GenericResponse(0, "Business already in DB. Updated successfully !");
+                }     
                 else // No existing business profile
                 {
                     DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Url);
                     DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
                     db.CreateBusinessProfile(profile);
+                    return new GenericResponse(0, "Business successfully created in DB!");
                 };
-                return new GenericResponse(0, message);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
@@ -351,7 +351,7 @@ namespace GMB.BusinessService.Api.Controllers
                 using DbLib db = new();
                 db.UpdateBusinessProfile(businessProfile);
 
-                return new GenericResponse(businessProfile.Id);
+                return new GenericResponse(0);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
@@ -406,6 +406,32 @@ namespace GMB.BusinessService.Api.Controllers
             }
             catch (Exception e) {
                 return null;
+            }
+        }
+        #endregion
+
+        #region KPI
+        /// <summary>
+        /// Get KPI.
+        /// </summary>
+        [HttpGet("kpi")]
+        //[Authorize]
+        public ActionResult<GetMainKpiResponse> GetKpi()
+        {
+            try
+            {
+                using DbLib db = new();
+                int? brTotal = db.GetBRTotal();
+                int? bpTotal = db.GetBRTotal();
+                int? bpNetworkTotal = db.GetBPNetworkTotal();
+                int? brFeelingTotal = db.GetBRFeelingsTotal();
+                int? brandTotal = db.GetBrandTotal();
+                MainKPI kpi = new(bpTotal, bpNetworkTotal, brTotal, brFeelingTotal, brandTotal);
+                return new GetMainKpiResponse();
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetMainKpiResponse.Exception("Error getting KPIs.");
             }
         }
         #endregion

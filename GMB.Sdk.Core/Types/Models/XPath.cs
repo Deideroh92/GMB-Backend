@@ -67,6 +67,6 @@ namespace GMB.Sdk.Core.Types.Models
 
         // Review reply info
         public static readonly List<By> replyText = new() { By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::div") };
-        //public static readonly List<By> replyGoogleDate = new() { By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::span") };
+        public static readonly List<By> replyGoogleDate = new() { By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::span") };
     }
 }
