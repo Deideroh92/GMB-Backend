@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -60,11 +59,15 @@ namespace GMB.BusinessService.Api.Core
         // Configure: Define how your application's request processing pipeline should be set up.
         public static void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
-
             app.UseRouting();
 
             // Use authentication
             app.UseAuthentication();
+
+            // Authorize users based on policies (if needed).
+            app.UseAuthorization();
+
+            
 
             app.UseCors(builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
@@ -81,9 +84,6 @@ namespace GMB.BusinessService.Api.Core
                 }
                 return next();
             });
-
-            // Authorize users based on policies (if needed).
-            app.UseAuthorization();
 
             // Define how endpoints should be matched and handled.
             app.UseEndpoints(endpoints =>

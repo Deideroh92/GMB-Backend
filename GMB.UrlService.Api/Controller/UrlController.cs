@@ -61,7 +61,7 @@ namespace GMB.Url.Api
         /// </summary>
         /// <param name="url"></param>
         /// <param name="date"></param>
-        public static DbBusinessUrl CreateUrl(string url, DateTime? date = null) {
+        public static DbBusinessUrl CreateUrl(string url, UrlState urlState = UrlState.NEW) {
             try
             {
                 using DbLib db = new();
@@ -69,7 +69,7 @@ namespace GMB.Url.Api
                 DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(urlEncoded);
                 if (businessUrl == null)
                 {
-                    businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", ToolBox.ComputeMd5Hash(url), UrlState.NEW, null, date);
+                    businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", ToolBox.ComputeMd5Hash(url), urlState);
                     db.CreateBusinessUrl(businessUrl);
                 }
                 return businessUrl;

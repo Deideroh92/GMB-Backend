@@ -876,7 +876,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Website", GetValueOrDefault(businessProfile.Website));
                 cmd.Parameters.AddWithValue("@UrlPicture", GetValueOrDefault(businessProfile.PictureUrl));
                 cmd.Parameters.AddWithValue("@AddressScore", GetValueOrDefault(businessProfile.AddressScore));
-                cmd.Parameters.AddWithValue("@DateUpdate", businessProfile.DateUpdate ?? DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
                 cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
@@ -888,6 +888,48 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             }
         }
         /// <summary>
+        /// Update Business profile from web portal.
+        /// </summary>
+        /// <param name="businessProfile"></param>
+        public void UpdateBusinessProfileFromWeb(DbBusinessProfile businessProfile)
+        {
+            try
+            {
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country, URL_PLACE = @Url, TEL_INT = @TelInt, PROCESSING = @Processing WHERE ID_ETAB = @IdEtab";
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
+                cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
+                cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
+                cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
+                cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(businessProfile.Address));
+                cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(businessProfile.PlusCode));
+                cmd.Parameters.AddWithValue("@City", GetValueOrDefault(businessProfile.City));
+                cmd.Parameters.AddWithValue("@CityCode", GetValueOrDefault(businessProfile.CityCode));
+                cmd.Parameters.AddWithValue("@IdBan", GetValueOrDefault(businessProfile.IdBan));
+                cmd.Parameters.AddWithValue("@AddressType", GetValueOrDefault(businessProfile.AddressType));
+                cmd.Parameters.AddWithValue("@Lon", GetValueOrDefault(businessProfile.Lon));
+                cmd.Parameters.AddWithValue("@Lat", GetValueOrDefault(businessProfile.Lat));
+                cmd.Parameters.AddWithValue("@PostCode", GetValueOrDefault(businessProfile.PostCode));
+                cmd.Parameters.AddWithValue("@Category", GetValueOrDefault(businessProfile.Category));
+                cmd.Parameters.AddWithValue("@StreetNumber", GetValueOrDefault(businessProfile.StreetNumber));
+                cmd.Parameters.AddWithValue("@Tel", GetValueOrDefault(businessProfile.Tel));
+                cmd.Parameters.AddWithValue("@Website", GetValueOrDefault(businessProfile.Website));
+                cmd.Parameters.AddWithValue("@UrlPicture", GetValueOrDefault(businessProfile.PictureUrl));
+                cmd.Parameters.AddWithValue("@AddressScore", GetValueOrDefault(businessProfile.AddressScore));
+                cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
+                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
+                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
+                cmd.Parameters.AddWithValue("@Url", GetValueOrDefault(businessProfile.PlaceUrl));
+                cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(businessProfile.TelInt));
+                cmd.Parameters.AddWithValue("@Processing", GetValueOrDefault(businessProfile.Processing));
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error updating BP from web with id_etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
+            }
+        }
+        /// <summary>
         /// Update Business profile with place Details.
         /// </summary>
         /// <param name="placeDetails"></param>
@@ -895,12 +937,12 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_LON = @Lon, A_LAT = @Lat, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, TEL_INT = @TelInt, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, A_COUNTRY = @Country, URL_PLACE = @Place_URL WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_POSTCODE = @PostCode, A_CITY = @City, A_LON = @Lon, A_LAT = @Lat, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, TEL_INT = @TelInt, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, A_COUNTRY = @Country, URL_PLACE = @PlaceUrl WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.Parameters.AddWithValue("@Name", placeDetails.Name);
+                cmd.Parameters.AddWithValue("@Category", GetValueOrDefault(placeDetails.FirstType));
                 cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(placeDetails.Address));
-                cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(placeDetails.Address));
                 cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(placeDetails.PlusCode));
                 cmd.Parameters.AddWithValue("@City", GetValueOrDefault(placeDetails.City));
                 cmd.Parameters.AddWithValue("@Lon", GetValueOrDefault(placeDetails.Long));
@@ -911,7 +953,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Website", GetValueOrDefault(placeDetails.Website));
                 cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
                 cmd.Parameters.AddWithValue("@Status", placeDetails.Status);
-                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(placeDetails.Lat) + "," + GetValueOrDefault(placeDetails.Long));
+                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(placeDetails.Lat) + " , " + GetValueOrDefault(placeDetails.Long));
                 cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(placeDetails.Country));
                 cmd.Parameters.AddWithValue("@PlaceUrl", GetValueOrDefault(placeDetails.Url));
                 cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(placeDetails.PhoneInternational));

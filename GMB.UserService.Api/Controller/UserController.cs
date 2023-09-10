@@ -27,23 +27,20 @@ namespace GMB.UserService.Api.Controller
         /// <param name="request"></param>
         /// <returns>JWT Token if success, or NotFound if fail</returns>
         [HttpPost("login")]
-        public IActionResult Login(GetLoginRequest request)
+        public ActionResult<GetLoginResponse> Login(GetLoginRequest request)
         {
             if (request.Login == null || request.Password == null)
-            {
-                return NotFound();
-            }
+                return GetLoginResponse.Exception("Authentication failed. Username or password is/are null.");
 
             using DbLib db = new();
             DbUser? user = db.GetUser(request.Login, request.Password);
 
             if (user == null)
-            {
-                return NotFound();
-            }
+                return GetLoginResponse.Exception("Authentication failed. Username or password incorrect.");
 
-            string token = GenerateJwtToken(request.Login);
-            return Ok(token);
+            string token = GenerateJwtToken(user.Login);
+
+            return new GetLoginResponse(user.Login, token);
         }
 
         /// <summary>
@@ -54,6 +51,7 @@ namespace GMB.UserService.Api.Controller
         private string GenerateJwtToken(string username)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
+            var test = _configuration["Jwt:Secret"];
             var key = Encoding.ASCII.GetBytes(_configuration["Jwt:Secret"]);
 
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -63,7 +61,9 @@ namespace GMB.UserService.Api.Controller
                     new Claim(ClaimTypes.Name, username)
                 }),
                 Expires = DateTime.UtcNow.AddHours(10), // Token expiration time
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature),
+                Issuer = "vasano",
+                Audience = "vasano-api"
             };
 
             var token = tokenHandler.CreateToken(tokenDescriptor);

@@ -235,25 +235,27 @@ namespace GMB.BusinessService.Api.Controllers
                 using DbLib db = new();
                 string idEtab = ToolBox.ComputeMd5Hash(placeDetails.PlaceId);
                 DbBusinessProfile? dbBusinessProfile = db.GetBusinessByIdEtab(idEtab);
-                
+                DbBusinessScore businessScore = new(idEtab, placeDetails.Rating, placeDetails.UserRatingsTotal);
 
                 // Update business if exist
                 if (dbBusinessProfile != null)
                 {
                     db.UpdateBusinessProfileFromPlaceDetails(placeDetails, dbBusinessProfile.IdEtab);
+                    db.CreateBusinessScore(businessScore);
                     return new GenericResponse(0, "Business already in DB. Updated successfully !");
                 }     
                 else // No existing business profile
                 {
-                    DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Url);
+                    DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Url, UrlState.UPDATED);
                     DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
                     db.CreateBusinessProfile(profile);
+                    db.CreateBusinessScore(businessScore);
                     return new GenericResponse(0, "Business successfully created in DB!");
                 };
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GenericResponse.Exception("Error creating business by place details.");
+                return GenericResponse.Exception($"Error creating business by place details : [{e.Message}]");
             }
         }
         /// <summary>
@@ -269,11 +271,11 @@ namespace GMB.BusinessService.Api.Controllers
                 using DbLib db = new();
                 db.CreateBusinessProfile(businessProfile);
 
-                return new GenericResponse(businessProfile.Id);
+                return new GenericResponse();
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GenericResponse.Exception("Error creating business.");
+                return GenericResponse.Exception($"Error creating business : [{e.Message}]");
             }
 
         }
@@ -289,11 +291,11 @@ namespace GMB.BusinessService.Api.Controllers
             {
                 using DbLib db = new();
                 db.CreateBusinessScore(businessScore);
-                return new GenericResponse(businessScore.Id);
+                return new GenericResponse();
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GenericResponse.Exception("Error creating business score.");
+                return GenericResponse.Exception($"Error creating business score : [{e.Message}]");
             }
         }
         /// <summary>
@@ -314,7 +316,7 @@ namespace GMB.BusinessService.Api.Controllers
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileResponse.Exception("Error getting business profile by id etab.");
+                return GetBusinessProfileResponse.Exception($"Error getting business profile by id etab : [{e.Message}]");
             }
         }
         /// <summary>
@@ -322,7 +324,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// </summary>
         /// <param name="placeId"></param>
         [HttpGet("bp/place-id/{placeId}")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByPlaceId(string placeId)
         {
             try
@@ -335,7 +337,7 @@ namespace GMB.BusinessService.Api.Controllers
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileResponse.Exception("Error getting business profile by place id.");
+                return GetBusinessProfileResponse.Exception($"Error getting business profile by place id : [{e.Message}]");
             }
         }
         /// <summary>
@@ -349,13 +351,13 @@ namespace GMB.BusinessService.Api.Controllers
             try
             {
                 using DbLib db = new();
-                db.UpdateBusinessProfile(businessProfile);
+                db.UpdateBusinessProfileFromWeb(businessProfile);
 
-                return new GenericResponse(0);
+                return new GenericResponse();
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GenericResponse.Exception("Error updating business profile.");
+                return GenericResponse.Exception($"Error updating business profile : [{e.Message}]");
             }
         }
         /// <summary>
@@ -381,7 +383,7 @@ namespace GMB.BusinessService.Api.Controllers
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileResponse.Exception("Error getting business profile by url.");
+                return GetBusinessProfileResponse.Exception($"Error getting business profile by url : [{e.Message}]");
 
             }
         }

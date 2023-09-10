@@ -67,7 +67,7 @@ namespace GMB.Sdk.Core
                 null,
                 placeDetails.Country,
                 placeDetails.Url,
-                placeDetails.Lat + " - " + placeDetails.Long,
+                placeDetails.Lat + " , " + placeDetails.Long,
                 0,
                 null,
                 placeDetails.PhoneInternational
