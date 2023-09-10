@@ -594,10 +594,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand =
-                    "SELECT BP.ID_ETAB, BU.GUID, BU.URL FROM BUSINESS_PROFILE as BP" +
-                    " JOIN BUSINESS_URL as BU ON BP.FIRST_GUID = BU.GUID" +
-                    " WHERE BU.URL_MD5 = @UrlEncoded";
+                string selectCommand = "SELECT GUID, URL FROM vBUSINESS_URL WHERE URL_MD5 = @UrlEncoded";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@UrlEncoded", urlEncoded);
@@ -605,7 +602,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
                 while (reader.Read())
                 {
-                    BusinessAgent businessProfile = new(reader.GetString(1), reader.GetString(2), reader.GetString(0));
+                    BusinessAgent businessProfile = new(reader.GetString(0), reader.GetString(1), null);
                     return businessProfile;
                 }
 

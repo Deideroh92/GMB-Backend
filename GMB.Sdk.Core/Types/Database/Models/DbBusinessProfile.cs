@@ -130,21 +130,9 @@ namespace GMB.Sdk.Core.Types.Database.Models
                    PlaceId == other.PlaceId &&
                    Name == other.Name &&
                    Category == other.Category &&
-                   Geoloc == other.Geoloc &&
                    GoogleAddress == other.GoogleAddress &&
-                   Address == other.Address &&
-                   PostCode == other.PostCode &&
-                   City == other.City &&
-                   CityCode == other.CityCode &&
-                   Lat == other.Lat &&
-                   Lon == other.Lon &&
-                   IdBan == other.IdBan &&
-                   StreetNumber == other.StreetNumber &&
-                   Country == other.Country &&
-                   AddressType == other.AddressType &&
                    Tel == other.Tel &&
                    Website == other.Website &&
-                   PlusCode == other.PlusCode &&
                    Status == other.Status &&
                    PictureUrl == other.PictureUrl;
         }

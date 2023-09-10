@@ -139,7 +139,7 @@ namespace GMB.Tests
             int threadNumber = 0;
 
             int entries = 40000;
-            int processing = 1;
+            int processing = 9;
             Operation operationType = Operation.OTHER;
             bool getReviews = true;
             DateTime reviewsDate = DateTime.UtcNow.AddMonths(-12);
@@ -154,13 +154,13 @@ namespace GMB.Tests
                     string? brand = null;
                     string? category = null;
                     CategoryFamily? categoryFamily = null;
-                    bool isNetwork = true;
+                    bool isNetwork = false;
                     bool isIndependant = false;
                     GetBusinessListRequest request = new(entries, processing, brand, category, categoryFamily, isNetwork, isIndependant);
                     businessList = db.GetBusinessAgentList(request);
                     break;
                 case Operation.FILE:
-                    bool isUrlKnownFile = false;
+                    bool isUrlKnownFile = true;
                     bool isUrlFile = true;
                     string[]? urlList = File.ReadAllLines(pathUrlFile);
 
@@ -199,7 +199,7 @@ namespace GMB.Tests
                 threadNumber++;
                 Task newThread = Task.Run(async () =>
                 {
-                    BusinessAgentRequest request = new(operationType, getReviews, new List<BusinessAgent>(chunk), reviewsDate);
+                    BusinessAgentRequest request = new(operationType, getReviews, new List<BusinessAgent>(chunk), reviewsDate, processing != 9);
                     await controller.Scanner(request).ConfigureAwait(false);
                 });
                 tasks.Add(newThread);

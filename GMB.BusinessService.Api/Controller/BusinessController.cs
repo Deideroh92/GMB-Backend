@@ -10,6 +10,7 @@ using GMB.Business.Api.API;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using GMB.Sdk.Core.Types.Api;
+using AngleSharp.Dom;
 
 namespace GMB.BusinessService.Api.Controllers
 {
@@ -56,6 +57,7 @@ namespace GMB.BusinessService.Api.Controllers
 
                     // Get business profile infos from Google.
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
+                    
 
                     if (request.Operation == Operation.FILE) {
                         if (profile == null) {
@@ -84,14 +86,14 @@ namespace GMB.BusinessService.Api.Controllers
 
                     business ??= db.GetBusinessByIdEtab(profile.IdEtab);
 
-                    /*if (business == null)
+                    if (business == null)
                         db.CreateBusinessProfile(profile);
                     if (business != null && !profile.Equals(business))
                         db.UpdateBusinessProfile(profile);
 
                     // Insert Business Score if have one.
                     if (score?.Score != null)
-                        db.CreateBusinessScore(score);*/
+                        db.CreateBusinessScore(score);
 
                     // Getting reviews
                     if (request.GetReviews && request.DateLimit != null && score?.Score != null && profile.Category != "Hébergement") {
@@ -130,7 +132,8 @@ namespace GMB.BusinessService.Api.Controllers
                         db.UpdateBusinessUrlState(profile.FirstGuid, UrlState.UPDATED);
 
                     // Update Business State when finished
-                    db.UpdateBusinessProfileProcessingState(profile.IdEtab, 0);
+                    if (request.UpdateProcessingState)
+                        db.UpdateBusinessProfileProcessingState(profile.IdEtab, 0);
 
                     if (request.Operation == Operation.FILE) {
                         using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);

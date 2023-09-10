@@ -36,6 +36,7 @@
     public class BusinessAgentRequest {
         public List<BusinessAgent>? BusinessList { get; set; }
         public bool GetReviews { get; set; }
+        public bool UpdateProcessingState { get; set; }
         public DateTime? DateLimit { get; set; }
         public Operation Operation { get; set; }
 
@@ -47,11 +48,14 @@
         /// <param name="getReviews"></param>
         /// <param name="businessList"></param>
         /// <param name="dateLimit"></param>
-        public BusinessAgentRequest(Operation operation, bool getReviews, List<BusinessAgent>? businessList, DateTime? dateLimit = null) {
+        /// <param name="updateProcessingState"></param>
+        public BusinessAgentRequest(Operation operation, bool getReviews, List<BusinessAgent>? businessList, DateTime? dateLimit = null, bool updateProcessingState = true)
+        {
             GetReviews = getReviews;
             DateLimit = dateLimit;
             BusinessList = businessList;
             Operation = operation;
+            UpdateProcessingState = updateProcessingState;
         }
         #endregion
     }
