@@ -138,11 +138,11 @@ namespace GMB.Tests
             using DbLib db = new();
             int threadNumber = 0;
 
-            int entries = 40000;
-            int processing = 9;
+            int entries = 45000;
+            int processing = 1;
             Operation operationType = Operation.OTHER;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-3);
+            DateTime reviewsDate = DateTime.UtcNow.AddDays(-15);
             BusinessController controller = new();
 
             Log.Logger = new LoggerConfiguration()
@@ -154,7 +154,7 @@ namespace GMB.Tests
                     string? brand = null;
                     string? category = null;
                     CategoryFamily? categoryFamily = null;
-                    bool isNetwork = false;
+                    bool isNetwork = true;
                     bool isIndependant = false;
                     GetBusinessListRequest request = new(entries, processing, brand, category, categoryFamily, isNetwork, isIndependant);
                     businessList = db.GetBusinessAgentList(request);
