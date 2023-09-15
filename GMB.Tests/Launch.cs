@@ -192,7 +192,7 @@ namespace GMB.Tests
                 default: break;
             }
 
-            int nbThreads = 1;
+            int nbThreads = 8;
 
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
             {
