@@ -111,7 +111,7 @@ namespace GMB.Business.Api.API
                 DbBusinessProfile dbBusinessProfile = new(placeId, request.IdEtab, request.Guid, name, category, googleAddress, business?.Address, business?.PostCode, business?.City, business?.CityCode, business?.Lat, business?.Lon, business?.IdBan, business?.AddressType, business?.StreetNumber, business?.AddressScore, tel, website, business?.PlusCode, DateTime.UtcNow, status, img, country, null, geoloc);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
 
-                if (true) //business == null || !dbBusinessProfile.AdressEquals(business) || !business.Equals(dbBusinessProfile))
+                if (business == null || !dbBusinessProfile.AdressEquals(business) || !business.Equals(dbBusinessProfile) || business.Country == null)
                 {
                     #region PlusCode
                     if (getPlusCode)

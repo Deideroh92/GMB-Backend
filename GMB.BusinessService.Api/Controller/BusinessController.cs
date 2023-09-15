@@ -114,6 +114,9 @@ namespace GMB.BusinessService.Api.Controllers
                                         continue;
                                     }
 
+                                    if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
+                                        db.UpdateBusinessReviewReply(review);
+
                                     if (!review.Equals(dbBusinessReview))
                                     {
                                         db.UpdateBusinessReview(review);

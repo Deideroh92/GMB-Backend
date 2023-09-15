@@ -134,6 +134,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
                    Tel == other.Tel &&
                    Website == other.Website &&
                    Status == other.Status &&
+                   Country == other.Country &&
                    PictureUrl == other.PictureUrl;
         }
 

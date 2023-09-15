@@ -1169,7 +1169,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdReview", idReview);
                 using SqlDataReader reader = cmd.ExecuteReader();
@@ -1189,8 +1189,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         null,
                         reader.GetBoolean(5),
                         null,
-                        null,
-                        null);
+                        reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                        reader.IsDBNull(7) ? null : reader.GetString(7));
 
                 } else
                     return null;
@@ -1261,6 +1261,26 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Review", GetValueOrDefault(review.ReviewText));
                 cmd.Parameters.AddWithValue("@ReviewAnswered", GetValueOrDefault(review.ReviewReplied));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(review.DateUpdate));
+                cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
+                cmd.ExecuteNonQuery();
+            }
+            catch (Exception e)
+            {
+                throw new Exception($"Error updating BR with id etab = [{review.IdEtab}] and id review = [{review.Id}]", e);
+            }
+        }
+        /// <summary>
+        /// Update Business Review.
+        /// </summary>
+        /// <param name="review"></param>
+        public void UpdateBusinessReviewReply(DbBusinessReview review)
+        {
+            try
+            {
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET REVIEW_ANSWERED_GOOGLE_DATE = @ReplyGoogleDate, REVIEW_ANSWERED_DATE = @ReplyDate WHERE REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@ReplyDate", GetValueOrDefault(review.ReviewReplyDate));
+                cmd.Parameters.AddWithValue("@ReplyGoogleDate", GetValueOrDefault(review.ReviewReplyGoogleDate));
                 cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
                 cmd.ExecuteNonQuery();
             }

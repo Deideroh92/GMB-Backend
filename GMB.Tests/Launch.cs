@@ -142,7 +142,7 @@ namespace GMB.Tests
             int processing = 9;
             Operation operationType = Operation.OTHER;
             bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-12);
+            DateTime reviewsDate = DateTime.UtcNow.AddMonths(-3);
             BusinessController controller = new();
 
             Log.Logger = new LoggerConfiguration()
@@ -192,7 +192,7 @@ namespace GMB.Tests
                 default: break;
             }
 
-            int nbThreads = 8;
+            int nbThreads = 1;
 
             foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
             {
