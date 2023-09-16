@@ -67,7 +67,22 @@ namespace GMB.Sdk.Core.Types.Models
                 System.Diagnostics.Debug.WriteLine("Couldn't get to page.");
             }
         }
-
+        /// <summary>
+        /// Checking if driver is still responding.
+        /// </summary>
+        /// <returns>True if it does, else false.</returns>
+        public bool IsDriverAlive()
+        {
+            try
+            {
+                // Execute a simple command to check if the driver is still responsive
+                return WebDriver.Title != null;
+            } catch (WebDriverException)
+            {
+                // WebDriverException is thrown if the driver is not responsive
+                return false;
+            }
+        }
         public void Dispose()
         {
             Dispose(true);

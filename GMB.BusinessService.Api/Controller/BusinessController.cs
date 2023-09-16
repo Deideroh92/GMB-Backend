@@ -38,7 +38,7 @@ namespace GMB.BusinessService.Api.Controllers
             .CreateLogger();
 
             using DbLib db = new();
-            using SeleniumDriver driver = new();
+            SeleniumDriver driver = new();
 
             int count = 0;
 
@@ -54,6 +54,12 @@ namespace GMB.BusinessService.Api.Controllers
 
                     if (businessAgent.IdEtab != null)
                         business = db.GetBusinessByIdEtab(businessAgent.IdEtab);
+
+                    if (!driver.IsDriverAlive())
+                    {
+                        driver.Dispose();
+                        driver = new();
+                    }
 
                     // Get business profile infos from Google.
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
