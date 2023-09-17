@@ -44,7 +44,14 @@ namespace GMB.Business.Api.API
             try
             {
                 // Business Name
-                wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[@role='main' and @aria-label]")));
+                try
+                {
+                    wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[@role='main' and @aria-label]")));
+                } catch (WebDriverTimeoutException)
+                {
+                    return (null, null);
+                }
+
                 string ? name = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim();
                 if (name == null)
                     return (null, null);
@@ -192,8 +199,10 @@ namespace GMB.Business.Api.API
                 WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
                 IWebElement toReviewPage = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[@role='tab' and contains(@aria-label, 'Avis')]")));
                 toReviewPage.Click();
-            }
-            catch (Exception e)
+            } catch (WebDriverTimeoutException)
+            {
+                return null;
+            } catch (Exception e)
             {
                 throw new Exception("Couldn't get to review pages", e);
             }
