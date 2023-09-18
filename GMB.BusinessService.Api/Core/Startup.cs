@@ -88,6 +88,9 @@ namespace GMB.BusinessService.Api.Core
             // Define how endpoints should be matched and handled.
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "business-service",
+                    pattern: "business-service/api/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllers(); // Example
             });
         }

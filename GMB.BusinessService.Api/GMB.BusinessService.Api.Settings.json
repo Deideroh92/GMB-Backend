@@ -30,6 +30,7 @@
     "Secret": "fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG"
   },
   "AllowedHosts": "*",
+  "BaseUrl": "https://gmb-webapp.azurewebsites.net/business-service/api/",
   "AppConfiguration": {
     "appName": "GMB.BusinessService.Api",
     "hosting": {

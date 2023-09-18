@@ -85,6 +85,9 @@ namespace GMB.UserService.Api.Core
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapControllerRoute(
+                    name: "user-service",
+                    pattern: "user-service/api/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllers();
             });
         }
