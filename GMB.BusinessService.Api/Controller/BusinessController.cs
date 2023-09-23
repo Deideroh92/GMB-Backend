@@ -125,7 +125,7 @@ namespace GMB.BusinessService.Api.Controllers
 
                                     if (!review.Equals(dbBusinessReview))
                                     {
-                                        db.UpdateBusinessReview(review);
+                                        db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
                                         continue;
                                     }
                                 } catch (Exception e)

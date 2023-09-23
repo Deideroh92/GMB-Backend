@@ -1248,12 +1248,15 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// Update Business Review.
         /// </summary>
         /// <param name="review"></param>
-        public void UpdateBusinessReview(DbBusinessReview review)
+        /// <param name="changeDate"></param>
+        public void UpdateBusinessReview(DbBusinessReview review, bool changeDate)
         {
             try
             {
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate WHERE REVIEW_ID = @IdReview";
-                using SqlCommand cmd = new(selectCommand, Connection);
+                string changeDateCommand = changeDate ? ", REVIEW_DATE = @ReviewDate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate" : "";
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate";
+                string whereCommand = " WHERE REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand + changeDateCommand + whereCommand, Connection);
                 cmd.Parameters.AddWithValue("@UserName", GetValueOrDefault(review.User.Name));
                 cmd.Parameters.AddWithValue("@UserStatus", GetValueOrDefault(review.User.LocalGuide));
                 cmd.Parameters.AddWithValue("@Score", GetValueOrDefault(review.Score));
@@ -1262,6 +1265,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@ReviewAnswered", GetValueOrDefault(review.ReviewReplied));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(review.DateUpdate));
                 cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
+                if (changeDate)
+                {
+                    cmd.Parameters.AddWithValue("@ReviewDate", GetValueOrDefault(review.ReviewDate));
+                    cmd.Parameters.AddWithValue("@ReviewGoogleDate", GetValueOrDefault(review.ReviewGoogleDate));
+                }
                 cmd.ExecuteNonQuery();
             }
             catch (Exception e)
