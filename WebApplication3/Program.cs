@@ -9,12 +9,11 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://vasanogmbapi.azurewebsites.net").AllowAnyHeader().AllowAnyMethod();
+            policy.WithOrigins("https://vasanogmbapi.azurewebsites.net", "http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
         });
 });
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
