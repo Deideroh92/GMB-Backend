@@ -24,14 +24,12 @@ namespace GMB.BusinessService.Api.Core
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static IHostBuilder
-        CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
-                    webBuilder.UseConfiguration(Configuration).ConfigureLogging(log => log.AddSerilog(Log.Logger)).UseStartup<Startup>()
-            .UseKestrel(options =>
-                    {
-                        options.ListenAnyIP(5003); // Specify the desired port
-                    }));
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                });
 
         /// <summary>
         /// Main method of the program.

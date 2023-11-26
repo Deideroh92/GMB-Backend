@@ -24,15 +24,13 @@ namespace GMB.PlaceService.Api.Core
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static IHostBuilder
-        CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
-                    webBuilder.UseConfiguration(Configuration).ConfigureLogging(log => log.AddSerilog(Log.Logger)).UseStartup<Startup>()
-            .UseKestrel(options =>
-                    {
-                        options.ListenAnyIP(5002); // Specify the desired port
-                    }));
-
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("http://localhost:5003");
+                });
         /// <summary>
         /// Main method of the program.
         /// </summary>

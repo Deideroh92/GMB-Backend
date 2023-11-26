@@ -23,6 +23,38 @@ namespace GMB.Tests
 
             return;
         }
+
+        [TestMethod]
+        public void CheckIfPlaceIdExist()
+        {
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\placeId.txt";
+            using DbLib db = new();
+
+            List<string> values = new();
+
+            using (StreamReader reader = new(filePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string? line = reader.ReadLine();
+                    if (line != null)
+                        values.Add(line);
+                }
+            }
+
+            List<string> list = new();
+
+            foreach (string placeId in values)
+            {
+                DbBusinessProfile? business = db.GetBusinessByPlaceId(placeId);
+                using StreamWriter operationFileWritter = File.AppendText(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\test.txt");
+                operationFileWritter.WriteLine(business != null ? business.IdEtab : "");
+            }
+
+            return;
+
+        }
+
         [TestMethod]
         public async Task GetBusinessInfos()
         {

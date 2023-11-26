@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.UrlService.Api", "GMB.U
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.UserService.Api", "GMB.UserService.Api\GMB.UserService.Api.csproj", "{867CAB28-68E7-4C86-AA00-BB0858644608}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebApplication3", "WebApplication3\WebApplication3.csproj", "{E0709357-8C93-4EBB-B1FD-D0F2E015E0CF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{867CAB28-68E7-4C86-AA00-BB0858644608}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{867CAB28-68E7-4C86-AA00-BB0858644608}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{867CAB28-68E7-4C86-AA00-BB0858644608}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E0709357-8C93-4EBB-B1FD-D0F2E015E0CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E0709357-8C93-4EBB-B1FD-D0F2E015E0CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E0709357-8C93-4EBB-B1FD-D0F2E015E0CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E0709357-8C93-4EBB-B1FD-D0F2E015E0CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

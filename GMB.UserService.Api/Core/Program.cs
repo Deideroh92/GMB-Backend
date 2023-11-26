@@ -15,7 +15,7 @@ namespace GMB.UserService.Api.Core
         /// </summary>
         public static IConfiguration Configuration { get; } = new ConfigurationBuilder()
             .SetBasePath(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.UserService.Api")
-            .AddJsonFile("GMB.UserService.Api.settings.json", optional: false, reloadOnChange: true)
+            .AddJsonFile("GMB.UserService.Api.Settings.json", optional: false, reloadOnChange: true)
             .AddEnvironmentVariables()
             .Build();
 
@@ -24,14 +24,13 @@ namespace GMB.UserService.Api.Core
         /// </summary>
         /// <param name="args"></param>
         /// <returns></returns>
-        public static IHostBuilder
-        CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args).ConfigureWebHostDefaults(webBuilder =>
-                    webBuilder.UseConfiguration(Configuration).ConfigureLogging(log => log.AddSerilog(Log.Logger)).UseStartup<Startup>()
-                    .UseKestrel(options =>
-                    {
-                        options.ListenAnyIP(5001); // Specify the desired port
-                    }));
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("http://localhost:5001");
+                });
 
         /// <summary>
         /// Main method of the program.

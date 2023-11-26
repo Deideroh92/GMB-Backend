@@ -24,8 +24,6 @@ namespace GMB.BusinessService.Api.Core
             services.AddControllers().AddNewtonsoftJson();
 
             // Configure JWT authentication
-            var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Secret"]) ?? throw new InvalidOperationException("JWT secret key is missing or invalid.");
-
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -41,8 +39,10 @@ namespace GMB.BusinessService.Api.Core
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = "vasano",
                     ValidAudience = "vasano-api",
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG"))
                 };
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
             });
 
             services.AddCors(options =>

@@ -1,57 +1,9 @@
 {
-  "Serilog": {
-    "Using": [
-      "Serilog.Exceptions",
-      "Serilog",
-      "Serilog.Sinks.Console"
-    ],
-    "MinimumLevel": {
-      "Default": "Information",
-      "Override": {
-        "Microsoft": "Error",
-        "System": "Error"
-      }
-    },
-    "Enrich": [
-      "FromLogContext",
-      "WithExceptionDetails",
-      "WithThreadId"
-    ],
-    "WriteTo": [
-      {
-        "Name": "Console",
-        "Args": {
-          "outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{ThreadId}] {EventType:x8} {Level:u3} {Caller}     {Message:lj}{NewLine}"
-        }
-      }
-    ]
-  },
   "Jwt": {
     "Secret": "fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG"
-  },
-  "AllowedHosts": "*",
-  "AppConfiguration": {
-    "appName": "GMB.UserService.Api",
-    "hosting": {
-      "k8s": true,
-      "baseUrl": "/api/user-service/",
-      "replicaMin": 2,
-      "replicaMax": 4,
-      "nodeRoutingGroup": [ "vm" ],
-      "fileSystemMounting": false,
-      "resources": {
-        "requests": {
-          "cpu": "500m",
-          "ram": "500M"
-        },
-        "limits": {
-          "cpu": "1000m",
-          "ram": "1G"
-        }
-      }
-    },
-    "corsOrigins": ["http://localhost:3000"],
-    "Settings": {
-    }
   }
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=tcp:vasano.database.windows.net,1433;Initial Catalog=GMS;Persist Security Info=False;User ID=vs-sa;Password={your_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
+  },
+  "Allowedhosts": "*"
 }

@@ -14,6 +14,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:9500"
+    },
+    "Docker": {
+      "commandName": "Docker"
     }
   },
   "iisSettings": {

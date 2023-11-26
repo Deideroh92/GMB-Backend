@@ -50,7 +50,7 @@
         }
       }
     },
-    "corsOrigins": [ "http://localhost:3000" ],
+    "corsOrigins": [ "http://localhost:3000", "https://admin-vasano.web.app" ],
     "Settings": {
     }
   }

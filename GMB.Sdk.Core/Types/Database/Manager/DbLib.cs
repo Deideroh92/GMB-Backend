@@ -473,9 +473,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             {
                 string selectCommand = "SELECT TOP (@Entries) URL, ID_ETAB FROM " + table +
                     " WHERE PROCESSING = @Processing" +
-                    brand + 
-                    categoryFilter +
-                    " ORDER BY ID_ETAB ASC";
+                    brand +
+                    categoryFilter;
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", request.Entries);
@@ -537,8 +536,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 string selectCommand = "SELECT TOP (@Entries) * FROM " + table +
                     " WHERE PROCESSING = @Processing" +
                     brand +
-                    categoryFilter +
-                    " ORDER BY ID_ETAB ASC";
+                    categoryFilter;
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", request.Entries);

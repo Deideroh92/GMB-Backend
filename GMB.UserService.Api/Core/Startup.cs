@@ -23,7 +23,6 @@ namespace GMB.UserService.Api.Core
             services.AddControllers();
 
             // Configure JWT authentication
-            var key = Encoding.ASCII.GetBytes(Configuration["Jwt:Secret"]);
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -39,7 +38,7 @@ namespace GMB.UserService.Api.Core
                     ValidateIssuerSigningKey = true,
                     ValidIssuer = "vasano",
                     ValidAudience = "vasano-api",
-                    IssuerSigningKey = new SymmetricSecurityKey(key)
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG"))
                 };
             });
 
@@ -85,9 +84,6 @@ namespace GMB.UserService.Api.Core
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllerRoute(
-                    name: "user-service",
-                    pattern: "user-service/api/{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllers();
             });
         }
