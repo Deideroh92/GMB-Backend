@@ -9,7 +9,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: MyAllowSpecificOrigins,
         policy =>
         {
-            policy.WithOrigins("https://vasanogmbapi.azurewebsites.net", "http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
+            policy.WithOrigins("https://vasanogmbapi.azurewebsites.net", "http://localhost:3000", "https://admin-vasano.web.app").AllowAnyHeader().AllowAnyMethod();
         });
 });
 
