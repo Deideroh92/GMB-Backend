@@ -29,7 +29,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         [HttpPost("scanner/start")]
-        [Authorize]
+        //[Authorize]
         public async Task Scanner(BusinessAgentRequest request) {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
@@ -164,7 +164,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="url"></param>
         /// <returns>Business Profile and Score as a Tuple</returns>
         [HttpPost("scanner/gmb/url")]
-        [Authorize]
+        //[Authorize]
         public async Task<(DbBusinessProfile?, DbBusinessScore?)> ScanGMBByUrl(string url) {
             try {
                 using SeleniumDriver driver = new();
@@ -180,7 +180,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="idEtab"></param>
         /// <returns>Business Profile and Score as a Tuple</returns>
         [HttpPost("scanner/gmb/idEtab")]
-        [Authorize]
+        //[Authorize]
         public async Task<(DbBusinessProfile?, DbBusinessScore?)> ScanGMBByIdEtab(string idEtab) {
             try {
                 using DbLib db = new();
@@ -336,7 +336,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// </summary>
         /// <param name="placeId"></param>
         [HttpGet("bp/place-id/{placeId}")]
-        [Authorize]
+        //[Authorize]
         public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByPlaceId(string placeId)
         {
             try
