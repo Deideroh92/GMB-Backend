@@ -56,6 +56,8 @@ namespace GMB.UserService.Api.Controller
 
             var claims = new[] {
                 new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Aud, "vasano-api"),
+                new Claim(JwtRegisteredClaimNames.Iss, "vasano")
                 // Add more claims as needed
             };
 

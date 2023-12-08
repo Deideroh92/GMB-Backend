@@ -8,6 +8,7 @@ using GMB.Sdk.Core.Types.Api;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
 using GMB.PlaceService.Api.API;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GMB.PlaceService.Api.Controller
 {
@@ -27,7 +28,7 @@ namespace GMB.PlaceService.Api.Controller
         /// <param name="query"></param>
         /// <returns>GMB</returns>
         [HttpGet("find-business/{query}")]
-        //[Authorize]
+        [Authorize]
         public async Task<ActionResult<GetBusinessProfileResponse>> FindBusinessByQuery(string query)
         {
             string? placeId = await PlaceApi.GetPlaceId(query);
@@ -83,7 +84,7 @@ namespace GMB.PlaceService.Api.Controller
         /// <param name="placeId"></param>
         /// <returns>GMB as described in API</returns>
         [HttpGet("place/{placeId}")]
-        //[Authorize]
+        [Authorize]
         public async Task<ActionResult<GetPlaceDetails>> GetGMBByPlaceId(string placeId)
         {
             try
@@ -101,7 +102,7 @@ namespace GMB.PlaceService.Api.Controller
         /// <param name="query"></param>
         /// <returns>GMB as described in API</returns>
         [HttpPost("place-id")]
-        //[Authorize]
+        [Authorize]
         public async Task<ActionResult<GetPlaceIdResponse>> GetPlaceIdByQuery([FromBody] string query)
         {
             try

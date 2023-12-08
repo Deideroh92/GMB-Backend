@@ -1,7 +1,7 @@
 {
   "Jwt": {
     "Secret": "fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG"
-  }
+  },
   "ConnectionStrings": {
     "DefaultConnection": "Server=tcp:vasano.database.windows.net,1433;Initial Catalog=GMS;Persist Security Info=False;User ID=vs-sa;Password={your_password};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
   },

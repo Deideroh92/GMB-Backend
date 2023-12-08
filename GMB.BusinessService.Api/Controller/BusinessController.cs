@@ -29,7 +29,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// </summary>
         /// <param name="request"></param>
         [HttpPost("scanner/start")]
-        //[Authorize]
+        [Authorize]
         public async Task Scanner(BusinessAgentRequest request) {
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
 
@@ -154,24 +154,33 @@ namespace GMB.BusinessService.Api.Controllers
                 }
             }
             Log.CloseAndFlush();
+            driver.Dispose();
         }
         #endregion
 
         #region Profile & Score
+
+        #region Scanner
         /// <summary>
-        /// Get BP and BS by given url.
+        /// Sacan BP and BS by given url.
         /// </summary>
         /// <param name="url"></param>
         /// <returns>Business Profile and Score as a Tuple</returns>
         [HttpPost("scanner/gmb/url")]
-        //[Authorize]
-        public async Task<(DbBusinessProfile?, DbBusinessScore?)> ScanGMBByUrl(string url) {
+        [Authorize]
+        public async Task<GetBusinessProfileResponse?> ScanGMBByUrl(string url) {
             try {
                 using SeleniumDriver driver = new();
+                using DbLib db = new();
 
-                return await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url), null);
+                (DbBusinessProfile? bp, DbBusinessScore? bs) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url), null);
+
+                GetBusinessProfileResponse response = new (bp, bs, true);
+
+                return response;
+
             } catch (Exception e) {
-                return (null, null);
+                return (null);
             }
         }
         /// <summary>
@@ -180,7 +189,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="idEtab"></param>
         /// <returns>Business Profile and Score as a Tuple</returns>
         [HttpPost("scanner/gmb/idEtab")]
-        //[Authorize]
+        [Authorize]
         public async Task<(DbBusinessProfile?, DbBusinessScore?)> ScanGMBByIdEtab(string idEtab) {
             try {
                 using DbLib db = new();
@@ -199,12 +208,15 @@ namespace GMB.BusinessService.Api.Controllers
                 return (null, null);
             }
         }
+        #endregion
+
+        #region Create
         /// <summary>
         /// Create a new business url and business if it doesn't exist already.
         /// </summary>
         /// <param name="url"></param>
         [HttpPost("bp/create/by-url")]
-        //[Authorize]
+        [Authorize]
         public async void CreateNewBusinessProfileByUrl(string url)
         {
             try {
@@ -234,7 +246,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// </summary>
         /// <param name="placeDetails"></param>
         [HttpPost("bp/create/by-place-details")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GenericResponse> CreateNewBusinessByPlaceDetails([FromBody] PlaceDetails placeDetails)
         {
             try
@@ -275,7 +287,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// </summary>
         /// <param name="businessProfile"></param>
         [HttpPost("bp/create")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GenericResponse> CreateNewBusiness([FromBody] DbBusinessProfile businessProfile)
         {
             try
@@ -296,7 +308,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// </summary>
         /// <param name="businessScore"></param>
         [HttpPost("bs/create")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GenericResponse> CreateNewBusinessScore([FromBody] DbBusinessScore businessScore)
         {
             try
@@ -310,12 +322,15 @@ namespace GMB.BusinessService.Api.Controllers
                 return GenericResponse.Exception($"Error creating business score : [{e.Message}]");
             }
         }
+        #endregion
+
+        #region Get
         /// <summary>
         /// Get BP by idEtab.
         /// </summary>
         /// <param name="idEtab"></param>
         [HttpGet("bp/id-etab/{idEtab}")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByIdEtab(string idEtab)
         {
             try
@@ -336,7 +351,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// </summary>
         /// <param name="placeId"></param>
         [HttpGet("bp/place-id/{placeId}")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByPlaceId(string placeId)
         {
             try
@@ -352,12 +367,15 @@ namespace GMB.BusinessService.Api.Controllers
                 return GetBusinessProfileResponse.Exception($"Error getting business profile by place id : [{e.Message}]");
             }
         }
+        #endregion
+
+        #region Update
         /// <summary>
         /// Update BP.
         /// </summary>
         /// <param name="businessProfile"></param>
         [HttpPut("bp/update")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GenericResponse> UpdateBusinessProfile([FromBody] DbBusinessProfile businessProfile)
         {
             try
@@ -372,12 +390,14 @@ namespace GMB.BusinessService.Api.Controllers
                 return GenericResponse.Exception($"Error updating business profile : [{e.Message}]");
             }
         }
+        #endregion
+
         /// <summary>
         /// Get BP by url.
         /// </summary>
         /// <param name="url"></param>
         [HttpPost("bp/url")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByUrl([FromBody] string url)
         {
             try
@@ -410,7 +430,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// <param name="idEtab"></param>
         /// <returns>List of business reviews</returns>
         [HttpGet("bp/reviews/{url}")]
-        //[Authorize]
+        [Authorize]
         public List<DbBusinessReview>? GetBusinessReviews(string url, DateTime? dateLimit, string idEtab = "-1") {
             using SeleniumDriver driver = new();
 
@@ -429,7 +449,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// Get KPI.
         /// </summary>
         [HttpGet("kpi")]
-        //[Authorize]
+        [Authorize]
         public ActionResult<GetMainKpiResponse> GetKpi()
         {
             try
