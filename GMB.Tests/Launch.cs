@@ -102,6 +102,26 @@ namespace GMB.Tests
         /// Exporting Hotels info.
         /// </summary>
         [TestMethod]
+        public void GetIdEtabByPlaceId()
+        {
+            string[] placeIds = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "urls.txt"));
+            using DbLib db = new();
+            DbBusinessProfile? bp = null;
+            using StreamWriter sw2 = File.AppendText(@"C:\Users\maxim\Desktop\test.txt");
+
+            foreach (var id in placeIds)
+            {
+                bp = db.GetBusinessByPlaceId(id);
+                if (bp != null)
+                    sw2.WriteLine(bp.IdEtab);
+                else
+                    sw2.WriteLine(id);
+            }
+        }
+        /// <summary>
+        /// Exporting Hotels info.
+        /// </summary>
+        [TestMethod]
         public async Task ExportHotelAsync() {
 
             // CONFIG

@@ -9,6 +9,7 @@ using System.Text;
 using GMB.Business.Api.API;
 using GMB.Business.Api.Models;
 using GMB.BusinessService.Api.Controllers;
+using GMB.PlaceService.Api.Controller;
 
 namespace GMB.Tests
 {
@@ -18,7 +19,6 @@ namespace GMB.Tests
         [TestMethod]
         public void Main()
         {
-            var test = ToolBox.ComputeMd5Hash("https://www.google.com/maps/place/4PADEL+Annemasse/@46.2065902,6.2778623,17z/data=!3m1!4b1!4m6!3m5!1s0x478c6d4d94c69b45:0x1a1464a319f512bc!8m2!3d46.2065902!4d6.2804372!16s%2Fg%2F11ff2v_mxv?entry=ttu");
 
             return;
         }
