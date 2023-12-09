@@ -55,12 +55,14 @@ namespace GMB.UserService.Api.Controller
 
             var claims = new[] {
                 new Claim(JwtRegisteredClaimNames.Sub, username),
+                new Claim(JwtRegisteredClaimNames.Aud, "vasano-api"),
+                new Claim(JwtRegisteredClaimNames.Iss, "vasano")
                 // Add more claims as needed
             };
 
             var token = new JwtSecurityToken(
                 claims: claims,
-                expires: DateTime.UtcNow.AddHours(1), // Token expiration time
+                expires: DateTime.UtcNow.AddHours(12), // Token expiration time
                 signingCredentials: new SigningCredentials(new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)), SecurityAlgorithms.HmacSha256)
             );
 
