@@ -56,14 +56,6 @@ namespace GMB.BusinessService.Api.Core
                            .AllowAnyHeader();
                 });
             });
-
-            services.AddSwaggerGen(c =>
-            {
-                // Set the comments path for the Swagger JSON and UI.
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-                c.IncludeXmlComments(xmlPath);
-            });
         }
 
         // Configure: Define how your application's request processing pipeline should be set up.
