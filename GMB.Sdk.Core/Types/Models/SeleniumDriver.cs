@@ -19,13 +19,21 @@ namespace GMB.Sdk.Core.Types.Models
         /// </summary>
         public SeleniumDriver(bool headless = true)
         {
+            string chromeDriverPath = Path.Combine(Environment.GetEnvironmentVariable("HOME"), "site", "wwwroot", "chromedriver", "chromedriver.exe");
+
             try
             {
                 ChromeOptions chromeOptions = new();
-                if(headless) chromeOptions.AddArguments("--headless=new");
+                chromeOptions.AddArguments("--headless=new");
                 chromeOptions.AddArguments("--lang=fr");
+                if (headless)
+                {
+                    chromeOptions.AddArguments("--disable-gpu");
+                    chromeOptions.AddArguments("--no-sandbox");
+                    chromeOptions.AddArguments("--disable-dev-shm-usage");
+                }
                 new DriverManager().SetUpDriver(new ChromeConfig());
-                WebDriver = new ChromeDriver(chromeOptions);
+                WebDriver = new ChromeDriver(chromeDriverPath, chromeOptions);
             }
             catch (Exception)
             {

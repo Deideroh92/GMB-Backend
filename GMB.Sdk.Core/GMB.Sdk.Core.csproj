@@ -15,4 +15,10 @@
     <PackageReference Include="WebDriverManager" Version="2.17.1" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ChromeDriver\chromedriver.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
