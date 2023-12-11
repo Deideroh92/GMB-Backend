@@ -10,7 +10,6 @@ using GMB.Business.Api.API;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using GMB.Sdk.Core.Types.Api;
-using AngleSharp.Dom;
 
 namespace GMB.BusinessService.Api.Controllers
 {
@@ -168,7 +167,7 @@ namespace GMB.BusinessService.Api.Controllers
         /// <returns>Business Profile and Score as a Tuple</returns>
         [HttpPost("scanner/gmb/url")]
         [Authorize]
-        public async Task<GetBusinessProfileResponse?> ScanGMBByUrl(string url) {
+        public async Task<GetBusinessProfileResponse?> ScanGMBByUrl([FromBody] string url) {
             try {
                 using SeleniumDriver driver = new();
                 using DbLib db = new();
