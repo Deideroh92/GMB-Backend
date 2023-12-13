@@ -1,4 +1,7 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using System.Reflection;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +20,26 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "vasano",
+                    ValidAudience = "vasano-api",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG"))
+                };
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+            });
 
 var app = builder.Build();
 
