@@ -208,6 +208,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
                 cmd.Parameters.AddWithValue("@UrlState", urlState.ToString());
+                cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 while (reader.Read())
