@@ -43,8 +43,8 @@ namespace GMB.Url.Api
                         continue;
 
                     foreach(string urlToValidate in urls) {
-                        if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(url))) {
-                            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), url, textSearch, ToolBox.ComputeMd5Hash(url));
+                        if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(urlToValidate))) {
+                            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), urlToValidate, textSearch, ToolBox.ComputeMd5Hash(urlToValidate));
                             db.CreateBusinessUrl(businessUrl);
                         }
                     }
@@ -60,7 +60,6 @@ namespace GMB.Url.Api
         /// Create a BU.
         /// </summary>
         /// <param name="url"></param>
-        /// <param name="date"></param>
         public static DbBusinessUrl CreateUrl(string url, UrlState urlState = UrlState.NEW) {
             try
             {

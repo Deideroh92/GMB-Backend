@@ -300,7 +300,6 @@ namespace GMB.BusinessService.Api.Controllers
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
                 return GenericResponse.Exception($"Error creating business : [{e.Message}]");
             }
-
         }
         /// <summary>
         /// Create Business Score.
@@ -387,6 +386,37 @@ namespace GMB.BusinessService.Api.Controllers
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
                 return GenericResponse.Exception($"Error updating business profile : [{e.Message}]");
+            }
+        }
+        #endregion
+
+        #region Delete
+        /// <summary>
+        /// Delete business profile (with score, reviews feeling and reviews).
+        /// </summary>
+        /// <param name="idEtab"></param>
+        [HttpPost("bp/delete")]
+        [Authorize]
+        public ActionResult<GenericResponse> DeleteBusinessProfile([FromBody] string idEtab)
+        {
+            try
+            {
+                DbLib db = new();
+                List<DbBusinessReview> businessReviews = db.GetBusinessReviewsList(idEtab);
+                foreach(DbBusinessReview review in businessReviews)
+                {
+                    db.DeleteBusinessReviewsFeeling(review.IdReview);
+                }
+                db.DeleteBusinessReviews(idEtab);
+                db.DeleteBusinessScore(idEtab);
+                db.DeleteBusinessProfile(idEtab);
+
+                return new GenericResponse(null, $"BP with idEtab = [{idEtab}]");
+
+            } catch (Exception e)
+            {
+                Log.Error(e, $"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception($"An exception occurred while deleting BP with idEtab = [{idEtab}] : {e.Message}");
             }
         }
         #endregion
