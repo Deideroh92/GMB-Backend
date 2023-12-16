@@ -31,11 +31,11 @@ namespace GMB.PlaceService.Api.Controller
         [Authorize]
         public async Task<ActionResult<GetBusinessProfileResponse>> FindBusinessByQuery(string query)
         {
-            string? placeId = await PlaceApi.GetPlaceId(query);
+            string? placeId = await PlaceApi.GetPlaceIdByQuery(query);
             if (placeId == null)
                 return new GetBusinessProfileResponse(null, null);
 
-            PlaceDetails? placeDetails = await PlaceApi.GetGMB(placeId);
+            PlaceDetails? placeDetails = await PlaceApi.GetPlaceByPlaceId(placeId);
             if (placeDetails == null || placeDetails.Url == null)
                 return new GetBusinessProfileResponse(null, null);
 
@@ -85,11 +85,11 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB as described in API</returns>
         [HttpGet("place/{placeId}")]
         [Authorize]
-        public async Task<ActionResult<GetPlaceDetails>> GetGMBByPlaceId(string placeId)
+        public async Task<ActionResult<GetPlaceDetails>> GetPlaceByPlaceId(string placeId)
         {
             try
             {
-                PlaceDetails? placeDetails = await PlaceApi.GetGMB(placeId);
+                PlaceDetails? placeDetails = await PlaceApi.GetPlaceByPlaceId(placeId);
                 return new GetPlaceDetails(placeDetails);
             } catch (Exception ex)
             {
@@ -107,7 +107,7 @@ namespace GMB.PlaceService.Api.Controller
         {
             try
             {
-                string? placeId = await PlaceApi.GetPlaceId(query);
+                string? placeId = await PlaceApi.GetPlaceIdByQuery(query);
                 return new GetPlaceIdResponse(placeId);
             } catch (Exception ex)
             {

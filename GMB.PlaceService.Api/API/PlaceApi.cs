@@ -12,10 +12,11 @@ namespace GMB.PlaceService.Api.API
         public static readonly string LANGUAGE = "fr";
 
         /// <summary>
-        /// Get Business info by Place Id from Google API
+        /// Get Place details by place ID from Google API
         /// </summary>
         /// <param name="placeId"></param>
-        public static async Task<PlaceDetails?> GetGMB(string placeId)
+        /// <returns>Place details or null if nothing found</returns>
+        public static async Task<PlaceDetails?> GetPlaceByPlaceId(string placeId)
         {
             try
             {
@@ -48,15 +49,15 @@ namespace GMB.PlaceService.Api.API
                 return null;
             } catch (Exception e)
             {
-                throw new Exception($"Couldn't get GMB from Google API for placeId = [{placeId}]", e);
+                throw new Exception($"Couldn't get place details from Google API for placeId = [{placeId}]", e);
             }
         }
         /// <summary>
-        /// Get Place Id by query from Google API
+        /// Get Place ID by query from Google API
         /// </summary>
         /// <param name="query"></param>
-        /// <returns></returns>
-        public static async Task<string?> GetPlaceId(string query)
+        /// <returns>Place ID or null if nothing found</returns>
+        public static async Task<string?> GetPlaceIdByQuery(string query)
         {
             try
             {
@@ -85,6 +86,46 @@ namespace GMB.PlaceService.Api.API
             } catch (Exception ex)
             {
                 throw new Exception($"An error occurred while getting Place ID from Google API using query: {query}", ex);
+            }
+        }
+        /// <summary>
+        /// Get Places by Query from Google API
+        /// </summary>
+        /// <param name="query"></param>
+        /// <returns>List of possible matching places</returns>
+        public static async Task<List<PlaceDetails>> GetPlacesByQuery(string query)
+        {
+            try
+            {
+                using HttpClient client = new();
+                List<PlaceDetails> places = new();
+                HttpResponseMessage response = await client.GetAsync($"https://places.googleapis.com/v1/places:searchText&textQuery={query}&fields=" +
+                    $"name" +
+                    $"%2Crating" +
+                    $"%2Cformatted_phone_number" +
+                    $"%2Cbusiness_status" +
+                    $"%2Cgeometry" +
+                    $"%2Cplace_id" +
+                    $"%2Cplus_code" +
+                    $"%2Curl" +
+                    $"%2Caddress_components" +
+                    $"%2Cuser_ratings_total" +
+                    $"%2Cinternational_phone_number" +
+                    $"%2Cwebsite" +
+                    $"%2Cformatted_address" +
+                    $"%2Ctypes" +
+                    $"&key={API_KEY}&language={LANGUAGE}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    PlaceDetailsResponse? placeDetailsResponse = PlaceDetailsResponse.FromJson(responseBody);
+                }
+
+                return places;
+            } catch (Exception e)
+            {
+                throw new Exception($"Couldn't get place details from Google API for query = [{query}]", e);
             }
         }
     }

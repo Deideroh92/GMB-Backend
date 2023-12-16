@@ -10,6 +10,7 @@ using GMB.Business.Api.API;
 using GMB.Business.Api.Models;
 using GMB.BusinessService.Api.Controllers;
 using GMB.PlaceService.Api.Controller;
+using GMB.PlaceService.Api.API;
 
 namespace GMB.Tests
 {
@@ -19,7 +20,8 @@ namespace GMB.Tests
         [TestMethod]
         public void Main()
         {
-
+            string query = "Mcdonalds boulogne-billancourt";
+            PlaceApi.GetPlacesByQuery(query);
             return;
         }
 
