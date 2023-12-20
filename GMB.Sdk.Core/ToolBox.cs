@@ -40,63 +40,46 @@ namespace GMB.Sdk.Core
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
 
-        public static DbBusinessProfile PlaceDetailsToBP(PlaceDetails placeDetails, string idEtab, string guid)
+        public static DbBusinessProfile? PlaceToBP(Place place)
         {
-            DbBusinessProfile? profile = new(
-                placeDetails.PlaceId,
-                idEtab,
-                guid,
-                placeDetails.Name,
-                placeDetails.FirstType,
-                placeDetails.Address,
-                placeDetails.Address,
-                placeDetails.PostalCode,
-                placeDetails.City,
+            try
+            {
+                DbBusinessProfile? profile = new(
+                place.PlaceId,
+                ComputeMd5Hash(place.PlaceId),
+                Guid.NewGuid().ToString("N"),
+                place.DisplayName.Text,
                 null,
-                placeDetails.Lat,
-                placeDetails.Long,
+                place.ShortFormattedAddress,
+                place.ShortFormattedAddress,
+                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("postal_code"))?.LongText,
+                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("locality"))?.LongText,
+                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("postal_code"))?.LongText,
+                place.Location.Latitude,
+                place.Location.Longitude,
                 null,
                 null,
-                placeDetails.StreetNumber,
+                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("street_number"))?.LongText,
                 null,
-                placeDetails.Phone,
-                placeDetails.Website,
-                placeDetails.PlusCode,
+                place.NationalPhoneNumber,
+                place.WebsiteUri,
+                place.PlusCode.GlobalCode,
                 null,
-                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), placeDetails.Status!),
+                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), place.BusinessStatus!),
                 null,
-                placeDetails.Country,
-                placeDetails.Url,
-                placeDetails.Lat + " , " + placeDetails.Long,
+                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("country"))?.LongText,
+                place.WebsiteUri,
+                place.Location.Latitude + " , " + place.Location.Longitude,
                 0,
                 null,
-                placeDetails.PhoneInternational
+                place.InternationalPhoneNumber
                 );
-            return profile;
-        }
-
-        public static PlaceDetails PlaceDetailsResponseToPlaceDetails(PlaceDetailsResponse placeDetails)
-        {
-            return new(
-                placeDetails.Result.PlaceId!,
-                placeDetails.Result.Name!,
-                placeDetails.Result.Types?.FirstOrDefault(),
-                placeDetails.Result.FormattedAdress,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("street_number"))?.LongName,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("postal_code"))?.LongName,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("locality"))?.LongName,
-                placeDetails.Result.Geometry?.Location?.Latitude,
-                placeDetails.Result.Geometry?.Location?.Longitude,
-                placeDetails.Result.AddressComponents.Find((x) => x.Types.Contains("country"))?.LongName,
-                placeDetails.Result.FormattedPhoneNumber,
-                placeDetails.Result.InternationalPhoneNumber,
-                placeDetails.Result.Website,
-                placeDetails.Result.PlusCode?.GlobalCode,
-                placeDetails.Result.Url,
-                placeDetails.Result.BusinessStatus?.ToString(),
-                placeDetails.Result.Rating,
-                placeDetails.Result.UserRatingsTotal
-                );
+                return profile;
+            } catch (Exception e) 
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
         }
 
         /// <summary>

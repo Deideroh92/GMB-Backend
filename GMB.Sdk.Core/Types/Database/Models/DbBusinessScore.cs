@@ -19,6 +19,7 @@
         /// <param name="dateInsert"></param>
         public DbBusinessScore(string idEtab, double? score, int? nbReviews, DateTime? dateInsert = null)
         {
+            Id = -500;
             IdEtab = idEtab;
             Score = score;
             NbReviews = nbReviews;

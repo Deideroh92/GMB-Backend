@@ -21,7 +21,11 @@ namespace GMB.Tests
         public void Main()
         {
             string query = "Mcdonalds boulogne-billancourt";
-            PlaceApi.GetPlacesByQuery(query);
+            Task task = PlaceApi.GetPlacesByQuery(query);
+
+            // Wait for the task to complete before continuing
+            task.Wait();
+            
             return;
         }
 

@@ -23,60 +23,29 @@ namespace GMB.PlaceService.Api.Controller
         static readonly ILogger log = Log.ForContext(MethodBase.GetCurrentMethod().DeclaringType);
 
         /// <summary>
-        /// Find GMB by query (should be name + address) then insert it in DB if new.
+        /// Find GMB by query (should be name + address).
         /// </summary>
         /// <param name="query"></param>
         /// <returns>GMB</returns>
         [HttpGet("find-business/{query}")]
         [Authorize]
-        public async Task<ActionResult<GetBusinessProfileResponse>> FindBusinessByQuery(string query)
+        public async Task<ActionResult<GetBusinessProfileListResponse>> FindBusinessByQuery(string query)
         {
-            string? placeId = await PlaceApi.GetPlaceIdByQuery(query);
-            if (placeId == null)
-                return new GetBusinessProfileResponse(null, null);
+            List<DbBusinessProfile> businessProfiles = new();
+            List<DbBusinessScore> businessScores = new();
+            Place[]? places = await PlaceApi.GetPlacesByQuery(query);
 
-            PlaceDetails? placeDetails = await PlaceApi.GetPlaceByPlaceId(placeId);
-            if (placeDetails == null || placeDetails.Url == null)
-                return new GetBusinessProfileResponse(null, null);
+            foreach (Place place in places)
+            {
+                DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
+                if (bp != null)
+                    businessProfiles.Add(bp);
+                businessScores.Add(new(bp.IdEtab, place.Rating, place.UserRatingCount));
+            }
 
             using DbLib db = new();
 
-            string idEtab = ToolBox.ComputeMd5Hash(placeId);
-
-            DbBusinessProfile? business = db.GetBusinessByIdEtab(idEtab);
-
-            // New business
-            if (business == null)
-            {
-                DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Url);
-                DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
-
-                if (placeDetails.Address != null)
-                {
-                    AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(placeDetails.Address);
-                    if (addressResponse != null)
-                    {
-                        profile.AddressType = addressResponse.Features[0]?.Properties?.PropertyType;
-                        profile.AddressScore = addressResponse.Features[0]?.Properties?.Score;
-                        profile.IdBan = addressResponse.Features[0]?.Properties?.Id;
-                        profile.StreetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
-                        profile.CityCode = addressResponse.Features[0]?.Properties?.CityCode;
-                    }
-                }
-
-                DbBusinessScore businessScore = new(profile.IdEtab, placeDetails.Rating, placeDetails.UserRatingsTotal);
-
-                db.CreateBusinessProfile(profile);
-                db.CreateBusinessScore(businessScore);
-
-                return new GetBusinessProfileResponse(profile, businessScore);
-            } else
-            {
-                db.UpdateBusinessProfileFromPlaceDetails(placeDetails, business.IdEtab);
-                return new GetBusinessProfileResponse(business, db.GetBusinessScoreByIdEtab(business.IdEtab));
-            }
-
-            
+            return new GetBusinessProfileListResponse(businessProfiles, businessScores);
         }
         /// <summary>
         /// Get GMB from Google Api.
@@ -85,15 +54,21 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB as described in API</returns>
         [HttpGet("place/{placeId}")]
         [Authorize]
-        public async Task<ActionResult<GetPlaceDetails>> GetPlaceByPlaceId(string placeId)
+        public async Task<ActionResult<GetBusinessProfileResponse>> GetPlaceByPlaceId(string placeId)
         {
             try
             {
-                PlaceDetails? placeDetails = await PlaceApi.GetPlaceByPlaceId(placeId);
-                return new GetPlaceDetails(placeDetails);
+                Place? place = await PlaceApi.GetPlaceByPlaceId(placeId);
+                if (place != null)
+                {
+                    DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
+                    DbBusinessScore? bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
+                    return new GetBusinessProfileResponse(bp, bs, true);
+                }
+                return new GetBusinessProfileResponse(null, null, true);
             } catch (Exception ex)
             {
-                return GetPlaceDetails.Exception(ex.Message);
+                return GetBusinessProfileResponse.Exception(ex.Message);
             }
         }
         /// <summary>

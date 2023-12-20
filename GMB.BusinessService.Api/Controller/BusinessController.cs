@@ -241,47 +241,6 @@ namespace GMB.BusinessService.Api.Controllers
             }
         }
         /// <summary>
-        /// Find business by query (should be name + address) then insert it in DB if new.
-        /// </summary>
-        /// <param name="placeDetails"></param>
-        [HttpPost("bp/create/by-place-details")]
-        [Authorize]
-        public ActionResult<GenericResponse> CreateNewBusinessByPlaceDetails([FromBody] PlaceDetails placeDetails)
-        {
-            try
-            {
-                if (placeDetails.PlaceId == null)
-                    return GenericResponse.Fail(-1, "Place ID is missing.");
-                if (placeDetails.Url == null)
-                    return GenericResponse.Fail(-2, "Unique URL is missing.");
-
-                using DbLib db = new();
-                string idEtab = ToolBox.ComputeMd5Hash(placeDetails.PlaceId);
-                DbBusinessProfile? dbBusinessProfile = db.GetBusinessByIdEtab(idEtab);
-                DbBusinessScore businessScore = new(idEtab, placeDetails.Rating, placeDetails.UserRatingsTotal);
-
-                // Update business if exist
-                if (dbBusinessProfile != null)
-                {
-                    db.UpdateBusinessProfileFromPlaceDetails(placeDetails, dbBusinessProfile.IdEtab);
-                    db.CreateBusinessScore(businessScore);
-                    return new GenericResponse(0, "Business already in DB. Updated successfully !");
-                }     
-                else // No existing business profile
-                {
-                    DbBusinessUrl? businessUrl = UrlController.CreateUrl(placeDetails.Url, UrlState.UPDATED);
-                    DbBusinessProfile? profile = ToolBox.PlaceDetailsToBP(placeDetails, idEtab, businessUrl.Guid);
-                    db.CreateBusinessProfile(profile);
-                    db.CreateBusinessScore(businessScore);
-                    return new GenericResponse(0, "Business successfully created in DB!");
-                };
-            } catch (Exception e)
-            {
-                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GenericResponse.Exception($"Error creating business by place details : [{e.Message}]");
-            }
-        }
-        /// <summary>
         /// Create Business Profile.
         /// </summary>
         /// <param name="businessProfile"></param>

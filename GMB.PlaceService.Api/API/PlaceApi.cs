@@ -1,5 +1,5 @@
-﻿using GMB.Sdk.Core;
-using GMB.Sdk.Core.Types.Models;
+﻿using GMB.Sdk.Core.Types.Models;
+using System.Text;
 
 namespace GMB.PlaceService.Api.API
 {
@@ -12,44 +12,37 @@ namespace GMB.PlaceService.Api.API
         public static readonly string LANGUAGE = "fr";
 
         /// <summary>
-        /// Get Place details by place ID from Google API
+        /// Get Place by place ID from Google API
         /// </summary>
         /// <param name="placeId"></param>
-        /// <returns>Place details or null if nothing found</returns>
-        public static async Task<PlaceDetails?> GetPlaceByPlaceId(string placeId)
+        /// <returns>Place or null if nothing found</returns>
+        public static async Task<Place?> GetPlaceByPlaceId(string placeId)
         {
             try
             {
                 using HttpClient client = new();
-                HttpResponseMessage response = await client.GetAsync($"https://maps.googleapis.com/maps/api/place/details/json?place_id={placeId}&fields=" +
-                    $"name" +
-                    $"%2Crating" +
-                    $"%2Cformatted_phone_number" +
-                    $"%2Cbusiness_status" +
-                    $"%2Cgeometry" +
-                    $"%2Cplace_id" +
-                    $"%2Cplus_code" +
-                    $"%2Curl" +
-                    $"%2Caddress_components" +
-                    $"%2Cuser_ratings_total" +
-                    $"%2Cinternational_phone_number" +
-                    $"%2Cwebsite" +
-                    $"%2Cformatted_address" +
-                    $"%2Ctypes" +
-                    $"&key={API_KEY}&language={LANGUAGE}");
+                string apiUrl = "https://places.googleapis.com/v1/places/" + placeId;
+
+                HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, apiUrl);
+
+                request.Headers.Add("X-Goog-Api-Key", API_KEY);
+                request.Headers.Add("X-Goog-FieldMask", "id,displayName,formattedAddress,internationalPhoneNumber," +
+                    "nationalPhoneNumber,websiteUri,userRatingCount,googleMapsUri,addressComponents,plusCode,shortFormattedAddress," +
+                    "location,rating,businessStatus");
+
+                HttpResponseMessage response = await client.SendAsync(request);
 
                 if (response.IsSuccessStatusCode)
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
-                    PlaceDetailsResponse? placeDetailsResponse = PlaceDetailsResponse.FromJson(responseBody);
-                    if (placeDetailsResponse != null )
-                        return ToolBox.PlaceDetailsResponseToPlaceDetails(placeDetailsResponse);
+                    Place? place = Place.FromJson(responseBody);
+                    return place;
                 }
 
                 return null;
             } catch (Exception e)
             {
-                throw new Exception($"Couldn't get place details from Google API for placeId = [{placeId}]", e);
+                throw new Exception($"Couldn't get place from Google API for placeId = [{placeId}]", e);
             }
         }
         /// <summary>
@@ -93,39 +86,33 @@ namespace GMB.PlaceService.Api.API
         /// </summary>
         /// <param name="query"></param>
         /// <returns>List of possible matching places</returns>
-        public static async Task<List<PlaceDetails>> GetPlacesByQuery(string query)
+        public static async Task<Place[]?> GetPlacesByQuery(string query)
         {
             try
             {
                 using HttpClient client = new();
-                List<PlaceDetails> places = new();
-                HttpResponseMessage response = await client.GetAsync($"https://places.googleapis.com/v1/places:searchText&textQuery={query}&fields=" +
-                    $"name" +
-                    $"%2Crating" +
-                    $"%2Cformatted_phone_number" +
-                    $"%2Cbusiness_status" +
-                    $"%2Cgeometry" +
-                    $"%2Cplace_id" +
-                    $"%2Cplus_code" +
-                    $"%2Curl" +
-                    $"%2Caddress_components" +
-                    $"%2Cuser_ratings_total" +
-                    $"%2Cinternational_phone_number" +
-                    $"%2Cwebsite" +
-                    $"%2Cformatted_address" +
-                    $"%2Ctypes" +
-                    $"&key={API_KEY}&language={LANGUAGE}");
+                Root? placeResponse = new();
+
+                string apiUrl = "https://places.googleapis.com/v1/places:searchText";
+                client.DefaultRequestHeaders.Add("X-Goog-Api-Key", API_KEY);
+                //client.DefaultRequestHeaders.Add("languageCode", LANGUAGE);
+                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.internationalPhoneNumber," +
+                    "places.nationalPhoneNumber,places.websiteUri,places.userRatingCount,places.googleMapsUri,places.addressComponents,places.plusCode,places.shortFormattedAddress," +
+                    "places.location,places.rating,places.businessStatus");
+                string requestBody = $"{{\"textQuery\": \"{query}\"}}";
+
+                HttpResponseMessage response = await client.PostAsync(apiUrl, new StringContent(requestBody, Encoding.UTF8, "application/json"));
 
                 if (response.IsSuccessStatusCode)
                 {
                     string responseBody = await response.Content.ReadAsStringAsync();
-                    PlaceDetailsResponse? placeDetailsResponse = PlaceDetailsResponse.FromJson(responseBody);
+                    placeResponse = Root.FromJson(responseBody);
                 }
 
-                return places;
+                return placeResponse.Places;
             } catch (Exception e)
             {
-                throw new Exception($"Couldn't get place details from Google API for query = [{query}]", e);
+                throw new Exception($"Couldn't get places from Google API for query = [{query}]", e);
             }
         }
     }
