@@ -251,9 +251,21 @@ namespace GMB.BusinessService.Api.Controllers
             try
             {
                 using DbLib db = new();
+
+                if (businessProfile.PlaceUrl == null)
+                    return GenericResponse.Exception("No URL specified, can't create the business profile.");
+
+                if (db.CheckBusinessUrlExist(businessProfile.PlaceUrl))
+                    return GenericResponse.Exception("URL already exists in DB.");
+
+                string guid = Guid.NewGuid().ToString("N");
+                db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl, "platform", ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)));
+
+                businessProfile.FirstGuid = guid;
+                
                 db.CreateBusinessProfile(businessProfile);
 
-                return new GenericResponse();
+                return new GenericResponse(businessProfile.Id, "Business Profile successfully created in DB.");
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
