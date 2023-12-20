@@ -255,7 +255,7 @@ namespace GMB.BusinessService.Api.Controllers
                 if (businessProfile.PlaceUrl == null)
                     return GenericResponse.Exception("No URL specified, can't create the business profile.");
 
-                if (db.CheckBusinessUrlExist(businessProfile.PlaceUrl))
+                if (db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)))
                     return GenericResponse.Exception("URL already exists in DB.");
 
                 string guid = Guid.NewGuid().ToString("N");
