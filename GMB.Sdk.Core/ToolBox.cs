@@ -68,7 +68,7 @@ namespace GMB.Sdk.Core
                 (BusinessStatus)Enum.Parse(typeof(BusinessStatus), place.BusinessStatus!),
                 null,
                 place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("country"))?.LongText,
-                place.WebsiteUri,
+                place.GoogleMapsUri,
                 place.Location.Latitude + " , " + place.Location.Longitude,
                 0,
                 null,
