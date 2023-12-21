@@ -376,6 +376,12 @@ namespace GMB.BusinessService.Api.Controllers
             try
             {
                 DbLib db = new();
+
+                DbBusinessProfile? bp = db.GetBusinessByIdEtab(idEtab);
+
+                if (bp == null)
+                    GenericResponse.Exception("Business Profile doesn't exist");
+
                 List<DbBusinessReview> businessReviews = db.GetBusinessReviewsList(idEtab);
                 foreach(DbBusinessReview review in businessReviews)
                 {
@@ -384,6 +390,7 @@ namespace GMB.BusinessService.Api.Controllers
                 db.DeleteBusinessReviews(idEtab);
                 db.DeleteBusinessScore(idEtab);
                 db.DeleteBusinessProfile(idEtab);
+                db.DeleteBusinessUrlByGuid(bp.FirstGuid);
 
                 return new GenericResponse(null, $"BP with idEtab = [{idEtab}]");
 
