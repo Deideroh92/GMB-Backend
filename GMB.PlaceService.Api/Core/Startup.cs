@@ -1,12 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using Serilog;
 using System.Text;
 using System.Text.Json.Serialization;
 
@@ -25,11 +23,7 @@ namespace GMB.PlaceService.Api.Core
         public void ConfigureServices(IServiceCollection services)
         {
             // Add controllers to handle API requests.
-            services.AddControllers().AddJsonOptions(x =>
-            {
-                // serialize enums as strings in api responses (e.g. Role)
-                x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
-            });
+            services.AddControllers();
 
             // Configure JWT authentication
             services.AddAuthentication(options =>
