@@ -1059,7 +1059,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="idEtab"></param>
         /// <returns>True (exist) or False (doesn't exist)</returns>
-        public bool CheckBusinessProfileExist(string idEtab)
+        public bool CheckBusinessProfileExistByIdEtab(string idEtab)
         {
             try
             {
@@ -1074,6 +1074,29 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             catch (Exception e)
             {
                 throw new Exception($"Error checking BP exist with idEtab = [{idEtab}]", e);
+            }
+        }
+        /// <summary>
+        /// Check if business profile exist by idEtab.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        /// <returns>True (exist) or False (doesn't exist)</returns>
+        public bool CheckBusinessProfileExistByPlaceId(string placeId)
+        {
+            try
+            {
+                string selectCommand = "SELECT 1 FROM vBUSINESS_PROFILE WHERE ID_ETAB = @PlaceId";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@PlaceId", placeId);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                    return true;
+                else
+                    return false;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error checking BP exist with idEtab = [{placeId}]", e);
             }
         }
         #endregion

@@ -228,7 +228,7 @@ namespace GMB.BusinessService.Api.Controllers
                 DbLib db = new();
 
                 // Update or insert Business Profile if exist or not.
-                if (db.CheckBusinessProfileExist(profile.IdEtab))
+                if (db.CheckBusinessProfileExistByIdEtab(profile.IdEtab))
                     db.UpdateBusinessProfile(profile);
                 else
                     db.CreateBusinessProfile(profile);
@@ -258,8 +258,11 @@ namespace GMB.BusinessService.Api.Controllers
                 if (db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)))
                     return GenericResponse.Exception("URL already exists in DB.");
 
-                if (db.CheckBusinessProfileExist(businessProfile.IdEtab))
-                    return GenericResponse.Exception("Business Profile already exists in DB.");
+                if (db.CheckBusinessProfileExistByIdEtab(businessProfile.IdEtab))
+                    return GenericResponse.Exception("Business Profile (ID ETAB) already exists in DD.");
+
+                if (db.CheckBusinessProfileExistByPlaceId(businessProfile.PlaceId))
+                    return GenericResponse.Exception("Business Profile (PLACE ID) already exists in DB.");
 
                 string guid = Guid.NewGuid().ToString("N");
                 db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl, "platform", ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)));
