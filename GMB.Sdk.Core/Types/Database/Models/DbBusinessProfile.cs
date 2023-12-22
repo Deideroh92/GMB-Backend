@@ -45,8 +45,6 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public int Processing { get; set; }
         public string? PictureUrl { get; set; }
         public string? PlaceUrl { get; set; }
-
-        [JsonConverter(typeof(StringEnumConverter))]
         public BusinessStatus Status { get; set; }
 
         #region Local
