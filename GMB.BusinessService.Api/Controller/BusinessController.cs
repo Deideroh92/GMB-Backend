@@ -304,9 +304,9 @@ namespace GMB.BusinessService.Api.Controllers
         /// Get BP by idEtab.
         /// </summary>
         /// <param name="idEtab"></param>
-        [HttpGet("bp/id-etab/{idEtab}")]
+        [HttpPost("bp/id-etab")]
         [Authorize]
-        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByIdEtab(string idEtab)
+        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByIdEtab([FromBody] string idEtab)
         {
             try
             {
@@ -325,14 +325,18 @@ namespace GMB.BusinessService.Api.Controllers
         /// Get BP by placeId.
         /// </summary>
         /// <param name="placeId"></param>
-        [HttpGet("bp/place-id/{placeId}")]
+        [HttpPost("bp/place-id")]
         [Authorize]
-        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByPlaceId(string placeId)
+        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByPlaceId([FromBody] string placeId)
         {
             try
             {
                 using DbLib db = new();
                 DbBusinessProfile? businessProfile = db.GetBusinessByPlaceId(placeId);
+
+                if (businessProfile == null)
+                    return new GetBusinessProfileResponse(null, null);
+
                 DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
 
                 return new GetBusinessProfileResponse(businessProfile, businessScore);
@@ -340,6 +344,33 @@ namespace GMB.BusinessService.Api.Controllers
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
                 return GetBusinessProfileResponse.Exception($"Error getting business profile by place id : [{e.Message}]");
+            }
+        }
+        /// <summary>
+        /// Get BP by url.
+        /// </summary>
+        /// <param name="url"></param>
+        [HttpPost("bp/url")]
+        [Authorize]
+        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByUrl([FromBody] string url)
+        {
+            try
+            {
+                using DbLib db = new();
+                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(url));
+
+                if (businessUrl == null)
+                    return new GetBusinessProfileResponse(null, null);
+
+                DbBusinessProfile? businessProfile = db.GetBusinessByGuid(businessUrl.Guid);
+                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
+
+                return new GetBusinessProfileResponse(businessProfile, businessScore);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetBusinessProfileResponse.Exception($"Error getting business profile by url : [{e.Message}]");
+
             }
         }
         #endregion
@@ -404,34 +435,6 @@ namespace GMB.BusinessService.Api.Controllers
             }
         }
         #endregion
-
-        /// <summary>
-        /// Get BP by url.
-        /// </summary>
-        /// <param name="url"></param>
-        [HttpPost("bp/url")]
-        [Authorize]
-        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByUrl([FromBody] string url)
-        {
-            try
-            {
-                using DbLib db = new();
-                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(url));
-
-                if (businessUrl == null)
-                    return new GetBusinessProfileResponse(null, null);
-
-                DbBusinessProfile? businessProfile = db.GetBusinessByGuid(businessUrl.Guid);
-                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
-
-                return new GetBusinessProfileResponse(businessProfile, businessScore);
-            } catch (Exception e)
-            {
-                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileResponse.Exception($"Error getting business profile by url : [{e.Message}]");
-
-            }
-        }
         #endregion
 
         #region Reviews

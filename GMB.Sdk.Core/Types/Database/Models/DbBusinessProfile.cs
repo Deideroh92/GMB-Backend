@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
+﻿using System.Runtime.Serialization;
 
 namespace GMB.Sdk.Core.Types.Database.Models
 {
@@ -7,9 +6,16 @@ namespace GMB.Sdk.Core.Types.Database.Models
 
     public enum BusinessStatus
     {
+        [EnumMember(Value = "OPERATIONAL")]
         OPERATIONAL,
+
+        [EnumMember(Value = "CLOSED_TEMPORARILY")]
         CLOSED_TEMPORARILY,
+
+        [EnumMember(Value = "CLOSED_PERMANENTLY")]
         CLOSED_PERMANENTLY,
+
+        [EnumMember(Value = "DELETED")]
         DELETED
     }
 
