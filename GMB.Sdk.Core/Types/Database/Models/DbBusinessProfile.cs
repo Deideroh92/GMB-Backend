@@ -6,17 +6,10 @@ namespace GMB.Sdk.Core.Types.Database.Models
 
     public enum BusinessStatus
     {
-        [EnumMember(Value = "OPERATIONAL")]
-        OPERATIONAL,
-
-        [EnumMember(Value = "CLOSED_TEMPORARILY")]
-        CLOSED_TEMPORARILY,
-
-        [EnumMember(Value = "CLOSED_PERMANENTLY")]
-        CLOSED_PERMANENTLY,
-
-        [EnumMember(Value = "DELETED")]
-        DELETED
+        OPERATIONAL = 0,
+        CLOSED_TEMPORARILY = 1,
+        CLOSED_PERMANENTLY = 2,
+        DELETED = 3
     }
 
     #endregion
