@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Runtime.Serialization;
+﻿using System.Runtime.Serialization;
 
 namespace GMB.Sdk.Core.Types.Database.Models
 {
@@ -22,18 +21,6 @@ namespace GMB.Sdk.Core.Types.Database.Models
 
     #endregion
 
-    public static class BusinessStatusExtensions
-    {
-        public static string ToEnumString(this BusinessStatus status)
-        {
-            return Enum.GetName(typeof(BusinessStatus), status);
-        }
-
-        public static BusinessStatus FromEnumString(string status)
-        {
-            return Enum.TryParse(status, out BusinessStatus result) ? result : BusinessStatus.OPERATIONAL;
-        }
-    }
 
     public class DbBusinessProfile : IEquatable<DbBusinessProfile?>
     {
@@ -66,13 +53,6 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public string? PictureUrl { get; set; }
         public string? PlaceUrl { get; set; }
         public BusinessStatus Status { get; set; }
-
-        [JsonProperty("status")]
-        public string StatusString
-        {
-            get => Status.ToEnumString();
-            set => Status = BusinessStatusExtensions.FromEnumString(value);
-        }
 
         #region Local
         /// <summary>
