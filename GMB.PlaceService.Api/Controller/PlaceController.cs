@@ -1,9 +1,7 @@
 ﻿using GMB.Sdk.Core;
 using Serilog;
-using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
-using GMB.Url.Api;
 using GMB.Sdk.Core.Types.Api;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
@@ -27,10 +25,11 @@ namespace GMB.PlaceService.Api.Controller
         /// </summary>
         /// <param name="query"></param>
         /// <returns>GMB</returns>
-        [HttpGet("find-business/{query}")]
+        [HttpGet("place/find-by-query/{query}")]
         [Authorize]
-        public async Task<ActionResult<GetBusinessProfileListResponse>> FindBusinessByQuery(string query)
+        public async Task<ActionResult<GetBusinessProfileListResponse>> GetPlaceByQuery(string query)
         {
+
             List<DbBusinessProfile> businessProfiles = new();
             List<DbBusinessScore> businessScores = new();
             Place[]? places = await PlaceApi.GetPlacesByQuery(query);
@@ -42,17 +41,46 @@ namespace GMB.PlaceService.Api.Controller
                     businessProfiles.Add(bp);
                 businessScores.Add(new(bp.IdEtab, place.Rating, place.UserRatingCount));
             }
-
-            using DbLib db = new();
-
             return new GetBusinessProfileListResponse(businessProfiles, businessScores);
         }
         /// <summary>
-        /// Get GMB from Google Api.
+        /// Find GMB list by query (should be name + address).
+        /// </summary>
+        /// <param name="queryList"></param>
+        /// <returns>GMB list or null if nothing found</returns>
+        [HttpPost("place/find-by-query")]
+        [Authorize]
+        public async Task<ActionResult<GetBusinessProfileListResponse>> GetPlacesByQueryList(List<string> queryList)
+        {
+            List<DbBusinessProfile> businessProfiles = new();
+            List<DbBusinessScore> businessScores = new();
+
+            try
+            {
+                foreach(string query in queryList)
+                {
+                    Place[]? places = await PlaceApi.GetPlacesByQuery(query);
+
+                    if (places != null && places.Any())
+                    {
+                        DbBusinessProfile? bp = ToolBox.PlaceToBP(places[0]);
+                        if (bp != null)
+                            businessProfiles.Add(bp);
+                        businessScores.Add(new(bp.IdEtab, places[0].Rating, places[0].UserRatingCount));
+                    }
+                }
+                return new GetBusinessProfileListResponse(businessProfiles, businessScores);
+            } catch (Exception ex)
+            {
+                return GetBusinessProfileListResponse.Exception(ex.Message);
+            }
+        }
+        /// <summary>
+        /// Find GMB by Place ID.
         /// </summary>
         /// <param name="placeId"></param>
-        /// <returns>GMB as described in API</returns>
-        [HttpGet("place/{placeId}")]
+        /// <returns>GMB or null if not found</returns>
+        [HttpGet("place/find-by-place-id/{placeId}")]
         [Authorize]
         public async Task<ActionResult<GetBusinessProfileResponse>> GetPlaceByPlaceId(string placeId)
         {
@@ -72,7 +100,39 @@ namespace GMB.PlaceService.Api.Controller
             }
         }
         /// <summary>
-        /// Get GMB from Google Api.
+        /// Find GMB list by Place IDs.
+        /// </summary>
+        /// <param name="placeIds"></param>
+        /// <returns>GMB list or null if nothing found</returns>
+        [HttpPost("place/find-by-place-id")]
+        [Authorize]
+        public async Task<ActionResult<GetBusinessProfileListResponse>> GetPlacesByPlaceIdList(List<string> placeIds)
+        {
+            try
+            {
+                List<DbBusinessProfile> bpList = new();
+                List<DbBusinessScore> bsList = new();
+
+                foreach (string placeId in placeIds)
+                {
+                    Place? place = await PlaceApi.GetPlaceByPlaceId(placeId);
+                    if (place != null)
+                    {
+                        DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
+                        DbBusinessScore? bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
+                        bpList.Add(bp);
+                        bsList.Add(bs);
+                    }
+                }
+
+                return new GetBusinessProfileListResponse(bpList, bsList);
+            } catch (Exception ex)
+            {
+                return GetBusinessProfileListResponse.Exception(ex.Message);
+            }
+        }
+        /// <summary>
+        /// Get Place ID from Google Api.
         /// </summary>  
         /// <param name="query"></param>
         /// <returns>GMB as described in API</returns>

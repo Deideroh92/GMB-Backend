@@ -279,6 +279,69 @@ namespace GMB.BusinessService.Api.Controllers
             }
         }
         /// <summary>
+        /// Create Business Profile list.
+        /// </summary>
+        /// <param name="request"></param>
+        [HttpPost("bp/create-list")]
+        [Authorize]
+        public ActionResult<CreateBusinessResponse> CreateNewBusinessList([FromBody] CreateBusinessListRequest request)
+        {
+            try
+            {
+                using DbLib db = new();
+
+                List<string> ids = new();
+
+                foreach (DbBusinessProfile businessProfile in request.BusinessProfileList)
+                {
+                    if (businessProfile.PlaceUrl == null)
+                    {
+                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + " does not have place URL");
+                        continue;
+                    }
+
+                    if (db.CheckBusinessProfileExistByIdEtab(businessProfile.IdEtab))
+                    {
+                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" ID_ETAB exist in our DB");
+                        continue;
+                    }
+
+                    if (businessProfile.PlaceId != null && db.CheckBusinessProfileExistByPlaceId(businessProfile.PlaceId))
+                    {
+                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" PLACE_ID exist in our DB");
+                        continue;
+                    }
+
+                    if (request.BusinessScoreList.Find(x => x.IdEtab == businessProfile.IdEtab) == null)
+                    {
+                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + " does not have business score");
+                        continue;
+                    }
+
+                    if (businessProfile.PlaceUrl != null && db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)))
+                    {
+                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" does have an existing URL [{businessProfile.PlaceUrl}] in DB");
+                        continue;
+                    }
+                        
+                    string guid = Guid.NewGuid().ToString("N");
+                    businessProfile.FirstGuid = guid;
+
+                    db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl ?? "manually", "platform", ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl ?? "manually")));
+                    db.CreateBusinessProfile(businessProfile);
+                    db.CreateBusinessScore(request.BusinessScoreList.Find(x => x.IdEtab == businessProfile.IdEtab)!);
+                }
+
+                ids.Add(request.BusinessProfileList.Count - ids.Count + "/" + request.BusinessProfileList.Count + " businesses treated.");
+
+                return new CreateBusinessResponse(ids);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return CreateBusinessResponse.Exception($"Error creating businesses : [{e.Message}]");
+            }
+        }
+        /// <summary>
         /// Create Business Score.
         /// </summary>
         /// <param name="businessScore"></param>
@@ -435,6 +498,7 @@ namespace GMB.BusinessService.Api.Controllers
             }
         }
         #endregion
+
         #endregion
 
         #region Reviews
