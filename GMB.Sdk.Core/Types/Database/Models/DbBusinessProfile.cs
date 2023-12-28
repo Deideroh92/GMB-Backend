@@ -6,10 +6,10 @@ namespace GMB.Sdk.Core.Types.Database.Models
 
     public enum BusinessStatus
     {
-        OPERATIONAL = 0,
-        CLOSED_TEMPORARILY = 1,
-        CLOSED_PERMANENTLY = 2,
-        DELETED = 3
+        OPERATIONAL,
+        CLOSED_TEMPORARILY,
+        CLOSED_PERMANENTLY,
+        DELETED
     }
 
     #endregion
@@ -108,6 +108,9 @@ namespace GMB.Sdk.Core.Types.Database.Models
             CheckValidity();
             TelInt = telInt;
         }
+
+        // DO NOT USE
+        public DbBusinessProfile() { }
 
         public void CheckValidity()
         {
