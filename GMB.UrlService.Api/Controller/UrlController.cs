@@ -3,7 +3,6 @@ using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Models;
 using Serilog;
-using System.Globalization;
 using GMB.Url.Api.Models;
 
 namespace GMB.Url.Api
@@ -12,49 +11,6 @@ namespace GMB.Url.Api
     /// Url Service.
     /// </summary>
     public class UrlController {
-
-        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Url.Agent\logs\log";
-
-        #region Scanner
-        /// <summary>
-        /// Start the URL Scanner.
-        /// </summary>
-        /// <param name="request"></param>
-        public static void Scanner(UrlRequest request) {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
-
-            Log.Logger = new LoggerConfiguration()
-            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
-            .CreateLogger();
-
-            using DbLib db = new();
-            using SeleniumDriver driver = new();
-            List<string>? urls = new();
-
-            foreach (string location in request.Locations) {
-                ToolBox.BreakingHours();
-
-                try {
-                    string textSearch = request.TextSearch + "+" + location;
-                    string url = "https://www.google.com/maps/search/" + textSearch;
-                    urls = UrlService.GetUrlsFromGooglePage(driver, url);
-
-                    if (urls == null)
-                        continue;
-
-                    foreach(string urlToValidate in urls) {
-                        if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(urlToValidate))) {
-                            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), urlToValidate, textSearch, ToolBox.ComputeMd5Hash(urlToValidate));
-                            db.CreateBusinessUrl(businessUrl);
-                        }
-                    }
-                } catch (Exception e) {
-                    Log.Error(e, $"An exception occurred while searching for business urls with search: [{request.TextSearch + "+" + location}] : {e.Message}");
-                }
-            }
-            Log.CloseAndFlush();
-        }
-        #endregion
 
         /// <summary>
         /// Create a BU.
