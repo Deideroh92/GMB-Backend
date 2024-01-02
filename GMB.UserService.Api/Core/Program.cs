@@ -1,62 +1,53 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Serilog;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-namespace GMB.UserService.Api.Core
+var builder = WebApplication.CreateBuilder(args);
+
+// Add services to the container.
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
 {
-    /// <summary>
-    /// Main class.
-    /// </summary>
-    public sealed class Program
-    {
-        /// <summary>
-        /// Set up the configuration.
-        /// </summary>
-        public static IConfiguration Configuration { get; } = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.UserService.Api")
-            .AddJsonFile("GMB.UserService.Api.Settings.json", optional: false, reloadOnChange: true)
-            .AddEnvironmentVariables()
-            .Build();
-
-        /// <summary>
-        /// Create web host.
-        /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                    webBuilder.UseUrls("http://localhost:5001");
-                });
-
-        /// <summary>
-        /// Main method of the program.
-        /// </summary>
-        /// <param name="args"></param>
-        public static int
-        Main(string[] args)
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
         {
-            // Create the Serilog logger, and configure the sinks
-            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration(Configuration).CreateLogger();
+            policy.WithOrigins("https://vasanogmbapi.azurewebsites.net", "http://localhost:3000", "https://admin-vasano.web.app").AllowAnyHeader().AllowAnyMethod();
+        });
+});
 
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+            .AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = "vasano",
+                    ValidAudience = "vasano-api",
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG"))
+                };
+                options.SaveToken = true;
+                options.RequireHttpsMetadata = false;
+            });
 
-            // Wrap creating and running the host in a try-catch block
-            try
-            {
-                Log.Information("Starting host");
-                CreateHostBuilder(args).Build().Run();
-                return 0;
-            } catch (Exception e)
-            {
-                Log.Fatal(e, $"Host terminated unexpectedly. Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return -1;
-            } finally
-            {
-                Log.CloseAndFlush();
-            }
-        }
-    };
-}
+var app = builder.Build();
+
+app.UseHttpsRedirection();
+
+app.UseAuthorization();
+
+app.MapControllers();
+
+app.UseCors(MyAllowSpecificOrigins);
+
+app.Run();

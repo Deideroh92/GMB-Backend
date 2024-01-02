@@ -13,13 +13,12 @@ namespace GMB.Sdk.Core.Types.Models
         public IWebDriver WebDriver { get; set; }
 
         #region Local
-
         /// <summary>
         /// Create an instance of Selenium Driver.
         /// </summary>
         public SeleniumDriver(bool headless = true)
         {
-            string chromeDriverPath = Path.Combine(Environment.GetEnvironmentVariable("HOME"), "site", "wwwroot", "chromedriver", "chromedriver.exe");
+            string chromeDriverPath = Path.Combine(Environment.GetEnvironmentVariable("HOME")!, "site", "wwwroot", "chromedriver", "chromedriver.exe");
 
             try
             {
@@ -34,8 +33,7 @@ namespace GMB.Sdk.Core.Types.Models
                 }
                 new DriverManager().SetUpDriver(new ChromeConfig());
                 WebDriver = new ChromeDriver(chromeDriverPath, chromeOptions);
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 throw new Exception("Failed initializing driver");
             }
@@ -46,7 +44,6 @@ namespace GMB.Sdk.Core.Types.Models
         /// </summary>
         public void AcceptCookies()
         {
-
             // Locating button and scrolling to it.
             ((IJavaScriptExecutor)WebDriver).ExecuteScript("arguments[0].scrollIntoView(true);", ToolBox.FindElementSafe(WebDriver, new List<By>(XPathDriver.acceptCookies)));
 
@@ -69,8 +66,7 @@ namespace GMB.Sdk.Core.Types.Models
                 WebDriver.Navigate().GoToUrl(url);
                 Thread.Sleep(2000);
                 AcceptCookies();
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 System.Diagnostics.Debug.WriteLine("Couldn't get to page.");
             }
@@ -105,12 +101,6 @@ namespace GMB.Sdk.Core.Types.Models
                 WebDriver?.Dispose();
             }
         }
-
-        ~SeleniumDriver()
-        {
-            Dispose(false);
-        }
-
         #endregion
     }
 }

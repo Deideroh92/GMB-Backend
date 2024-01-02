@@ -2,7 +2,6 @@
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -14,12 +13,6 @@ namespace GMB.UserService.Api.Controller
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
-
-        public UserController(IConfiguration configuration)
-        {
-            _configuration = configuration;
-        }
 
         /// <summary>
         /// Login into app with username and password
@@ -48,9 +41,9 @@ namespace GMB.UserService.Api.Controller
         /// </summary>
         /// <param name="username"></param>
         /// <returns>JWT Token</returns>
-        private string GenerateJwtToken(string username)
+        private static string GenerateJwtToken(string username)
         {
-            
+
             var key = "fjQYTZrDDp8hlPFQD3IxibbNsSF6bLTC4TI98XUJ3e4nZhGFmMgP4hsGbiaoNydG";
 
 

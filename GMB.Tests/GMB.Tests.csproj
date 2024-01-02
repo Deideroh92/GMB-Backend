@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
 
@@ -9,7 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="DotNetSeleniumExtras.WaitHelpers" Version="3.11.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.1.1" />
     <PackageReference Include="MSTest.TestFramework" Version="3.1.1" />
@@ -17,15 +16,14 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Serilog.AspNetCore" Version="7.0.0" />
-    <PackageReference Include="Serilog.Exceptions" Version="8.4.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\GMB.BusinessService.Api\GMB.BusinessService.Api.csproj" />
     <ProjectReference Include="..\GMB.PlaceService.Api\GMB.PlaceService.Api.csproj" />
+    <ProjectReference Include="..\GMB.Scanner.Agent\GMB.Scanner.Agent.csproj" />
+    <ProjectReference Include="..\GMB.Scanner.Api\GMB.ScannerService.Api.csproj" />
     <ProjectReference Include="..\GMB.Sdk.Core\GMB.Sdk.Core.csproj" />
-    <ProjectReference Include="..\GMB.UrlService.Api\GMB.UrlService.Api.csproj" />
   </ItemGroup>
 
   <ItemGroup>

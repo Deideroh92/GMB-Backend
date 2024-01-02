@@ -1,21 +1,22 @@
+using GMB.BusinessService.Api.Controller;
+using GMB.BusinessService.Api.Models;
+using GMB.Scanner.Agent.Core;
+using GMB.Scanner.Agent.Models;
+using GMB.ScannerService.Api.Controller;
+using GMB.Sdk.Core;
+using GMB.Sdk.Core.Types.Api;
+using GMB.Sdk.Core.Types.Database.Manager;
+using GMB.Sdk.Core.Types.Database.Models;
+using GMB.Sdk.Core.Types.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OpenQA.Selenium;
 using System.Globalization;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using GMB.Sdk.Core;
-using GMB.Sdk.Core.Types.Models;
-using GMB.Sdk.Core.Types.Database.Manager;
-using GMB.Url.Api;
-using GMB.Business.Api.Models;
-using GMB.Sdk.Core.Types.Database.Models;
-using GMB.Url.Api.Models;
-using Serilog;
-using GMB.Business.Api.API;
-using GMB.BusinessService.Api.Controllers;
 
 namespace GMB.Tests
 {
     [TestClass]
-    public class Launch {
+    public class Launch
+    {
 
         public static readonly string pathUrlFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\url.txt";
         public static readonly string pathUrlKnownFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\urlKnown.txt";
@@ -27,7 +28,8 @@ namespace GMB.Tests
         /// Launch URL Scanner
         /// </summary>
         [TestMethod]
-        public void ThreadsUrlScraper() {
+        public void ThreadsUrlScraper()
+        {
             string[] categories = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "Categories.txt"));
             string[] textSearch = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "UrlTextSearch.txt"));
             string[] dept = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "DeptList.txt"));
@@ -36,19 +38,20 @@ namespace GMB.Tests
             string[] customLocations = File.ReadAllLines(Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "CustomLocations.txt"));
 
             List<string> locations = new(cp);
-            List<Task> tasks = new();
+            List<Task> tasks = [];
 
             int maxConcurrentThreads = 1;
             SemaphoreSlim semaphore = new(maxConcurrentThreads);
 
-            foreach (string search in categories) {
-                UrlRequest request = new(locations.Select(s => s.Replace(';', ' ').Replace(' ', '+')).ToList(), search.Trim().Replace(' ', '+'));
+            foreach (string search in categories)
+            {
+                ScannerUrlRequest request = new(locations.Select(s => s.Replace(';', ' ').Replace(' ', '+')).ToList(), search.Trim().Replace(' ', '+'));
                 Task newThread = Task.Run(async () =>
                 {
                     await semaphore.WaitAsync(); // Wait until there's an available slot to run
                     try
                     {
-                        UrlController.Scanner(request);
+                        Scanner.Agent.Scanner.ScannerUrl(request);
                     } finally
                     {
                         semaphore.Release(); // Release the slot when the task is done
@@ -57,7 +60,7 @@ namespace GMB.Tests
                 tasks.Add(newThread);
             }
 
-            Task.WaitAll(tasks.ToArray());
+            Task.WaitAll([.. tasks]);
             return;
         }
 
@@ -65,9 +68,11 @@ namespace GMB.Tests
         /// Create a BU in DB.
         /// </summary>
         [TestMethod]
-        public void CreateUrl() {
+        public void CreateUrl()
+        {
             string url = "";
-            UrlController.CreateUrl(url);
+            BusinessController controller = new();
+            controller.CreateUrl(url);
         }
         #endregion
 
@@ -78,10 +83,10 @@ namespace GMB.Tests
         [TestMethod]
         public void SetProcessingFromIdEtabFile()
         {
-            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\urls.txt";
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\Custom.txt";
             using DbLib db = new();
 
-            List<string> values = new();
+            List<string> values = [];
 
             using (StreamReader reader = new(filePath))
             {
@@ -122,7 +127,8 @@ namespace GMB.Tests
         /// Exporting Hotels info.
         /// </summary>
         [TestMethod]
-        public async Task ExportHotelAsync() {
+        public async Task ExportHotelAsync()
+        {
 
             // CONFIG
             int nbEntries = 1;
@@ -130,18 +136,22 @@ namespace GMB.Tests
 
             using DbLib db = new();
             List<BusinessAgent> businessList = db.GetBusinessAgentListByUrlState(urlState, nbEntries);
+            ScannerFunctions toolbox = new();
 
             using SeleniumDriver driver = new();
             Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
             using StreamWriter sw2 = File.AppendText(@"C:\Users\maxim\Desktop\hotel.txt");
             sw2.WriteLine("NAME$$CATEGORY$$ADRESS$$TEL$$OPTIONS");
-            foreach (BusinessAgent elem in businessList) {
-                try {
+            foreach (BusinessAgent elem in businessList)
+            {
+                try
+                {
                     GetBusinessProfileRequest request = new(elem.Url, null, null);
-                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+                    (DbBusinessProfile? business, DbBusinessScore? businessScore) = await toolbox.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
                     var optionsOn = ToolBox.FindElementsSafe(driver.WebDriver, XPathProfile.optionsOn);
-                    List<string> optionsOnList = new();
-                    foreach (IWebElement element in optionsOn) {
+                    List<string> optionsOnList = [];
+                    foreach (IWebElement element in optionsOn)
+                    {
                         optionsOnList.Add(element.GetAttribute("aria-label").Replace("L'option ", "").Replace(" est disponible", ""));
                     }
                     sw2.WriteLine(business.Name + "$$" + business.Category + "$$" + business.GoogleAddress + "$$" + business.Tel + "$$" + string.Join(",", optionsOnList));
@@ -152,79 +162,12 @@ namespace GMB.Tests
         /// Starting Scanner.
         /// </summary>
         [TestMethod]
-        public async Task ThreadsBusinessScraper() {
-            List<BusinessAgent> businessList = new();
-            List<Task> tasks = new();
-            using DbLib db = new();
-            int threadNumber = 0;
+        public async void LaunchBusinessScanner()
+        {
+            ScannerController controller = new();
+            BusinessScannerRequest request = new(100000, 1, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddMonths(2), true);
 
-            int entries = 45000;
-            int processing = 1;
-            Operation operationType = Operation.OTHER;
-            bool getReviews = true;
-            DateTime reviewsDate = DateTime.UtcNow.AddDays(-15);
-            BusinessController controller = new();
-
-            Log.Logger = new LoggerConfiguration()
-            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
-            .CreateLogger();
-
-            switch (operationType) {
-                case Operation.OTHER:
-                    string? brand = null;
-                    string? category = null;
-                    CategoryFamily? categoryFamily = null;
-                    bool isNetwork = true;
-                    bool isIndependant = false;
-                    GetBusinessListRequest request = new(entries, processing, brand, category, categoryFamily, isNetwork, isIndependant);
-                    businessList = db.GetBusinessAgentList(request);
-                    break;
-                case Operation.FILE:
-                    bool isUrlKnownFile = true;
-                    bool isUrlFile = true;
-                    string[]? urlList = File.ReadAllLines(pathUrlFile);
-
-                    if (isUrlKnownFile) {
-                        foreach (string url in urlList) {
-                            BusinessAgent? business = db.GetBusinessAgentByUrlEncoded(ToolBox.ComputeMd5Hash(url));
-
-                            if (business == null) {
-                                Log.Error(url);
-                                continue;
-                            }
-
-                            businessList.Add(business);
-                        }
-                    } else {
-                        foreach (string url in urlList) {
-                            if (!isUrlFile)
-                                businessList.Add(new BusinessAgent(null, "https://www.google.fr/maps/search/" + url.ToLower()));
-                            else
-                                businessList.Add(new BusinessAgent(null, url));
-                        }
-                    }
-                    break;
-                case Operation.URL_STATE:
-                    UrlState urlState = UrlState.NEW;
-                    businessList = db.GetBusinessAgentListByUrlState(urlState, entries);
-                    break;
-
-                default: break;
-            }
-
-            int nbThreads = 8;
-
-            foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
-            {
-                threadNumber++;
-                Task newThread = Task.Run(async () =>
-                {
-                    BusinessAgentRequest request = new(operationType, getReviews, new List<BusinessAgent>(chunk), reviewsDate, processing != 9);
-                    await controller.Scanner(request).ConfigureAwait(false);
-                });
-                tasks.Add(newThread);
-            }
-            await Task.WhenAll(tasks);
+            await controller.StartBusinessScannerAsync(request);
             return;
         }
         #endregion
