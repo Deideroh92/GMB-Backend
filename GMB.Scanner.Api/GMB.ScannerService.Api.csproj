@@ -5,6 +5,8 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
+	<RootNamespace>GMB.ScannerService.Api</RootNamespace>
+	<OutputPath>bin\$(Configuration)\$(TargetFramework)\GMB.ScannerService.Api\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

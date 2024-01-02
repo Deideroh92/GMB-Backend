@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
     <RootNamespace>GMB.PlaceService.Api</RootNamespace>
+	<OutputPath>bin\$(Configuration)\$(TargetFramework)\GMB.PlaceService.Api\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>

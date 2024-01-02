@@ -6,6 +6,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <InvariantGlobalization>true</InvariantGlobalization>
     <RootNamespace>GMB.UserService.Api</RootNamespace>
+	<OutputPath>bin\$(Configuration)\$(TargetFramework)\GMB.UserService.Api\</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
