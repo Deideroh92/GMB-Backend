@@ -274,33 +274,6 @@ namespace GMB.BusinessService.Api.Controller
                 return GetIdEtabResponse.Exception($"Error getting business profile by id etab : [{e.Message}]");
             }
         }
-        /// <summary>
-        /// Get BP by url.
-        /// </summary>
-        /// <param name="url"></param>
-        [HttpPost("bp/url")]
-        [Authorize]
-        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByUrl([FromBody] string url)
-        {
-            try
-            {
-                using DbLib db = new();
-                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(url));
-
-                if (businessUrl == null)
-                    return new GetBusinessProfileResponse(null, null);
-
-                DbBusinessProfile? businessProfile = db.GetBusinessByGuid(businessUrl.Guid);
-                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
-
-                return new GetBusinessProfileResponse(businessProfile, businessScore);
-            } catch (Exception e)
-            {
-                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileResponse.Exception($"Error getting business profile by url : [{e.Message}]");
-
-            }
-        }
         #endregion
 
         #region Update

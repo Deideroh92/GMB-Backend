@@ -37,48 +37,6 @@ namespace GMB.Sdk.Core
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
 
-        public static DbBusinessProfile? PlaceToBP(Place place)
-        {
-            try
-            {
-                DbBusinessProfile? profile = new(
-                place.PlaceId,
-                ComputeMd5Hash(place.PlaceId),
-                Guid.NewGuid().ToString("N"),
-                place.DisplayName.Text,
-                null,
-                place.ShortFormattedAddress,
-                place.ShortFormattedAddress,
-                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("postal_code"))?.LongText,
-                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("locality"))?.LongText,
-                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("postal_code"))?.LongText,
-                place.Location.Latitude,
-                place.Location.Longitude,
-                null,
-                null,
-                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("street_number"))?.LongText,
-                null,
-                place.NationalPhoneNumber,
-                place.WebsiteUri,
-                place.PlusCode.GlobalCode,
-                null,
-                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), place.BusinessStatus!),
-                null,
-                place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("country"))?.LongText,
-                place.WebsiteUri,
-                place.Location.Latitude + " , " + place.Location.Longitude,
-                0,
-                null,
-                place.InternationalPhoneNumber
-                );
-                return profile;
-            } catch (Exception e) 
-            {
-                Console.WriteLine(e.Message);
-                return null;
-            }
-        }
-
         /// <summary>
         /// Return the current exact executable root path (folder where is located exe)
         /// </summary>
