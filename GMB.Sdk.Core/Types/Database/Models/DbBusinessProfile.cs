@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace GMB.Sdk.Core.Types.Database.Models
+﻿namespace GMB.Sdk.Core.Types.Database.Models
 {
     #region Enums
 
@@ -109,8 +107,10 @@ namespace GMB.Sdk.Core.Types.Database.Models
             TelInt = telInt;
         }
 
+#pragma warning disable CS8618
         // DO NOT USE
         public DbBusinessProfile() { }
+#pragma warning restore CS8618
 
         public void CheckValidity()
         {

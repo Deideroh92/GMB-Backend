@@ -1,245 +1,24 @@
-﻿using System.Globalization;
 using GMB.Sdk.Core;
-using Serilog;
-using GMB.Sdk.Core.Types.Models;
-using GMB.Sdk.Core.Types.Database.Models;
-using GMB.Sdk.Core.Types.Database.Manager;
-using GMB.Business.Api.Models;
-using GMB.Url.Api;
-using GMB.Business.Api.API;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using GMB.Sdk.Core.Types.Api;
+using GMB.Sdk.Core.Types.Database.Manager;
+using GMB.Sdk.Core.Types.Database.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Serilog;
 
-namespace GMB.BusinessService.Api.Controllers
+namespace GMB.BusinessService.Api.Controller
 {
     /// <summary>
     /// Business Service Controller.
     /// </summary>
     [ApiController]
     [Route("api/business-service")]
-    public class BusinessController {
-        public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
-        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Business.Agent\logs\log";
-
-        #region Scanner
-        /// <summary>
-        /// Start the Scanner.
-        /// </summary>
-        /// <param name="request"></param>
-        [HttpPost("scanner/start")]
-        [Authorize]
-        public async Task Scanner(BusinessAgentRequest request) {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
-
-            Log.Logger = new LoggerConfiguration()
-            .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
-            .CreateLogger();
-
-            using DbLib db = new();
-            SeleniumDriver driver = new();
-
-            int count = 0;
-
-            DateTime time = DateTime.UtcNow;
-
-            foreach (BusinessAgent businessAgent in request.BusinessList) {
-                try {
-                    ToolBox.BreakingHours();
-
-                    count++;
-                    GetBusinessProfileRequest BPRequest = new(businessAgent.Url, businessAgent.Guid, businessAgent.IdEtab);
-                    DbBusinessProfile? business = null;
-
-                    if (businessAgent.IdEtab != null)
-                        business = db.GetBusinessByIdEtab(businessAgent.IdEtab);
-
-                    if (!driver.IsDriverAlive())
-                    {
-                        driver.Dispose();
-                        driver = new();
-                    }
-
-                    // Get business profile infos from Google.
-                    (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
-                    
-
-                    if (request.Operation == Operation.FILE) {
-                        if (profile == null) {
-                            using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);
-                            operationFileWritter.WriteLine(businessAgent.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + "0" + "$$" + "0" + "$$" + "0" + "$$" + driver.WebDriver.Url);
-                            continue;
-                        }
-                        if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(BPRequest.Url))) {
-                            DbBusinessUrl businessUrl = new(profile.FirstGuid, BPRequest.Url, "file", ToolBox.ComputeMd5Hash(BPRequest.Url), UrlState.UPDATED);
-                            db.CreateBusinessUrl(businessUrl);
-                        }
-                    }
-                    
-                    // No business found at this url.
-                    if (profile == null) {
-                        if (request.Operation == Operation.URL_STATE && businessAgent.Guid != null)
-                            db.DeleteBusinessUrlByGuid(businessAgent.Guid);
-                        else {
-                            if (businessAgent.IdEtab != null) {
-                                db.UpdateBusinessProfileStatus(businessAgent.IdEtab, BusinessStatus.DELETED);
-                                db.UpdateBusinessProfileProcessingState(businessAgent.IdEtab, 0);
-                            }
-                        }   
-                        continue;
-                    }
-
-                    business ??= db.GetBusinessByIdEtab(profile.IdEtab);
-
-                    if (business == null)
-                        db.CreateBusinessProfile(profile);
-                    if (business != null && !profile.Equals(business))
-                        db.UpdateBusinessProfile(profile);
-
-                    // Insert Business Score if have one.
-                    if (score?.Score != null)
-                        db.CreateBusinessScore(score);
-
-                    // Getting reviews
-                    if (request.GetReviews && request.DateLimit != null && score?.Score != null && profile.Category != "Hébergement") {
-                        driver.GetToPage(BPRequest.Url);
-                        List<DbBusinessReview>? reviews = BusinessServiceApi.GetReviews(profile.IdEtab, request.DateLimit, driver);
-
-                        if (reviews != null)
-                        {
-                            foreach (DbBusinessReview review in reviews)
-                            {
-                                try
-                                {
-                                    DbBusinessReview? dbBusinessReview = db.GetBusinessReview(profile.IdEtab, review.IdReview);
-
-                                    if (dbBusinessReview == null)
-                                    {
-                                        db.CreateBusinessReview(review);
-                                        continue;
-                                    }
-
-                                    if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
-                                        db.UpdateBusinessReviewReply(review);
-
-                                    if (!review.Equals(dbBusinessReview))
-                                    {
-                                        db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
-                                        continue;
-                                    }
-                                } catch (Exception e)
-                                {
-                                    Log.Error($"Couldn't treat a review : {e.Message}", e);
-                                }
-                            }
-                        }
-                    }
-
-                    // Update Url state when finished.
-                    if (request.Operation == Operation.URL_STATE)
-                        db.UpdateBusinessUrlState(profile.FirstGuid, UrlState.UPDATED);
-
-                    // Update Business State when finished
-                    if (request.UpdateProcessingState)
-                        db.UpdateBusinessProfileProcessingState(profile.IdEtab, 0);
-
-                    if (request.Operation == Operation.FILE) {
-                        using StreamWriter operationFileWritter = File.AppendText(pathOperationIsFile);
-                        operationFileWritter.WriteLine(businessAgent.Url.Replace("https://www.google.fr/maps/search/", "") + "$$" + profile.Name + "$$" + profile.GoogleAddress + "$$" + profile.IdEtab + "$$" + driver.WebDriver.Url);
-                    }
-                }
-                catch (Exception e) {
-                    Log.Error(e, $"An exception occurred on BP with id etab = [{businessAgent.IdEtab}], guid = [{businessAgent.Guid}], url = [{businessAgent.Url}] : {e.Message}");
-                }
-            }
-            Log.CloseAndFlush();
-            driver.Dispose();
-        }
-        #endregion
+    public class BusinessController : ControllerBase
+    {
 
         #region Profile & Score
 
-        #region Scanner
-        /// <summary>
-        /// Sacan BP and BS by given url.
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns>Business Profile and Score as a Tuple</returns>
-        [HttpPost("scanner/gmb/url")]
-        [Authorize]
-        public async Task<GetBusinessProfileResponse?> ScanGMBByUrl([FromBody] string url) {
-            try {
-                using SeleniumDriver driver = new();
-                using DbLib db = new();
-
-                (DbBusinessProfile? bp, DbBusinessScore? bs) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url), null);
-
-                GetBusinessProfileResponse response = new (bp, bs, true);
-
-                return response;
-
-            } catch (Exception e) {
-                return (null);
-            }
-        }
-        /// <summary>
-        /// Get Google Business Profile and Score by id etab.
-        /// </summary>
-        /// <param name="idEtab"></param>
-        /// <returns>Business Profile and Score as a Tuple</returns>
-        [HttpPost("scanner/gmb/idEtab")]
-        [Authorize]
-        public async Task<(DbBusinessProfile?, DbBusinessScore?)> ScanGMBByIdEtab(string idEtab) {
-            try {
-                using DbLib db = new();
-                using SeleniumDriver driver = new();
-
-                BusinessAgent? business = db.GetBusinessAgentByIdEtab(idEtab);
-
-                if (business == null) {
-                    return (null, null);
-                }
-
-                GetBusinessProfileRequest request = new(business.Url, business.Guid, business.IdEtab);
-
-                return await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            } catch (Exception e) {
-                return (null, null);
-            }
-        }
-        #endregion
-
         #region Create
-        /// <summary>
-        /// Create a new business url and business if it doesn't exist already.
-        /// </summary>
-        /// <param name="url"></param>
-        [HttpPost("bp/create/by-url")]
-        [Authorize]
-        public async void CreateNewBusinessProfileByUrl(string url)
-        {
-            try {
-                DbBusinessUrl businessUrl = UrlController.CreateUrl(url);
-
-                using SeleniumDriver driver = new();
-
-                GetBusinessProfileRequest request = new(businessUrl.Url, businessUrl.Guid, null);
-                (DbBusinessProfile? profile, DbBusinessScore? score) = await BusinessServiceApi.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-                DbLib db = new();
-
-                // Update or insert Business Profile if exist or not.
-                if (db.CheckBusinessProfileExistByIdEtab(profile.IdEtab))
-                    db.UpdateBusinessProfile(profile);
-                else
-                    db.CreateBusinessProfile(profile);
-
-                // Insert Business Score if have one.
-                if (score?.Score != null)
-                    db.CreateBusinessScore(score);
-            } catch (Exception e) {
-                Log.Error(e, $"An exception occurred while inserting new BU and BP with url = [{url}] : {e.Message}");
-            }
-        }
         /// <summary>
         /// Create Business Profile.
         /// </summary>
@@ -251,6 +30,9 @@ namespace GMB.BusinessService.Api.Controllers
             try
             {
                 using DbLib db = new();
+
+                if (businessProfile.PlaceId == null)
+                    return GenericResponse.Exception("No Place ID, can't create the business profile.");
 
                 if (businessProfile.PlaceUrl == null)
                     return GenericResponse.Exception("No URL specified, can't create the business profile.");
@@ -268,7 +50,7 @@ namespace GMB.BusinessService.Api.Controllers
                 db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl, "platform", ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)));
 
                 businessProfile.FirstGuid = guid;
-                
+
                 db.CreateBusinessProfile(businessProfile);
 
                 return new GenericResponse(businessProfile.Id, "Business Profile successfully created in DB.");
@@ -290,7 +72,7 @@ namespace GMB.BusinessService.Api.Controllers
             {
                 using DbLib db = new();
 
-                List<string> ids = new();
+                List<string> ids = [];
 
                 foreach (DbBusinessProfile businessProfile in request.BusinessProfileList)
                 {
@@ -323,7 +105,7 @@ namespace GMB.BusinessService.Api.Controllers
                         ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" does have an existing URL [{businessProfile.PlaceUrl}] in DB");
                         continue;
                     }
-                        
+
                     string guid = Guid.NewGuid().ToString("N");
                     businessProfile.FirstGuid = guid;
 
@@ -436,6 +218,89 @@ namespace GMB.BusinessService.Api.Controllers
 
             }
         }
+        /// <summary>
+        /// Get IDs ETAB by given Place IDs.
+        /// </summary>
+        /// <param name="placeIdList"></param>
+        /// <returns>List of id Etab or empty if not found</returns>
+        [HttpPost("id-etab/place-id-list")]
+        [Authorize]
+        public ActionResult<GetIdEtabResponse> GetIdEtabsByPlaceIds([FromBody] List<string> placeIdList)
+        {
+            try
+            {
+                using DbLib db = new();
+                List<string> idsEtab = [];
+
+                foreach (string placeId in placeIdList)
+                {
+                    string? id = db.GetIdEtabByPlaceId(placeId);
+                    if (id != null)
+                        idsEtab.Add(id);
+                    else
+                        idsEtab.Add(placeId);
+                }
+
+                return new GetIdEtabResponse(idsEtab);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetIdEtabResponse.Exception($"Error getting business profile by id etab : [{e.Message}]");
+            }
+        }
+        /// <summary>
+        /// Get ID ETAB by given Place ID.
+        /// </summary>
+        /// <param name="placeId"></param>
+        /// <returns>Id etab list with the id etab or empty if not found</returns>
+        [HttpPost("id-etab/place-id")]
+        [Authorize]
+        public ActionResult<GetIdEtabResponse> GetIdEtabByPlaceId([FromBody] string placeId)
+        {
+            try
+            {
+                using DbLib db = new();
+                List<string> idsEtab = [];
+
+                string? id = db.GetIdEtabByPlaceId(placeId);
+
+                if (id != null)
+                    idsEtab.Add(id);
+
+                return new GetIdEtabResponse(idsEtab);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetIdEtabResponse.Exception($"Error getting business profile by id etab : [{e.Message}]");
+            }
+        }
+        /// <summary>
+        /// Get BP by url.
+        /// </summary>
+        /// <param name="url"></param>
+        [HttpPost("bp/url")]
+        [Authorize]
+        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByUrl([FromBody] string url)
+        {
+            try
+            {
+                using DbLib db = new();
+                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(url));
+
+                if (businessUrl == null)
+                    return new GetBusinessProfileResponse(null, null);
+
+                DbBusinessProfile? businessProfile = db.GetBusinessByGuid(businessUrl.Guid);
+                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
+
+                return new GetBusinessProfileResponse(businessProfile, businessScore);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetBusinessProfileResponse.Exception($"Error getting business profile by url : [{e.Message}]");
+
+            }
+        }
         #endregion
 
         #region Update
@@ -480,7 +345,7 @@ namespace GMB.BusinessService.Api.Controllers
                     GenericResponse.Exception("Business Profile doesn't exist");
 
                 List<DbBusinessReview> businessReviews = db.GetBusinessReviewsList(idEtab);
-                foreach(DbBusinessReview review in businessReviews)
+                foreach (DbBusinessReview review in businessReviews)
                 {
                     db.DeleteBusinessReviewsFeeling(review.IdReview);
                 }
@@ -501,53 +366,33 @@ namespace GMB.BusinessService.Api.Controllers
 
         #endregion
 
-        #region Reviews
+        #region Url
         /// <summary>
-        /// Get Business Reviews list from url.
+        /// Create Url.
         /// </summary>
         /// <param name="url"></param>
-        /// <param name="dateLimit"></param>
-        /// <param name="idEtab"></param>
-        /// <returns>List of business reviews</returns>
-        [HttpGet("bp/reviews/{url}")]
+        [HttpPost("url/create")]
         [Authorize]
-        public List<DbBusinessReview>? GetBusinessReviews(string url, DateTime? dateLimit, string idEtab = "-1") {
-            using SeleniumDriver driver = new();
-
-            driver.GetToPage(url);
-            try {
-                return BusinessServiceApi.GetReviews(idEtab, dateLimit, driver);
-            }
-            catch (Exception e) {
-                return null;
-            }
-        }
-        #endregion
-
-        #region KPI
-        /// <summary>
-        /// Get KPI.
-        /// </summary>
-        [HttpGet("kpi")]
-        [Authorize]
-        public ActionResult<GetMainKpiResponse> GetKpi()
+        public ActionResult<GenericResponse> CreateUrl([FromBody] string url, UrlState urlState = UrlState.NEW)
         {
             try
             {
                 using DbLib db = new();
-                int? brTotal = db.GetBRTotal();
-                int? bpTotal = db.GetBRTotal();
-                int? bpNetworkTotal = db.GetBPNetworkTotal();
-                int? brFeelingTotal = db.GetBRFeelingsTotal();
-                int? brandTotal = db.GetBrandTotal();
-                MainKPI kpi = new(bpTotal, bpNetworkTotal, brTotal, brFeelingTotal, brandTotal);
-                return new GetMainKpiResponse();
+                string? urlEncoded = ToolBox.ComputeMd5Hash(url);
+                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(urlEncoded);
+                if (businessUrl == null)
+                {
+                    businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", ToolBox.ComputeMd5Hash(url), urlState);
+                    db.CreateBusinessUrl(businessUrl);
+                }
+                return new GenericResponse(businessUrl.Id, "Url created successfully.");
             } catch (Exception e)
             {
-                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetMainKpiResponse.Exception("Error getting KPIs.");
+                Log.Error(e, $"An exception occurred while creating url: [{url}].");
+                return GenericResponse.Exception($"An exception occurred while creating Url = [{url}] : {e.Message}");
             }
+
         }
         #endregion
     }
-}   
+}

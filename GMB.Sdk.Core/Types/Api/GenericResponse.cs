@@ -136,8 +136,8 @@ namespace GMB.Sdk.Core.Types.Api
         public
         GenericResponse(long? objectId = null, string? message = null)
         {
-            this.ObjectId = objectId;
-            this.Message = message.Trim();
+            ObjectId = objectId;
+            Message = message.Trim();
         }
 
         /// <summary>
@@ -149,9 +149,9 @@ namespace GMB.Sdk.Core.Types.Api
         public
         GenericResponse(long rescode, string message, long objectId)
         {
-            this.Rescode = rescode;
-            this.Message = message.Trim();
-            this.ObjectId = objectId;
+            Rescode = rescode;
+            Message = message.Trim();
+            ObjectId = objectId;
         }
     };
 
@@ -177,6 +177,6 @@ namespace GMB.Sdk.Core.Types.Api
         /// </summary>
         /// <param name="responses"></param>
         public
-        GenericResponses(List<GenericResponse> responses) => this.Responses = responses;
+        GenericResponses(List<GenericResponse> responses) => Responses = responses;
     };
 }

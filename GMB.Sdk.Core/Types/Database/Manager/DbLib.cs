@@ -1,7 +1,6 @@
-﻿using System.Data.SqlClient;
-using System.Runtime.CompilerServices;
-using GMB.Sdk.Core.Types.Database.Models;
+﻿using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
+using System.Data.SqlClient;
 
 namespace GMB.Sdk.Core.Types.Database.Manager
 {
@@ -29,8 +28,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             try
             {
                 Connection.Open();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine("Couldn't connect to DB");
                 System.Diagnostics.Debug.WriteLine(e.Message);
@@ -47,8 +45,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             try
             {
                 Connection.Close();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 System.Diagnostics.Debug.WriteLine("Couldn't disconnect from DB");
                 System.Diagnostics.Debug.WriteLine(e.Message);
@@ -101,14 +98,13 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 using SqlDataReader reader = cmd.ExecuteReader();
 
 
-                List<string> categories = new();
+                List<string> categories = [];
 
                 while (reader.Read())
                     categories.Add(reader.GetString(0));
 
                 return categories;
-            }
-            catch (Exception)
+            } catch (Exception)
             {
                 throw;
             }
@@ -125,7 +121,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 using SqlCommand cmd = new(selectCommand, Connection);
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+                return reader.Read() ? reader.GetInt32(0) : null;
 
             } catch (Exception e)
             {
@@ -175,8 +171,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@TextSearch", GetValueOrDefault(businessUrl.TextSearch));
                 cmd.Parameters.AddWithValue("@UrlEncoded", businessUrl.UrlEncoded);
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception("Error while creating BU", e);
             }
@@ -192,11 +187,12 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// <returns>List of Bussiness Agent</returns>
         public List<BusinessAgent> GetBusinessAgentListByUrlState(UrlState urlState, int? entries)
         {
-            List<BusinessAgent> businessAgentList = new();
+            List<BusinessAgent> businessAgentList = [];
             try
             {
                 string table = "";
-                table = urlState switch {
+                table = urlState switch
+                {
                     UrlState.NEW => "vBUSINESS_URL_NEW",
                     UrlState.UPDATED => "vBUSINESS_URL_UPDATED",
                     UrlState.NO_CATEGORY => "vBUSINESS_URL_NO_CATEGORY",
@@ -231,7 +227,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// <returns>List of Business Agent</returns>
         public List<BusinessAgent> GetBusinessAgentNetworkListByUrlList(List<string> urlList, bool isNetwork, bool isIndependant)
         {
-            List<BusinessAgent> businessAgentList = new();
+            List<BusinessAgent> businessAgentList = [];
             string urlEncoded;
             string table = "vBUSINESS_PROFILE";
 
@@ -256,8 +252,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         BusinessAgent business = new(reader.GetString(0), reader.GetString(1), reader.GetString(2));
                         businessAgentList.Add(business);
                     }
-                }
-                catch (Exception e)
+                } catch (Exception e)
                 {
                     throw new Exception($"Error getting BA list (network) by url list", e);
                 }
@@ -282,8 +277,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                     return reader.GetString(0);
 
                 return null;
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error getting BU guid with url encoded = [{urlEncoded}]", e);
             }
@@ -329,8 +323,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(DateTime.UtcNow));
                 cmd.Parameters.AddWithValue("@Guid", guid);
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error updating BP with guid = [{guid}] and state = [{state}]", e);
             }
@@ -350,8 +343,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 using SqlCommand cmd = new(deleteCommand, Connection);
                 cmd.Parameters.AddWithValue("@Guid", guid);
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error deleting BU with guid = [{guid}]", e);
             }
@@ -374,8 +366,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 return reader.Read();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error checking if BU exists with url encoded = [{urlEncoded}]", e);
             }
@@ -424,8 +415,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@UrlPlace", GetValueOrDefault(businessProfile.PlaceUrl));
                 cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(businessProfile.TelInt));
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error creating BP with idEtab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
             }
@@ -440,21 +430,23 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// <returns>List of Business Agent</returns>
         public List<BusinessAgent> GetBusinessAgentList(GetBusinessListRequest request)
         {
-            List<BusinessAgent> businessUrlList = new();
+            List<BusinessAgent> businessUrlList = [];
             string table = "vBUSINESS_PROFILE";
             string categoryFilter = "";
             string brand = "";
 
-            if (request.IsNetwork) {
+            if (request.IsNetwork)
+            {
                 table = "vBUSINESS_PROFILE_RESEAU";
                 if (request.Brand != null)
                     brand = " AND MARQUE = '" + request.Brand + "'";
             }
-                
+
             if (request.IsIndependant)
                 table = "vBUSINESS_PROFILE_HORS_RESEAU";
 
-            switch (request.CategoryFamily) {
+            switch (request.CategoryFamily)
+            {
                 case CategoryFamily.UNIVERS:
                     categoryFilter = " AND UNIVERS = '" + request.Category + "'";
                     break;
@@ -491,8 +483,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 }
 
                 return businessUrlList;
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error getting BA list", e);
             }
@@ -502,13 +493,15 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="request"></param>
         /// <returns>List of Business</returns>
-        public List<DbBusinessProfile> GetBusinessList(GetBusinessListRequest request) {
-            List<DbBusinessProfile> businessList = new();
+        public List<DbBusinessProfile> GetBusinessList(GetBusinessListRequest request)
+        {
+            List<DbBusinessProfile> businessList = [];
             string table = "vBUSINESS_PROFILE";
             string categoryFilter = "";
             string brand = "";
 
-            if (request.IsNetwork) {
+            if (request.IsNetwork)
+            {
                 table = "vBUSINESS_PROFILE_RESEAU";
                 if (request.Brand != null)
                     brand = " AND MARQUE = " + request.Brand;
@@ -517,7 +510,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             if (request.IsIndependant)
                 table = "vBUSINESS_PROFILE_HORS_RESEAU";
 
-            switch (request.CategoryFamily) {
+            switch (request.CategoryFamily)
+            {
                 case CategoryFamily.UNIVERS:
                     categoryFilter = " AND UNIVERS = " + request.Category;
                     break;
@@ -534,7 +528,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                     break;
             }
 
-            try {
+            try
+            {
                 string selectCommand = "SELECT TOP (@Entries) * FROM " + table +
                     " WHERE PROCESSING = @Processing" +
                     brand +
@@ -546,7 +541,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                while (reader.Read()) {
+                while (reader.Read())
+                {
                     DbBusinessProfile businessProfile = new(
                         (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
                         reader["ID_ETAB"].ToString()!,
@@ -581,7 +577,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 }
 
                 return businessList;
-            } catch (Exception e) {
+            } catch (Exception e)
+            {
                 throw new Exception($"Error getting BP list", e);
             }
         }
@@ -607,8 +604,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 }
 
                 return null;
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error getting BA by url encoded = [{urlEncoded}]", e);
             }
@@ -618,21 +614,25 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="idEtab"></param>
         /// <returns>Business or null</returns>
-        public BusinessAgent? GetBusinessAgentByIdEtab(string idEtab) {
-            try {
+        public BusinessAgent? GetBusinessAgentByIdEtab(string idEtab)
+        {
+            try
+            {
                 string selectCommand = "SELECT FIRST_GUID, URL, ID_ETAB FROM vBUSINESS_PROFILE WHERE ID_ETAB = @IdEtab";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                if (reader.Read()) {
+                if (reader.Read())
+                {
                     BusinessAgent businessProfile = new(reader.GetString(0), reader.GetString(1), reader.GetString(2));
                     return businessProfile;
                 }
 
                 return null;
-            } catch (Exception e) {
+            } catch (Exception e)
+            {
                 throw new Exception($"Error getting BA by id etab = [{idEtab}]", e);
             }
         }
@@ -802,6 +802,32 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             }
         }
         /// <summary>
+        /// Get Id Etab by place Id.
+        /// </summary>
+        /// <param name="placeId"></param>
+        /// <returns>Id Etab or null if not found</returns>
+        public string? GetIdEtabByPlaceId(string placeId)
+        {
+            try
+            {
+                string selectCommand = "SELECT ID_ETAB FROM vBUSINESS_PROFILE WHERE PLACE_ID = @placeId";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@PLACE_ID", placeId);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    return reader.GetString(0);
+                }
+
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting id etab by place id = [{placeId}]", e);
+            }
+        }
+        /// <summary>
         /// Get Business Profile total.
         /// </summary>
         /// <returns>Total or null</returns>
@@ -814,7 +840,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+                return reader.Read() ? reader.GetInt32(0) : null;
 
             } catch (Exception e)
             {
@@ -834,7 +860,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+                return reader.Read() ? reader.GetInt32(0) : null;
 
             } catch (Exception e)
             {
@@ -878,8 +904,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
                 cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error updating BP with id_etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
             }
@@ -964,8 +989,10 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// Update Business profile address.
         /// </summary>
         /// <param name="businessProfile"></param>
-        public void UpdateBusinessProfileAddress(DbBusinessProfile businessProfile) {
-            try {
+        public void UpdateBusinessProfileAddress(DbBusinessProfile businessProfile)
+        {
+            try
+            {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET ADRESS = @GoogleAddress, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, A_SCORE = @AddressScore, DATE_UPDATE = @DateUpdate, A_COUNTRY = @Country WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
@@ -985,7 +1012,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessProfile.DateUpdate));
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.ExecuteNonQuery();
-            } catch (Exception e) {
+            } catch (Exception e)
+            {
                 throw new Exception($"Error updating BP address with id_etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
             }
         }
@@ -1004,8 +1032,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(DateTime.UtcNow));
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error updating BP processing state with id etab = [{idEtab}] and processing = [{processing}]", e);
             }
@@ -1025,8 +1052,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error updating BP status with id etab category = [{idEtab}] and status = [{businessStatus}]", e);
             }
@@ -1068,10 +1094,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                if (reader.Read()) return true;
-                else return false;
-            }
-            catch (Exception e)
+                if (reader.Read())
+                    return true;
+                else
+                    return false;
+            } catch (Exception e)
             {
                 throw new Exception($"Error checking BP exist with idEtab = [{idEtab}]", e);
             }
@@ -1120,8 +1147,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Score", GetValueOrDefault(businessScore.Score));
                 cmd.Parameters.AddWithValue("@NbReviews", GetValueOrDefault(businessScore.NbReviews));
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception("Error while creating BS", e);
             }
@@ -1213,8 +1239,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@ReviewReplyGoogleDate", GetValueOrDefault(businessReview.ReviewReplyGoogleDate));
                 cmd.Parameters.AddWithValue("@ReviewReplyDate", GetValueOrDefault(businessReview.ReviewReplyDate));
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception("Error while creating BR", e);
             }
@@ -1245,7 +1270,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.GetString(6),
                         new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0),
                             reader.IsDBNull(3) ? null : reader.GetInt32(3),
-                            reader.IsDBNull(1) ? false : reader.GetBoolean(1)),
+                            !reader.IsDBNull(1) && reader.GetBoolean(1)),
                         reader.GetInt32(2),
                         reader.IsDBNull(4) ? null : reader.GetString(4),
                         null,
@@ -1258,8 +1283,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 } else
                     return null;
 
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error getting BR with id etab = [{idEtab}] and id review = [{idReview}]", e);
             }
@@ -1278,7 +1302,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                List<DbBusinessReview> brList = new();
+                List<DbBusinessReview> brList = [];
 
                 while (reader.Read())
                 {
@@ -1287,7 +1311,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.GetString(6),
                         new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0),
                             reader.IsDBNull(3) ? null : reader.GetInt32(3),
-                            reader.IsDBNull(1) ? false : reader.GetBoolean(1)),
+                            !reader.IsDBNull(1) && reader.GetBoolean(1)),
                         reader.GetInt32(2),
                         reader.IsDBNull(4) ? null : reader.GetString(4),
                         null,
@@ -1317,7 +1341,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+                return reader.Read() ? reader.GetInt32(0) : null;
 
             } catch (Exception e)
             {
@@ -1337,7 +1361,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
-                return reader.Read() ? reader.GetInt32(0) : (int?)null;
+                return reader.Read() ? reader.GetInt32(0) : null;
 
             } catch (Exception e)
             {
@@ -1374,8 +1398,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                     cmd.Parameters.AddWithValue("@ReviewGoogleDate", GetValueOrDefault(review.ReviewGoogleDate));
                 }
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error updating BR with id etab = [{review.IdEtab}] and id review = [{review.Id}]", e);
             }
@@ -1394,8 +1417,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@ReplyGoogleDate", GetValueOrDefault(review.ReviewReplyGoogleDate));
                 cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
                 cmd.ExecuteNonQuery();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error updating BR with id etab = [{review.IdEtab}] and id review = [{review.Id}]", e);
             }
@@ -1457,8 +1479,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 return reader.Read();
-            }
-            catch (Exception e)
+            } catch (Exception e)
             {
                 throw new Exception($"Error while checking if BR exists with id etab = [{idEtab}] and id review = [{idReview}]", e);
             }

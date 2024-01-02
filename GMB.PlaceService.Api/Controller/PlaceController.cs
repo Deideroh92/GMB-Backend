@@ -1,12 +1,8 @@
 ﻿using GMB.Sdk.Core;
-using Serilog;
-using GMB.Sdk.Core.Types.Database.Models;
-using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Api;
-using Microsoft.AspNetCore.Mvc;
-using System.Reflection;
-using GMB.PlaceService.Api.API;
+using GMB.Sdk.Core.Types.Database.Models;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace GMB.PlaceService.Api.Controller
 {
@@ -18,8 +14,6 @@ namespace GMB.PlaceService.Api.Controller
     [Route("api/place-service")]
     public sealed class PlaceController : ControllerBase
     {
-        static readonly ILogger log = Log.ForContext(MethodBase.GetCurrentMethod().DeclaringType);
-
         /// <summary>
         /// Find GMB by query (should be name + address).
         /// </summary>
@@ -30,9 +24,9 @@ namespace GMB.PlaceService.Api.Controller
         public async Task<ActionResult<GetBusinessProfileListResponse>> GetPlaceByQuery(string query)
         {
 
-            List<DbBusinessProfile> businessProfiles = new();
-            List<DbBusinessScore> businessScores = new();
-            Place[]? places = await PlaceApi.GetPlacesByQuery(query);
+            List<DbBusinessProfile> businessProfiles = [];
+            List<DbBusinessScore> businessScores = [];
+            Place[]? places = await Core.PlaceService.GetPlacesByQuery(query);
 
             foreach (Place place in places)
             {
@@ -52,16 +46,16 @@ namespace GMB.PlaceService.Api.Controller
         [Authorize]
         public async Task<ActionResult<GetBusinessProfileListResponse>> GetPlacesByQueryList(List<string> queryList)
         {
-            List<DbBusinessProfile> businessProfiles = new();
-            List<DbBusinessScore> businessScores = new();
+            List<DbBusinessProfile> businessProfiles = [];
+            List<DbBusinessScore> businessScores = [];
 
             try
             {
-                foreach(string query in queryList)
+                foreach (string query in queryList)
                 {
-                    Place[]? places = await PlaceApi.GetPlacesByQuery(query);
+                    Place[]? places = await Core.PlaceService.GetPlacesByQuery(query);
 
-                    if (places != null && places.Any())
+                    if (places != null && places.Length != 0)
                     {
                         DbBusinessProfile? bp = ToolBox.PlaceToBP(places[0]);
                         if (bp != null)
@@ -86,7 +80,7 @@ namespace GMB.PlaceService.Api.Controller
         {
             try
             {
-                Place? place = await PlaceApi.GetPlaceByPlaceId(placeId);
+                Place? place = await Core.PlaceService.GetPlaceByPlaceId(placeId);
                 if (place != null)
                 {
                     DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
@@ -110,12 +104,12 @@ namespace GMB.PlaceService.Api.Controller
         {
             try
             {
-                List<DbBusinessProfile> bpList = new();
-                List<DbBusinessScore> bsList = new();
+                List<DbBusinessProfile> bpList = [];
+                List<DbBusinessScore> bsList = [];
 
                 foreach (string placeId in placeIds)
                 {
-                    Place? place = await PlaceApi.GetPlaceByPlaceId(placeId);
+                    Place? place = await Core.PlaceService.GetPlaceByPlaceId(placeId);
                     if (place != null)
                     {
                         DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
@@ -142,13 +136,13 @@ namespace GMB.PlaceService.Api.Controller
         {
             try
             {
-                string? placeId = await PlaceApi.GetPlaceIdByQuery(query);
+                string? placeId = await Core.PlaceService.GetPlaceIdByQuery(query);
                 return new GetPlaceIdResponse(placeId);
             } catch (Exception ex)
             {
                 return GetPlaceIdResponse.Exception(ex.Message);
             }
-            
+
         }
     }
 }

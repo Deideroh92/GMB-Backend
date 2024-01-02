@@ -37,7 +37,7 @@
             {
                 Score = null;
                 NbReviews = null;
-            }  
+            }
         }
         #endregion
     }

@@ -1,14 +1,13 @@
-﻿using Newtonsoft.Json;
-using System.Security.Cryptography;
-using System.Text;
+﻿using GMB.Sdk.Core.Types.Api;
+using GMB.Sdk.Core.Types.Database.Models;
+using Newtonsoft.Json;
 using OpenQA.Selenium;
 using System.Collections.ObjectModel;
-using System.Security.Authentication;
-using GMB.Sdk.Core.Types.Database.Models;
-using GMB.Sdk.Core.Types.Api;
 using System.Reflection;
 using System.Runtime.InteropServices;
-using GMB.Sdk.Core.Types.Models;
+using System.Security.Authentication;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace GMB.Sdk.Core
 {
@@ -25,7 +24,6 @@ namespace GMB.Sdk.Core
         #endregion
 
         #region Local
-
         /// <summary>
         /// Encode a string.
         /// </summary>
@@ -33,9 +31,8 @@ namespace GMB.Sdk.Core
         /// <returns>The input string encoded.</returns>
         public static string ComputeMd5Hash(string message)
         {
-            using MD5 md5 = MD5.Create();
             byte[] input = Encoding.Default.GetBytes(message.ToUpper());
-            byte[] hash = md5.ComputeHash(input);
+            byte[] hash = MD5.HashData(input);
 
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
@@ -48,7 +45,7 @@ namespace GMB.Sdk.Core
                 place.PlaceId,
                 ComputeMd5Hash(place.PlaceId),
                 Guid.NewGuid().ToString("N"),
-                place.DisplayName?.Text,
+                place.DisplayName.Text,
                 null,
                 place.ShortFormattedAddress,
                 place.ShortFormattedAddress,
@@ -63,13 +60,13 @@ namespace GMB.Sdk.Core
                 null,
                 place.NationalPhoneNumber,
                 place.WebsiteUri,
-                place.PlusCode?.GlobalCode ?? place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("plus_code"))?.LongText,
+                place.PlusCode.GlobalCode,
                 null,
                 (BusinessStatus)Enum.Parse(typeof(BusinessStatus), place.BusinessStatus!),
                 null,
                 place.AddressComponents?.FirstOrDefault((x) => x.Types.Contains("country"))?.LongText,
-                place.GoogleMapsUri,
-                place.Location?.Latitude + " , " + place.Location?.Longitude,
+                place.WebsiteUri,
+                place.Location.Latitude + " , " + place.Location.Longitude,
                 0,
                 null,
                 place.InternationalPhoneNumber
@@ -98,7 +95,8 @@ namespace GMB.Sdk.Core
         /// <returns>Real date from google date.</returns>
         public static DateTime ComputeDateFromGoogleDate(string? googleDate)
         {
-            if (googleDate == null) return DateTime.UtcNow;
+            if (googleDate == null)
+                return DateTime.UtcNow;
 
             string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "GoogleDate.json");
             string json = File.ReadAllText(path);
@@ -107,7 +105,7 @@ namespace GMB.Sdk.Core
             if (mapper.TryGetValue(googleDate, out string? value) && int.TryParse(value, out int jsonValue))
             {
                 DateTime currentDate = DateTime.UtcNow;
-                
+
 
                 if (googleDate.Contains("moi"))
                     return currentDate.AddMonths(-jsonValue);
@@ -125,6 +123,53 @@ namespace GMB.Sdk.Core
         }
 
         /// <summary>
+        /// Transform Place class to Business Profile Class
+        /// </summary>
+        /// <param name="place"></param>
+        /// <returns>Business Profile</returns>
+        public static DbBusinessProfile? PlaceToBP(Place place)
+        {
+            try
+            {
+                DbBusinessProfile? profile = new(
+                place.PlaceId,
+                ToolBox.ComputeMd5Hash(place.PlaceId),
+                Guid.NewGuid().ToString("N"),
+                place.DisplayName?.Text,
+                null,
+                place.FormattedAddress,
+                place.ShortFormattedAddress,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("postal_code") == true)?.LongText,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("locality") == true)?.LongText,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("postal_code") == true)?.LongText,
+                place.Location.Latitude,
+                place.Location.Longitude,
+                null,
+                null,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("street_number") == true)?.LongText,
+                null,
+                place.NationalPhoneNumber,
+                place.WebsiteUri,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("plus_code") == true)?.LongText,
+                null,
+                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), place.BusinessStatus!),
+                null,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("country") == true)?.LongText,
+                place.GoogleMapsUri,
+                place.Location?.Latitude + " , " + place.Location?.Longitude,
+                0,
+                null,
+                place.InternationalPhoneNumber
+                );
+                return profile;
+            } catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Same as FindElement only returns null when not found instead of an exception.
         /// </summary>
         /// <param name="by">The search string for finding element</param>
@@ -136,8 +181,7 @@ namespace GMB.Sdk.Core
                 try
                 {
                     return driver.FindElement(item);
-                }
-                catch (NoSuchElementException)
+                } catch (NoSuchElementException)
                 {
                     continue;
                 }
@@ -157,8 +201,7 @@ namespace GMB.Sdk.Core
                 try
                 {
                     return webElement.FindElement(item);
-                }
-                catch (NoSuchElementException)
+                } catch (NoSuchElementException)
                 {
                     continue;
                 }
@@ -178,8 +221,7 @@ namespace GMB.Sdk.Core
                 try
                 {
                     return driver.FindElements(item);
-                }
-                catch (NoSuchElementException)
+                } catch (NoSuchElementException)
                 {
                     continue;
                 }
@@ -199,8 +241,7 @@ namespace GMB.Sdk.Core
                 try
                 {
                     return webElement.FindElements(item);
-                }
-                catch (NoSuchElementException)
+                } catch (NoSuchElementException)
                 {
                     continue;
                 }
@@ -214,7 +255,8 @@ namespace GMB.Sdk.Core
         /// </summary>
         /// <param name="elements">Current element</param>
         /// <returns>Returns T/F depending on if element is defined or null.</returns>
-        public static bool Exists<T>(T elements) {
+        public static bool Exists<T>(T elements)
+        {
             return elements != null;
         }
 
@@ -223,23 +265,28 @@ namespace GMB.Sdk.Core
         /// </summary>
         /// <param name="address"></param>
         /// <returns>addressResponse object if adress found or null.</returns>
-        public static async Task<AddressApiResponse?> ApiCallForAddress(string address) {
+        public static async Task<AddressApiResponse?> ApiCallForAddress(string address)
+        {
             using HttpClientHandler handler = new();
             handler.SslProtocols = SslProtocols.Tls12;
             using HttpClient client = new(handler);
 
             string apiUrl = $"https://api-adresse.data.gouv.fr/search/?q={Uri.EscapeDataString(address)}";
-            string[] types = { "housenumber", "street", "locality", "municipality" };
-            foreach (string type in types) {
-                try {
+            string[] types = ["housenumber", "street", "locality", "municipality"];
+            foreach (string type in types)
+            {
+                try
+                {
                     HttpResponseMessage response = await client.GetAsync(apiUrl + $"&type={type}");
                     string responseBody = await response.Content.ReadAsStringAsync();
                     AddressApiResponse? addressResponse = AddressApiResponse.FromJson(responseBody);
 
-                    if (addressResponse?.Features?.Length > 0) {
+                    if (addressResponse?.Features?.Length > 0)
+                    {
                         return addressResponse;
                     }
-                } catch (Exception) {
+                } catch (Exception)
+                {
                     continue;
                 }
             }
@@ -252,9 +299,10 @@ namespace GMB.Sdk.Core
         /// <param name="business"></param>
         /// <param name="address"></param>
         /// <returns>Business with address updated</returns>
-        public static DbBusinessProfile InsertApiAddressInBusiness(DbBusinessProfile business, AddressApiResponse address) {
-            business.Lon = (double?)address.Features[0]?.Geometry?.Coordinates[0];
-            business.Lat = (double?)address.Features[0]?.Geometry?.Coordinates[1];
+        public static DbBusinessProfile InsertApiAddressInBusiness(DbBusinessProfile business, AddressApiResponse address)
+        {
+            business.Lon = (address.Features[0]?.Geometry?.Coordinates[0]);
+            business.Lat = (address.Features[0]?.Geometry?.Coordinates[1]);
             business.City = address.Features[0]?.Properties?.City;
             business.PostCode = address.Features[0]?.Properties?.Postcode;
             business.CityCode = address.Features[0]?.Properties?.CityCode;
@@ -270,20 +318,21 @@ namespace GMB.Sdk.Core
         /// <summary>
         /// Breaking hours, when the program needs to pause.
         /// </summary>
-        public static void BreakingHours() {
+        public static void BreakingHours()
+        {
             DateTime actualTime = DateTime.UtcNow;
 
             // Breaking hours
             TimeSpan heureDebut = new(1, 0, 0); // 1AM
             TimeSpan heureFin = new(3, 0, 0); // 3AM
 
-            while (actualTime.TimeOfDay >= heureDebut && actualTime.TimeOfDay < heureFin) {
+            while (actualTime.TimeOfDay >= heureDebut && actualTime.TimeOfDay < heureFin)
+            {
                 // Pausing program for 1 hour
                 Thread.Sleep(3600000);
                 actualTime = DateTime.UtcNow;
             }
         }
-
         #endregion
     }
 }
