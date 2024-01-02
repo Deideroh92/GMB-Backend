@@ -1,14 +1,14 @@
-name: Build and deploy .NET Core application to Web App vasano-business-service
+name: Build and deploy .NET Core application to Web App vasano-place-service
 on:
   push:
     branches:
     - main
 env:
-  AZURE_WEBAPP_NAME: vasano-business-service
-  AZURE_WEBAPP_PACKAGE_PATH: GMB.BusinessService.Api\published
+  AZURE_WEBAPP_NAME: vasano-place-service
+  AZURE_WEBAPP_PACKAGE_PATH: GMB.PlaceService.Api\published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
-  WORKING_DIRECTORY: GMB.BusinessService.Api
+  WORKING_DIRECTORY: GMB.PlaceService.Api
 jobs:
   build:
     runs-on: windows-latest
@@ -44,5 +44,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.azure_business_service }}
+        publish-profile: ${{ secrets.vasano_place_service_0E86 }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
