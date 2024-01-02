@@ -24,8 +24,7 @@ jobs:
       - name: Check for Changes
         id: check_changes
         run: |
-          changes=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep "^${{ env.WORKING_DIRECTORY }}/" || true)
-          if [ -n "$changes" ]; then
+          if [ $(git diff --name-only "${{ github.sha }}^" "${{ github.sha }}" | grep "^${{ env.WORKING_DIRECTORY }}/" | wc -l) -gt 0 ]; then
             echo "::set-output name=changes::true"
           else
             echo "::set-output name=changes::false"
@@ -61,8 +60,7 @@ jobs:
       - name: Check for Changes (Deployment)
         id: check_changes_deploy
         run: |
-          changes=$(git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep "^${{ env.WORKING_DIRECTORY }}/" || true)
-          if [ -n "$changes" ]; then
+          if [ $(git diff --name-only "${{ github.sha }}^" "${{ github.sha }}" | grep "^${{ env.WORKING_DIRECTORY }}/" | wc -l) -gt 0 ]; then
             echo "::set-output name=changes::true"
           else
             echo "::set-output name=changes::false"
