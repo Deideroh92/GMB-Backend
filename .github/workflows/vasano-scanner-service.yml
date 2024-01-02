@@ -1,4 +1,4 @@
-name: Build and deploy Business Service
+name: Build and deploy .NET Core application to Web App vasano-scanner-service
 
 on:
   push:
@@ -6,11 +6,11 @@ on:
     - main
 
 env:
-  AZURE_WEBAPP_NAME: vasano-business-service
-  AZURE_WEBAPP_PACKAGE_PATH: GMB.BusinessService.Api\published
+  AZURE_WEBAPP_NAME: vasano-scanner-service
+  AZURE_WEBAPP_PACKAGE_PATH: GMB.Scanner.Api\publish
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
-  WORKING_DIRECTORY: GMB.BusinessService.Api
+  WORKING_DIRECTORY: GMB.Scanner.Api
 
 jobs:
   build:
@@ -66,5 +66,5 @@ jobs:
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.azure_business_service }}
+        publish-profile: ${{ secrets.vasano_scanner_service }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}

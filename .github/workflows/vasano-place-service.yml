@@ -1,14 +1,17 @@
-name: Build and deploy .NET Core application to Web App vasano-place-service
+name: Build and deploy Place Service
+
 on:
   push:
     branches:
     - main
+
 env:
   AZURE_WEBAPP_NAME: vasano-place-service
   AZURE_WEBAPP_PACKAGE_PATH: GMB.PlaceService.Api\published
   CONFIGURATION: Release
   DOTNET_CORE_VERSION: 8.0.x
   WORKING_DIRECTORY: GMB.PlaceService.Api
+
 jobs:
   build:
     runs-on: windows-latest
@@ -26,11 +29,21 @@ jobs:
       run: dotnet test "${{ env.WORKING_DIRECTORY }}" --no-build
     - name: Publish
       run: dotnet publish "${{ env.WORKING_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+    - name: Check for Changes
+      id: check_changes
+      run: |
+        if git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep '^${{ env.WORKING_DIRECTORY }}/'; then
+          echo "::set-output name=changes::true"
+        else
+          echo "::set-output name=changes::false"
+        fi
     - name: Publish Artifacts
+      if: steps.check_changes.outputs.changes == 'true'
       uses: actions/upload-artifact@v3
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
   deploy:
     runs-on: windows-latest
     needs: build
@@ -40,9 +53,18 @@ jobs:
       with:
         name: webapp
         path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Check for Changes (Deployment)
+      id: check_changes_deploy
+      run: |
+        if git diff --name-only ${{ github.sha }}^ ${{ github.sha }} | grep '^${{ env.WORKING_DIRECTORY }}/'; then
+          echo "::set-output name=changes::true"
+        else
+          echo "::set-output name=changes::false"
+        fi
     - name: Deploy to Azure WebApp
+      if: steps.check_changes_deploy.outputs.changes == 'true'
       uses: azure/webapps-deploy@v2
       with:
         app-name: ${{ env.AZURE_WEBAPP_NAME }}
-        publish-profile: ${{ secrets.vasano_place_service_0E86 }}
+        publish-profile: ${{ secrets.vasano_place_service }}
         package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
