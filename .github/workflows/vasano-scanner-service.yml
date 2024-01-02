@@ -1,4 +1,4 @@
-name: Build and deploy .NET Core application to Web App vasano-scanner-service
+name: Build and deploy Scanner Service
 
 on:
   push:
