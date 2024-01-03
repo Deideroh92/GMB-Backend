@@ -18,8 +18,6 @@ namespace GMB.Sdk.Core.Types.Models
         /// </summary>
         public SeleniumDriver(bool headless = true)
         {
-            string chromeDriverPath = Path.Combine(Environment.GetEnvironmentVariable("HOME")!, "site", "wwwroot", "chromedriver", "chromedriver.exe");
-
             try
             {
                 ChromeOptions chromeOptions = new();
@@ -32,7 +30,7 @@ namespace GMB.Sdk.Core.Types.Models
                     chromeOptions.AddArguments("--disable-dev-shm-usage");
                 }
                 new DriverManager().SetUpDriver(new ChromeConfig());
-                WebDriver = new ChromeDriver(chromeDriverPath, chromeOptions);
+                WebDriver = new ChromeDriver(chromeOptions);
             } catch (Exception)
             {
                 throw new Exception("Failed initializing driver");

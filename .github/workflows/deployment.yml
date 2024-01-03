@@ -27,9 +27,62 @@ jobs:
         dotnet build --configuration Release
         dotnet test --no-restore
 
-    - name: Publish Microservices to Azure
-      run: |
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name vasano-business-service --src GMB.BusinessService.Api/bin/Release/net8.0/publish.zip
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name vasano-place-service --src GMB.PlaceService.Api/bin/Release/net8.0/publish.zip
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name vasano-scanner-service --src GMB.ScannerService.Api/bin/Release/net8.0/publish.zip
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name vasano-user-service --src GMB.UserService.Api/bin/Release/net8.0/publish.zip
+    deploy-business-service:
+        needs: build
+        runs-on: windows-latest
+
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+
+        - name: Deploy Business Service
+          uses: azure/webapps-deploy@v2
+          with:
+            app-name: vasano-business-service
+            publish-profile: ${{ secrets.azure_business_service }}
+            package: GMB.BusinessService.Api/bin/Release/netcoreapp3.1/publish.zip
+
+      deploy-place-service:
+        needs: build
+        runs-on: windows-latest
+
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+
+        - name: Deploy Place Service
+          uses: azure/webapps-deploy@v2
+          with:
+            app-name: vasano-place-service
+            publish-profile: ${{ secrets.azure_place_service }}
+            package: GMB.PlaceService.Api/bin/Release/netcoreapp3.1/publish.zip
+
+      deploy-scanner-service:
+        needs: build
+        runs-on: windows-latest
+
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+
+        - name: Deploy Scanner Service
+          uses: azure/webapps-deploy@v2
+          with:
+            app-name: vasano-scanner-service
+            publish-profile: ${{ secrets.azure_scanner_service }}
+            package: GMB.ScannerService.Api/bin/Release/netcoreapp3.1/publish.zip
+
+      deploy-user-service:
+        needs: build
+        runs-on: windows-latest
+
+        steps:
+        - name: Checkout Repository
+          uses: actions/checkout@v2
+
+        - name: Deploy User Service
+          uses: azure/webapps-deploy@v2
+          with:
+            app-name: vasano-user-service
+            publish-profile: ${{ secrets.azure_user_service }}
+            package: GMB.UserService.Api/bin/Release/netcoreapp3.1/publish.zip
