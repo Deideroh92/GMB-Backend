@@ -1,0 +1,129 @@
+name: Build and deploy Microservices
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: windows-latest
+    env:
+      AZURE_WEBAPP_NAME: vasano-business-service
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
+      CONFIGURATION: Release
+      DOTNET_CORE_VERSION: 8.0.x
+      SOLUTION_DIRECTORY: GMB-Backend
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+
+      - name: Check for Changes
+        id: check_changes
+        run: |
+          $changes = $(git diff --name-only HEAD^ HEAD | wc -l)
+          echo "::set-output name=changes::$(($changes -gt 0))"
+
+      - name: Restore
+        if: steps.check_changes.outputs.changes == 'true'
+        run: dotnet restore "${{ env.SOLUTION_DIRECTORY }}"
+
+      - name: Build Solution
+        if: steps.check_changes.outputs.changes == 'true'
+        run: dotnet build "${{ env.SOLUTION_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+
+      - name: Test Solution
+        if: steps.check_changes.outputs.changes == 'true'
+        run: dotnet test "${{ env.SOLUTION_DIRECTORY }}" --no-build
+
+      - name: Publish Artifacts
+        if: steps.check_changes.outputs.changes == 'true'
+        run: dotnet publish "${{ env.SOLUTION_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+
+  deploy_business_service:
+    runs-on: windows-latest
+    needs: build_and_deploy
+    env:
+      AZURE_WEBAPP_NAME: vasano-business-service
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\GMB.BusinessService.Api\publish
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: webapp
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Deploy to Azure WebApp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.azure_business_service }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+  deploy_user_service:
+    runs-on: windows-latest
+    needs: build_and_deploy
+    env:
+      AZURE_WEBAPP_NAME: vasano-user-service
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\GMB.UserService.Api\publish
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: webapp
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Deploy to Azure WebApp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.vasano_user_service }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+  deploy_place_service:
+    runs-on: windows-latest
+    needs: build_and_deploy
+    env:
+      AZURE_WEBAPP_NAME: vasano-place-service
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\GMB.PlaceService.Api\publish
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: webapp
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Deploy to Azure WebApp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.vasano_place_service }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+  deploy_scanner_service:
+    runs-on: windows-latest
+    needs: build_and_deploy
+    env:
+      AZURE_WEBAPP_NAME: vasano-scanner-service
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\GMB.Scanner.Api\publish
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v3
+        with:
+          name: webapp
+          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Deploy to Azure WebApp
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.vasano_scanner_service }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
