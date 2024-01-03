@@ -52,12 +52,6 @@ jobs:
       AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: webapp
-          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-
       - name: Deploy to Azure WebApp
         uses: azure/webapps-deploy@v2
         with:
@@ -73,12 +67,6 @@ jobs:
       AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: webapp
-          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-
       - name: Deploy to Azure WebApp
         uses: azure/webapps-deploy@v2
         with:
@@ -94,12 +82,6 @@ jobs:
       AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: webapp
-          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-
       - name: Deploy to Azure WebApp
         uses: azure/webapps-deploy@v2
         with:
@@ -115,12 +97,6 @@ jobs:
       AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
 
     steps:
-      - name: Download artifact from build job
-        uses: actions/download-artifact@v3
-        with:
-          name: webapp
-          path: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-
       - name: Deploy to Azure WebApp
         uses: azure/webapps-deploy@v2
         with:
