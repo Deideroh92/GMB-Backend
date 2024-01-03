@@ -49,7 +49,7 @@ jobs:
     needs: build_and_deploy
     env:
       AZURE_WEBAPP_NAME: vasano-business-service
-      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\GMB.BusinessService.Api\publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
 
     steps:
       - name: Download artifact from build job
@@ -70,7 +70,7 @@ jobs:
     needs: build_and_deploy
     env:
       AZURE_WEBAPP_NAME: vasano-user-service
-      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\GMB.UserService.Api\publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
 
     steps:
       - name: Download artifact from build job
@@ -91,7 +91,7 @@ jobs:
     needs: build_and_deploy
     env:
       AZURE_WEBAPP_NAME: vasano-place-service
-      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\GMB.PlaceService.Api\publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
 
     steps:
       - name: Download artifact from build job
@@ -112,7 +112,7 @@ jobs:
     needs: build_and_deploy
     env:
       AZURE_WEBAPP_NAME: vasano-scanner-service
-      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\GMB.Scanner.Api\publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend\publish
 
     steps:
       - name: Download artifact from build job
