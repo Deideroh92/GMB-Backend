@@ -1,4 +1,4 @@
-name: Build and Deploy Microservices
+name: Deploy application on Azure
 
 on:
   push:
@@ -6,91 +6,61 @@ on:
       - main
 
 jobs:
-  build_and_deploy:
+  build:
     runs-on: windows-latest
-    env:
-      AZURE_WEBAPP_NAME_BUSINESS_SERVICE: vasano-business-service
-      AZURE_WEBAPP_NAME_PLACE_SERVICE: vasano-place-service
-      AZURE_WEBAPP_NAME_SCANNER_SERVICE: vasano-scanner-service
-      AZURE_WEBAPP_NAME_USER_SERVICE: vasano-user-service
-      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend/publish
-      CONFIGURATION: Release
-      DOTNET_CORE_VERSION: 8.0.x
-      SOLUTION_DIRECTORY: ./GMB-Backend.sln
 
     steps:
-      - uses: actions/checkout@v4
+    - name: Checkout Repository
+      uses: actions/checkout@v2
 
-      - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v2
+      with:
+        dotnet-version: '8.0.x'
 
-      - name: Restore
-        run: dotnet restore "${{ env.SOLUTION_DIRECTORY }}"
+    - name: Build and Test Microservices
+      run: |
+        cd GMB.BusinessService.Api
+        dotnet build --configuration Release
+        dotnet test --no-restore
 
-      - name: Build Solution
-        run: dotnet build "${{ env.SOLUTION_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
+        cd ../GMB.PlaceService.Api
+        dotnet build --configuration Release
+        dotnet test --no-restore
 
-      - name: Publish Artifacts
-        run: dotnet publish "${{ env.SOLUTION_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
+        cd ../GMB.ScannerService.Api
+        dotnet build --configuration Release
+        dotnet test --no-restore
 
-  deploy_business_service:
-    runs-on: windows-latest
-    needs: build_and_deploy
-    env:
-      AZURE_WEBAPP_NAME: ${{ AZURE_WEBAPP_NAME_BUSINESS_SERVICE }}
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
+        cd ../GMB.UserService.Api
+        dotnet build --configuration Release
+        dotnet test --no-restore
 
-    steps:
-      - name: Deploy to Azure WebApp (Business Service)
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.azure_business_service }}
-          package: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
+        cd ../GMB.Tests
+        dotnet build --configuration Release
+        dotnet test --no-restore
 
-  deploy_place_service:
-    runs-on: windows-latest
-    needs: build_and_deploy
-    env:
-      AZURE_WEBAPP_NAME: ${{ AZURE_WEBAPP_NAME_PLACE_SERVICE }}
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Build and Test SDK and Console Apps
+      run: |
+        cd GMB.Sdk.Core
+        dotnet build --configuration Release
+        dotnet test --no-restore
 
-    steps:
-      - name: Deploy to Azure WebApp (Place Service)
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.azure_place_service }}
-          package: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
+        cd ../GMB.Scanner.Agent
+        dotnet build --configuration Release
+        dotnet test --no-restore
 
-  deploy_scanner_service:
-    runs-on: windows-latest
-    needs: build_and_deploy
-    env:
-      AZURE_WEBAPP_NAME: ${{ AZURE_WEBAPP_NAME_SCANNER_SERVICE }}
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Publish Microservices to Azure
+      run: |
+        # Use the publish profiles you created in Visual Studio
+        # Replace <YourAzurePublishProfile> with the actual profile file names
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-Business-Service --src GMB.BusinessService.Api/bin/Release/net8.0/publish.zip
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-Place-Service --src GMB.PlaceService.Api/bin/Release/net8.0/publish.zip
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-Scanner-Service --src GMB.ScannerService.Api/bin/Release/net8.0/publish.zip
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-User-Service --src GMB.UserService.Api/bin/Release/net8.0/publish.zip
 
-    steps:
-      - name: Deploy to Azure WebApp (Scanner Service)
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.azure_scanner_service }}
-          package: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
-
-  deploy_user_service:
-    runs-on: windows-latest
-    needs: build_and_deploy
-    env:
-      AZURE_WEBAPP_NAME: ${{ AZURE_WEBAPP_NAME_USER_SERVICE }}
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
-
-    steps:
-      - name: Deploy to Azure WebApp (User Service)
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.azure_user_service }}
-          package: ${{ AZURE_WEBAPP_PACKAGE_PATH }}
+    - name: Publish SDK and Console Apps to Azure
+      run: |
+        # Replace <YourAzurePublishProfile> with the actual profile file names
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-SDK-Core --src GMB.Sdk.Core/bin/Release/net8.0/publish.zip
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-Scanner-Agent --src GMB.Scanner.Agent/bin/Release/net8.0/publish.zip
