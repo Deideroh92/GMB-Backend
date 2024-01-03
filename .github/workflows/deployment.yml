@@ -1,4 +1,4 @@
-name: Build and deploy Microservices
+name: Build and Deploy Microservices
 
 on:
   push:
@@ -9,14 +9,18 @@ jobs:
   build_and_deploy:
     runs-on: windows-latest
     env:
-      AZURE_WEBAPP_NAME: vasano-business-service
-      AZURE_WEBAPP_PACKAGE_PATH: ./publish
+      AZURE_WEBAPP_NAME_BUSINESS_SERVICE: vasano-business-service
+      AZURE_WEBAPP_NAME_PLACE_SERVICE: vasano-place-service
+      AZURE_WEBAPP_NAME_SCANNER_SERVICE: vasano-scanner-service
+      AZURE_WEBAPP_NAME_USER_SERVICE: vasano-user-service
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend/publish
       CONFIGURATION: Release
       DOTNET_CORE_VERSION: 8.0.x
       SOLUTION_DIRECTORY: ./GMB-Backend.sln
 
     steps:
       - uses: actions/checkout@v4
+
       - name: Setup .NET SDK
         uses: actions/setup-dotnet@v3
         with:
@@ -35,58 +39,58 @@ jobs:
     runs-on: windows-latest
     needs: build_and_deploy
     env:
-      AZURE_WEBAPP_NAME: vasano-business-service
-      AZURE_WEBAPP_PACKAGE_PATH: ./publish
+      AZURE_WEBAPP_NAME: ${{ env.AZURE_WEBAPP_NAME_BUSINESS_SERVICE }}
+      AZURE_WEBAPP_PACKAGE_PATH: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
     steps:
-      - name: Deploy to Azure WebApp
+      - name: Deploy to Azure WebApp (Business Service)
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
           publish-profile: ${{ secrets.azure_business_service }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
-  deploy_user_service:
-    runs-on: windows-latest
-    needs: build_and_deploy
-    env:
-      AZURE_WEBAPP_NAME: vasano-user-service
-      AZURE_WEBAPP_PACKAGE_PATH: ./publish
-
-    steps:
-      - name: Deploy to Azure WebApp
-        uses: azure/webapps-deploy@v2
-        with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.vasano_user_service }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
-
   deploy_place_service:
     runs-on: windows-latest
     needs: build_and_deploy
     env:
-      AZURE_WEBAPP_NAME: vasano-place-service
-      AZURE_WEBAPP_PACKAGE_PATH: ./publish
+      AZURE_WEBAPP_NAME: ${{ env.AZURE_WEBAPP_NAME_PLACE_SERVICE }}
+      AZURE_WEBAPP_PACKAGE_PATH: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
     steps:
-      - name: Deploy to Azure WebApp
+      - name: Deploy to Azure WebApp (Place Service)
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.vasano_place_service }}
+          publish-profile: ${{ secrets.azure_place_service }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
   deploy_scanner_service:
     runs-on: windows-latest
     needs: build_and_deploy
     env:
-      AZURE_WEBAPP_NAME: vasano-scanner-service
-      AZURE_WEBAPP_PACKAGE_PATH: ./publish
+      AZURE_WEBAPP_NAME: ${{ env.AZURE_WEBAPP_NAME_SCANNER_SERVICE }}
+      AZURE_WEBAPP_PACKAGE_PATH: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
 
     steps:
-      - name: Deploy to Azure WebApp
+      - name: Deploy to Azure WebApp (Scanner Service)
         uses: azure/webapps-deploy@v2
         with:
           app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          publish-profile: ${{ secrets.vasano_scanner_service }}
+          publish-profile: ${{ secrets.azure_scanner_service }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+  deploy_user_service:
+    runs-on: windows-latest
+    needs: build_and_deploy
+    env:
+      AZURE_WEBAPP_NAME: ${{ env.AZURE_WEBAPP_NAME_USER_SERVICE }}
+      AZURE_WEBAPP_PACKAGE_PATH: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+    steps:
+      - name: Deploy to Azure WebApp (User Service)
+        uses: azure/webapps-deploy@v2
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.azure_user_service }}
           package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
