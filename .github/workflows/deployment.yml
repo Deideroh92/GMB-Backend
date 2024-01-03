@@ -22,26 +22,16 @@ jobs:
         with:
           dotnet-version: ${{ env.DOTNET_CORE_VERSION }}
 
-      - name: Check for Changes
-        id: check_changes
-        run: |
-          $changes = $(git diff --name-only HEAD^ HEAD | wc -l)
-          echo "::set-output name=changes::$(($changes -gt 0))"
-
       - name: Restore
-        if: steps.check_changes.outputs.changes == 'true'
         run: dotnet restore "${{ env.SOLUTION_DIRECTORY }}"
 
       - name: Build Solution
-        if: steps.check_changes.outputs.changes == 'true'
         run: dotnet build "${{ env.SOLUTION_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-restore
 
       - name: Test Solution
-        if: steps.check_changes.outputs.changes == 'true'
         run: dotnet test "${{ env.SOLUTION_DIRECTORY }}" --no-build
 
       - name: Publish Artifacts
-        if: steps.check_changes.outputs.changes == 'true'
         run: dotnet publish "${{ env.SOLUTION_DIRECTORY }}" --configuration ${{ env.CONFIGURATION }} --no-build --output "${{ env.AZURE_WEBAPP_PACKAGE_PATH }}"
 
   deploy_business_service:
