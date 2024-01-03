@@ -1,4 +1,4 @@
-name: Deploy application on Azure
+name: Deploy on Azure
 
 on:
   push:
@@ -18,49 +18,18 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Build and Test Microservices
+    - name: Build Solution and SDK Core
       run: |
-        cd GMB.BusinessService.Api
         dotnet build --configuration Release
         dotnet test --no-restore
 
-        cd ../GMB.PlaceService.Api
-        dotnet build --configuration Release
-        dotnet test --no-restore
-
-        cd ../GMB.ScannerService.Api
-        dotnet build --configuration Release
-        dotnet test --no-restore
-
-        cd ../GMB.UserService.Api
-        dotnet build --configuration Release
-        dotnet test --no-restore
-
-        cd ../GMB.Tests
-        dotnet build --configuration Release
-        dotnet test --no-restore
-
-    - name: Build and Test SDK and Console Apps
-      run: |
         cd GMB.Sdk.Core
-        dotnet build --configuration Release
-        dotnet test --no-restore
-
-        cd ../GMB.Scanner.Agent
         dotnet build --configuration Release
         dotnet test --no-restore
 
     - name: Publish Microservices to Azure
       run: |
-        # Use the publish profiles you created in Visual Studio
-        # Replace <YourAzurePublishProfile> with the actual profile file names
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-Business-Service --src GMB.BusinessService.Api/bin/Release/net8.0/publish.zip
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-Place-Service --src GMB.PlaceService.Api/bin/Release/net8.0/publish.zip
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-Scanner-Service --src GMB.ScannerService.Api/bin/Release/net8.0/publish.zip
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-User-Service --src GMB.UserService.Api/bin/Release/net8.0/publish.zip
-
-    - name: Publish SDK and Console Apps to Azure
-      run: |
-        # Replace <YourAzurePublishProfile> with the actual profile file names
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-SDK-Core --src GMB.Sdk.Core/bin/Release/net8.0/publish.zip
-        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name GMB-Scanner-Agent --src GMB.Scanner.Agent/bin/Release/net8.0/publish.zip
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name vasano-business-service --src GMB.BusinessService.Api/bin/Release/net8.0/publish.zip
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name vasano-place-service --src GMB.PlaceService.Api/bin/Release/net8.0/publish.zip
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name vasano-scanner-service --src GMB.ScannerService.Api/bin/Release/net8.0/publish.zip
+        az webapp deployment source config-zip --resource-group NOTE-GOOGLE --name vasano-user-service --src GMB.UserService.Api/bin/Release/net8.0/publish.zip
