@@ -10,7 +10,7 @@ jobs:
     runs-on: windows-latest
     env:
       AZURE_WEBAPP_NAME: vasano-business-service
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ github.workspace }}/GMB-Backend/publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend/publish
       CONFIGURATION: Release
       DOTNET_CORE_VERSION: 8.0.x
       SOLUTION_DIRECTORY: GMB-Backend
@@ -39,7 +39,7 @@ jobs:
     needs: build_and_deploy
     env:
       AZURE_WEBAPP_NAME: vasano-business-service
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ github.workspace }}/GMB-Backend/publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend/publish
 
     steps:
       - name: Deploy to Azure WebApp
@@ -54,7 +54,7 @@ jobs:
     needs: build_and_deploy
     env:
       AZURE_WEBAPP_NAME: vasano-user-service
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ github.workspace }}/GMB-Backend/publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend/publish
 
     steps:
       - name: Deploy to Azure WebApp
@@ -69,7 +69,7 @@ jobs:
     needs: build_and_deploy
     env:
       AZURE_WEBAPP_NAME: vasano-place-service
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ github.workspace }}/GMB-Backend/publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend/publish
 
     steps:
       - name: Deploy to Azure WebApp
@@ -84,7 +84,7 @@ jobs:
     needs: build_and_deploy
     env:
       AZURE_WEBAPP_NAME: vasano-scanner-service
-      AZURE_WEBAPP_PACKAGE_PATH: ${{ github.workspace }}/GMB-Backend/publish
+      AZURE_WEBAPP_PACKAGE_PATH: GMB-Backend/publish
 
     steps:
       - name: Deploy to Azure WebApp
