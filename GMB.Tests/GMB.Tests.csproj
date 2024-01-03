@@ -22,7 +22,7 @@
     <ProjectReference Include="..\GMB.BusinessService.Api\GMB.BusinessService.Api.csproj" />
     <ProjectReference Include="..\GMB.PlaceService.Api\GMB.PlaceService.Api.csproj" />
     <ProjectReference Include="..\GMB.Scanner.Agent\GMB.Scanner.Agent.csproj" />
-    <ProjectReference Include="..\GMB.Scanner.Api\GMB.ScannerService.Api.csproj" />
+    <ProjectReference Include="..\GMB.ScannerService.Api\GMB.ScannerService.Api.csproj" />
     <ProjectReference Include="..\GMB.Sdk.Core\GMB.Sdk.Core.csproj" />
   </ItemGroup>
 

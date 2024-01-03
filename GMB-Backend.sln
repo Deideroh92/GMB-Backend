@@ -15,7 +15,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.PlaceService.Api", "GMB
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.UserService.Api", "GMB.UserService.Api\GMB.UserService.Api.csproj", "{D58286BB-28A9-46F4-AA05-F4F98A5E7122}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.ScannerService.Api", "GMB.Scanner.Api\GMB.ScannerService.Api.csproj", "{6CA0CDC9-9C47-40D9-B61E-5E298BE3DDA7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GMB.ScannerService.Api", "GMB.ScannerService.Api\GMB.ScannerService.Api.csproj", "{CEFC855E-C745-43A8-A1A5-256726194486}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,10 +47,10 @@ Global
 		{D58286BB-28A9-46F4-AA05-F4F98A5E7122}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D58286BB-28A9-46F4-AA05-F4F98A5E7122}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D58286BB-28A9-46F4-AA05-F4F98A5E7122}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6CA0CDC9-9C47-40D9-B61E-5E298BE3DDA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6CA0CDC9-9C47-40D9-B61E-5E298BE3DDA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6CA0CDC9-9C47-40D9-B61E-5E298BE3DDA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6CA0CDC9-9C47-40D9-B61E-5E298BE3DDA7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CEFC855E-C745-43A8-A1A5-256726194486}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CEFC855E-C745-43A8-A1A5-256726194486}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CEFC855E-C745-43A8-A1A5-256726194486}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CEFC855E-C745-43A8-A1A5-256726194486}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
