@@ -23,10 +23,6 @@ jobs:
         dotnet build --configuration Release
         dotnet test --no-restore
 
-        cd GMB.Sdk.Core
-        dotnet build --configuration Release
-        dotnet test --no-restore
-
   deploy-business-service:
     needs: build
     runs-on: windows-latest
