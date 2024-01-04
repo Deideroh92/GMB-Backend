@@ -1,4 +1,5 @@
-﻿using GMB.Sdk.Core.Types.Database.Models;
+﻿using AngleSharp.Io;
+using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using System.Data.SqlClient;
 
@@ -580,6 +581,117 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             } catch (Exception e)
             {
                 throw new Exception($"Error getting BP list", e);
+            }
+        }
+        /// <summary>
+        /// Get Business smooth by place id.
+        /// </summary>
+        /// <param name="placeId"></param>
+        /// <returns>Business smooth</returns>
+        public BusinessProfileSmooth? GetBusinessSmoothByPlaceId(string placeId)
+        {
+            try
+            {
+                string selectCommand = "SELECT * FROM vBUSINESS_PROFILE WHERE PLACE_ID = @placeId";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@placeId", placeId);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    BusinessProfileSmooth businessProfile = new(
+                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
+                        reader["ID_ETAB"].ToString()!,
+                        reader["FIRST_GUID"].ToString()!,
+                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
+                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
+                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
+                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
+                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
+                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
+                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
+                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
+                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
+                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
+                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
+                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
+                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
+                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
+                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
+                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
+                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
+                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
+                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
+                        (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
+                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
+                        (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null
+                    );
+                    return businessProfile;
+                } else
+                    return null;
+                
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting BP smooth by place id", e);
+            }
+        }
+        /// <summary>
+        /// Get Business smooth by id etab.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        /// <returns>Business smooth</returns>
+        public BusinessProfileSmooth? GetBusinessSmoothByIdEtab(string idEtab)
+        {
+            try
+            {
+                    string selectCommand = "SELECT * FROM vBUSINESS_PROFILE WHERE ID_ETAB = @idEtab";
+
+                    using SqlCommand cmd = new(selectCommand, Connection);
+                    cmd.Parameters.AddWithValue("@idEtab", idEtab);
+                    cmd.CommandTimeout = 10000;
+                    using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    BusinessProfileSmooth businessProfile = new(
+                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
+                        reader["ID_ETAB"].ToString()!,
+                        reader["FIRST_GUID"].ToString()!,
+                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
+                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
+                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
+                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
+                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
+                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
+                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
+                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
+                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
+                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
+                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
+                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
+                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
+                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
+                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
+                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
+                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
+                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
+                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
+                        (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
+                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
+                        (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null
+                    );
+                    return businessProfile;
+                } else
+                    return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting BP smooth by id etab", e);
             }
         }
         /// <summary>

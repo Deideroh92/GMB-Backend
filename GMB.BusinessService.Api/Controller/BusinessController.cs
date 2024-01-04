@@ -72,37 +72,43 @@ namespace GMB.BusinessService.Api.Controller
             {
                 using DbLib db = new();
 
-                List<string> ids = [];
+                List<string> errorList = [];
+                List<string?> idEtabList = [];
 
                 foreach (DbBusinessProfile businessProfile in request.BusinessProfileList)
                 {
                     if (businessProfile.PlaceUrl == null)
                     {
-                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + " does not have place URL");
+                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + " does not have place URL");
+                        idEtabList.Add(null);
                         continue;
                     }
 
                     if (db.CheckBusinessProfileExistByIdEtab(businessProfile.IdEtab))
                     {
-                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" ID_ETAB exist in our DB");
+                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" ID_ETAB exist in our DB");
+                        idEtabList.Add(null);
                         continue;
                     }
 
                     if (businessProfile.PlaceId != null && db.CheckBusinessProfileExistByPlaceId(businessProfile.PlaceId))
                     {
-                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" PLACE_ID exist in our DB");
+                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" PLACE_ID exist in our DB");
+                        idEtabList.Add(null);
                         continue;
                     }
 
                     if (request.BusinessScoreList.Find(x => x.IdEtab == businessProfile.IdEtab) == null)
                     {
-                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + " does not have business score");
+                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + " does not have business score");
+                        idEtabList.Add(null);
                         continue;
                     }
 
                     if (businessProfile.PlaceUrl != null && db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)))
                     {
-                        ids.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" does have an existing URL [{businessProfile.PlaceUrl}] in DB");
+                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" does have an existing URL [{businessProfile.PlaceUrl}] in DB");
+                        idEtabList.Add(null);
                         continue;
                     }
 
@@ -112,11 +118,12 @@ namespace GMB.BusinessService.Api.Controller
                     db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl ?? "manually", "platform", ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl ?? "manually")));
                     db.CreateBusinessProfile(businessProfile);
                     db.CreateBusinessScore(request.BusinessScoreList.Find(x => x.IdEtab == businessProfile.IdEtab)!);
+                    idEtabList.Add(businessProfile.IdEtab);
                 }
 
-                ids.Add(request.BusinessProfileList.Count - ids.Count + "/" + request.BusinessProfileList.Count + " businesses treated.");
+                errorList.Add(request.BusinessProfileList.Count - errorList.Count + "/" + request.BusinessProfileList.Count + " businesses treated.");
 
-                return new CreateBusinessResponse(ids);
+                return new CreateBusinessResponse(errorList, idEtabList);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
@@ -167,7 +174,31 @@ namespace GMB.BusinessService.Api.Controller
             }
         }
         /// <summary>
-        /// Get BP by placeId.
+        /// Get BP by idEtab.
+        /// </summary>
+        /// <param name="idEtabList"></param>
+        [HttpPost("bp/id-etab-list")]
+        [Authorize]
+        public ActionResult<GetBusinessProfileSmoothListResponse> GetBusinessProfileSmoothListByIdEtab([FromBody] List<string> idEtabList)
+        {
+            try
+            {
+                using DbLib db = new();
+                List<BusinessProfileSmooth?> bpList = [];
+                foreach ( var idEtab in idEtabList )
+                {
+                    bpList.Add(db.GetBusinessSmoothByIdEtab(idEtab));
+                }
+
+                return new GetBusinessProfileSmoothListResponse(bpList);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetBusinessProfileSmoothListResponse.Exception($"Error getting business profile smooth list by id etab list : [{e.Message}]");
+            }
+        }
+        /// <summary>
+        /// Get BP smooth list by place id.
         /// </summary>
         /// <param name="placeId"></param>
         [HttpPost("bp/place-id")]
@@ -189,6 +220,30 @@ namespace GMB.BusinessService.Api.Controller
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
                 return GetBusinessProfileResponse.Exception($"Error getting business profile by place id : [{e.Message}]");
+            }
+        }
+        /// <summary>
+        /// Get BP smooth list by id etab.
+        /// </summary>
+        /// <param name="placeIdList"></param>
+        [HttpPost("bp/place-id-list")]
+        [Authorize]
+        public ActionResult<GetBusinessProfileSmoothListResponse> GetBusinessProfileSmoothListByPlaceId([FromBody] List<string> placeIdList)
+        {
+            try
+            {
+                using DbLib db = new();
+                List<BusinessProfileSmooth?> bpList = [];
+                foreach (var placeId in placeIdList)
+                {
+                    bpList.Add(db.GetBusinessSmoothByPlaceId(placeId));
+                }
+
+                return new GetBusinessProfileSmoothListResponse(bpList);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetBusinessProfileSmoothListResponse.Exception($"Error getting business profile smooth list by place id list : [{e.Message}]");
             }
         }
         /// <summary>
@@ -327,12 +382,56 @@ namespace GMB.BusinessService.Api.Controller
                 db.DeleteBusinessProfile(idEtab);
                 db.DeleteBusinessUrlByGuid(bp.FirstGuid);
 
-                return new GenericResponse(null, $"BP with idEtab = [{idEtab}]");
+                return new GenericResponse(null, $"Deleted BP with idEtab = [{idEtab}]");
 
             } catch (Exception e)
             {
                 Log.Error(e, $"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
                 return GenericResponse.Exception($"An exception occurred while deleting BP with idEtab = [{idEtab}] : {e.Message}");
+            }
+        }
+        /// <summary>
+        /// Delete business profile list (with score, reviews feeling and reviews).
+        /// </summary>
+        /// <param name="idEtabList"></param>
+        [HttpPost("bp/delete-list")]
+        [Authorize]
+        public ActionResult<GenericResponse> DeleteBusinessProfileList([FromBody] List<string> idEtabList)
+        {
+            try
+            {
+                DbLib db = new();
+                List<DbBusinessProfile> bpList = [];
+
+                foreach(string idEtab in idEtabList)
+                {
+                    DbBusinessProfile? bp = db.GetBusinessByIdEtab(idEtab);
+
+                    if (bp == null)
+                        return GenericResponse.Exception($"Business Profile with idEtab=[{idEtab}] doesn't exist");
+                       
+                    bpList.Add(bp);
+                }
+
+                foreach(DbBusinessProfile bp in bpList)
+                {
+                    List<DbBusinessReview> businessReviews = db.GetBusinessReviewsList(bp.IdEtab);
+                    foreach (DbBusinessReview review in businessReviews)
+                    {
+                        db.DeleteBusinessReviewsFeeling(review.IdReview);
+                    }
+                    db.DeleteBusinessReviews(bp.IdEtab);
+                    db.DeleteBusinessScore(bp.IdEtab);
+                    db.DeleteBusinessProfile(bp.IdEtab);
+                    db.DeleteBusinessUrlByGuid(bp.FirstGuid);
+                }
+
+                return new GenericResponse(null, $"BP list deleted sucessfully!");
+
+            } catch (Exception e)
+            {
+                Log.Error(e, $"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception($"An exception occurred while deleting BP list : {e.Message}");
             }
         }
         #endregion
