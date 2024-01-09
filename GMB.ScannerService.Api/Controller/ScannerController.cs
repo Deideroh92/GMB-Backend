@@ -1,4 +1,5 @@
 using GMB.Scanner.Agent.Models;
+using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
@@ -11,15 +12,17 @@ namespace GMB.ScannerService.Api.Controller
 {
     [ApiController]
     [Route("api/scanner-service")]
-    public class ScannerController : ControllerBase
+    public class ScannerController(AuthorizationPolicyService policyService) : ControllerBase
     {
+        private readonly AuthorizationPolicyService _policyService = policyService;
+
         /// <summary>
         /// Start Business Scanner
         /// </summary>
         /// <param name="request"></param>
         /// <returns></returns>
         [HttpPost("scanner/business")]
-        [Authorize]
+        [Authorize(Policy = "DevelopmentPolicy")]
         public async Task<ActionResult<GenericResponse>> StartBusinessScannerAsync([FromBody] BusinessScannerRequest request)
         {
             try

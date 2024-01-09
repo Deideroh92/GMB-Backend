@@ -400,7 +400,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Website", GetValueOrDefault(businessProfile.Website));
                 cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
                 cmd.Parameters.AddWithValue("@UrlPicture", GetValueOrDefault(businessProfile.PictureUrl));
-                cmd.Parameters.AddWithValue("@Processing", 9);
+                cmd.Parameters.AddWithValue("@Processing", 8);
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(businessProfile.Address));
                 cmd.Parameters.AddWithValue("@PostCode", GetValueOrDefault(businessProfile.PostCode));
