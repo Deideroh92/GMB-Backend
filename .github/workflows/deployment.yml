@@ -35,7 +35,7 @@ jobs:
       with:
         app-name: vasano-business-service
         publish-profile: ${{ secrets.azure_business_service }}
-        package: D:\a\GMB-Backend\GMB-Backend\GMB.BusinessService.Api\bin\Release\net8.0\GMB.BusinessService.Api.dll
+        package: '**/GMB.BusinessService.Api.dll'
 
   deploy-place-service:
     needs: build
@@ -50,7 +50,7 @@ jobs:
       with:
         app-name: vasano-place-service
         publish-profile: ${{ secrets.azure_place_service }}
-        package: D:\a\GMB-Backend\GMB-Backend\GMB.PlaceService.Api\bin\Release\net8.0\GMB.PlaceService.Api.dll
+        package: '**/GMB.PlaceService.Api.dll'
 
   deploy-scanner-service:
     needs: build
@@ -65,7 +65,7 @@ jobs:
       with:
         app-name: vasano-scanner-service
         publish-profile: ${{ secrets.azure_scanner_service }}
-        package: D:\a\GMB-Backend\GMB-Backend\GMB.ScannerService.Api\bin\Release\net8.0\GMB.ScannerService.Api.dll
+        package: '**/GMB.ScannerService.Api.dll'
 
   deploy-user-service:
     needs: build
@@ -80,4 +80,4 @@ jobs:
       with:
         app-name: vasano-user-service
         publish-profile: ${{ secrets.azure_user_service }}
-        package: D:\a\GMB-Backend\GMB-Backend\GMB.UserService.Api\bin\Release\net8.0\GMB.UserService.Api.dll
+        package: '**/GMB.UserService.Api.dll'
