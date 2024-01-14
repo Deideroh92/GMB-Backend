@@ -21,6 +21,15 @@ jobs:
     - name: Build Solution and SDK Core
       run: |
         dotnet build --configuration Release
+        
+  check-contents:
+    needs: build
+    runs-on: windows-latest
+
+    steps:
+    - name: List Contents
+      run: |
+        ls -R '**/*.dll'
 
   deploy-business-service:
     needs: build
