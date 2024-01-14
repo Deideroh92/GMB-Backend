@@ -1,6 +1,7 @@
 ﻿using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Models;
+using GMB.Sdk.Core.Types.PlaceService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -21,21 +22,24 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB</returns>
         [HttpGet("place/find-by-query/{query}")]
         [Authorize]
-        public async Task<ActionResult<GetBusinessProfileListResponse>> GetPlaceByQuery(string query)
+        public async Task<ActionResult<GetBusinessListFromGoogleResponse>> GetPlaceByQuery(string query)
         {
 
-            List<DbBusinessProfile> businessProfiles = [];
-            List<DbBusinessScore> businessScores = [];
+            List<GoogleResponse> businessProfiles = [];
             Place[]? places = await Core.PlaceService.GetPlacesByQuery(query);
 
             foreach (Place place in places)
             {
                 DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
-                if (bp != null)
-                    businessProfiles.Add(bp);
-                businessScores.Add(new(bp.IdEtab, place.Rating, place.UserRatingCount));
+                if (bp == null || bp.IdEtab == null)
+                {
+                    businessProfiles.Add(new(query, null, null));
+                    continue;
+                }
+                DbBusinessScore bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
+                businessProfiles.Add(new(query, bp, bs));
             }
-            return new GetBusinessProfileListResponse(businessProfiles, businessScores);
+            return new GetBusinessListFromGoogleResponse(businessProfiles);
         }
         /// <summary>
         /// Find GMB list by query (should be name + address).
@@ -44,10 +48,9 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB list or null if nothing found</returns>
         [HttpPost("place/find-by-query")]
         [Authorize]
-        public async Task<ActionResult<GetBusinessProfileListResponse>> GetPlacesByQueryList(List<string> queryList)
+        public async Task<ActionResult<GetBusinessListFromGoogleResponse>> GetPlacesByQueryList(List<string> queryList)
         {
-            List<DbBusinessProfile> businessProfiles = [];
-            List<DbBusinessScore> businessScores = [];
+            List<GoogleResponse> businessProfiles = [];
 
             try
             {
@@ -58,15 +61,20 @@ namespace GMB.PlaceService.Api.Controller
                     if (places != null && places.Length != 0)
                     {
                         DbBusinessProfile? bp = ToolBox.PlaceToBP(places[0]);
-                        if (bp != null)
-                            businessProfiles.Add(bp);
-                        businessScores.Add(new(bp.IdEtab, places[0].Rating, places[0].UserRatingCount));
+                        if (bp == null || bp.IdEtab == null)
+                        {
+                            businessProfiles.Add(new(query, null, null));
+                            continue;
+                        }
+
+                        DbBusinessScore bs = new(bp.IdEtab, places[0].Rating, places[0].UserRatingCount);
+                        businessProfiles.Add(new(query, bp, bs));
                     }
                 }
-                return new GetBusinessProfileListResponse(businessProfiles, businessScores);
+                return new GetBusinessListFromGoogleResponse(businessProfiles);
             } catch (Exception ex)
             {
-                return GetBusinessProfileListResponse.Exception(ex.Message);
+                return GetBusinessListFromGoogleResponse.Exception(ex.Message);
             }
         }
         /// <summary>
@@ -76,23 +84,30 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB or null if not found</returns>
         [HttpGet("place/find-by-place-id/{placeId}")]
         [Authorize]
-        public async Task<ActionResult<GetBusinessProfileResponse>> GetPlaceByPlaceId(string placeId)
+        public async Task<ActionResult<GetBusinessFromGoogleResponse>> GetPlaceByPlaceId(string placeId)
         {
             try
             {
                 Place? place = await Core.PlaceService.GetPlaceByPlaceId(placeId);
-                if (place != null)
+                if (place == null)
                 {
-                    DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
-                    DbBusinessScore? bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
-                    return new GetBusinessProfileResponse(bp, bs, true);
+                    return new GetBusinessFromGoogleResponse(new(placeId, null, null));
                 }
-                return new GetBusinessProfileResponse(null, null, true);
+
+                DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
+                if (bp == null || bp.IdEtab == null)
+                {
+                    return new GetBusinessFromGoogleResponse(new(placeId, null, null));
+                }
+
+                DbBusinessScore? bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
+                return new GetBusinessFromGoogleResponse(new(placeId, bp, bs));
             } catch (Exception ex)
             {
-                return GetBusinessProfileResponse.Exception(ex.Message);
+                return GetBusinessFromGoogleResponse.Exception(ex.Message);
             }
         }
+
         /// <summary>
         /// Find GMB list by Place IDs.
         /// </summary>
@@ -100,12 +115,11 @@ namespace GMB.PlaceService.Api.Controller
         /// <returns>GMB list or null if nothing found</returns>
         [HttpPost("place/find-by-place-id")]
         [Authorize]
-        public async Task<ActionResult<GetBusinessProfileListResponse>> GetPlacesByPlaceIdList(List<string> placeIds)
+        public async Task<ActionResult<GetBusinessListFromGoogleResponse>> GetPlacesByPlaceIdList(List<string> placeIds)
         {
             try
             {
-                List<DbBusinessProfile> bpList = [];
-                List<DbBusinessScore> bsList = [];
+                List<GoogleResponse>? bpList = [];
 
                 foreach (string placeId in placeIds)
                 {
@@ -113,16 +127,20 @@ namespace GMB.PlaceService.Api.Controller
                     if (place != null)
                     {
                         DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
-                        DbBusinessScore? bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
-                        bpList.Add(bp);
-                        bsList.Add(bs);
+                        if (bp == null || bp.IdEtab == null)
+                        {
+                            bpList.Add(new(placeId, null, null));
+                            continue;
+                        }
+                        DbBusinessScore bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
+                        bpList.Add(new(placeId, bp, bs));
                     }
                 }
 
-                return new GetBusinessProfileListResponse(bpList, bsList);
+                return new GetBusinessListFromGoogleResponse(bpList);
             } catch (Exception ex)
             {
-                return GetBusinessProfileListResponse.Exception(ex.Message);
+                return GetBusinessListFromGoogleResponse.Exception(ex.Message);
             }
         }
         /// <summary>

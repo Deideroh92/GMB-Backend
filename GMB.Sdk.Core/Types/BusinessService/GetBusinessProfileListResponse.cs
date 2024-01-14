@@ -4,7 +4,7 @@ namespace GMB.Sdk.Core.Types.Api
 {
     public sealed class GetBusinessProfileListResponse : GenericResponse<GetBusinessProfileListResponse>
     {
-        public GetBusinessProfileListResponse(List<DbBusinessProfile>? businessList, List<DbBusinessScore>? businessScoreList)
+        public GetBusinessProfileListResponse(List<DbBusinessProfile?>? businessList, List<DbBusinessScore>? businessScoreList)
         {
             BusinessProfileList = businessList;
             BusinessScoreList = businessScoreList;
@@ -13,7 +13,7 @@ namespace GMB.Sdk.Core.Types.Api
         // DO NOT USE THIS CONSTRUCTOR
         public GetBusinessProfileListResponse() { }
 
-        public List<DbBusinessProfile>? BusinessProfileList { get; set; }
+        public List<DbBusinessProfile?>? BusinessProfileList { get; set; }
         public List<DbBusinessScore>? BusinessScoreList { get; set; }
     }
 }

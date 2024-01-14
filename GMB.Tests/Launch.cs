@@ -1,6 +1,7 @@
 using GMB.BusinessService.Api.Controller;
 using GMB.Scanner.Agent.Models;
 using GMB.ScannerService.Api.Controller;
+using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -94,10 +95,11 @@ namespace GMB.Tests
         [TestMethod]
         public void LaunchBusinessScanner()
         {
-            ScannerController controller = new();
-            BusinessScannerRequest request = new(100000, 1, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddDays(15), true);
+            AuthorizationPolicyService policy = new();
+            ScannerController scannerController = new(policy);
+            BusinessScannerRequest request = new(100000, 7, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddMonths(12), false);
 
-            _ = controller.StartBusinessScannerAsync(request);
+            Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;
         }
         #endregion
