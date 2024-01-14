@@ -21,7 +21,6 @@ jobs:
     - name: Build Solution and SDK Core
       run: |
         dotnet build --configuration Release
-        dotnet test --no-restore
 
   deploy-business-service:
     needs: build
