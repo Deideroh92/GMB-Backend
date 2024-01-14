@@ -25,10 +25,17 @@ jobs:
   check-contents:
     needs: build
     runs-on: windows-latest
-
+  
     steps:
-    - name: List Contents
+    - name: Display Current Directory
       run: |
+        Write-Host "Current Directory: $PWD"
+        Write-Host "Contents of Directory:"
+        Get-ChildItem -Recurse
+  
+    - name: List DLL Files
+      run: |
+        Write-Host "DLL Files:"
         Get-ChildItem -Recurse -Filter *.dll
 
   deploy-business-service:
