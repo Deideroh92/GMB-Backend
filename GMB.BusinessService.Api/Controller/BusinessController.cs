@@ -187,7 +187,7 @@ namespace GMB.BusinessService.Api.Controller
                 List<BusinessProfileSmooth?> bpList = [];
                 foreach ( var idEtab in idEtabList )
                 {
-                    bpList.Add(db.GetBusinessSmoothByIdEtab(idEtab));
+                    bpList.Add(db.GetBusinessSmoothByIdEtab(idEtab.Trim()));
                 }
 
                 return new GetBusinessProfileSmoothListResponse(bpList);
@@ -236,7 +236,7 @@ namespace GMB.BusinessService.Api.Controller
                 List<BusinessProfileSmooth?> bpList = [];
                 foreach (var placeId in placeIdList)
                 {
-                    bpList.Add(db.GetBusinessSmoothByPlaceId(placeId));
+                    bpList.Add(db.GetBusinessSmoothByPlaceId(placeId.Trim()));
                 }
 
                 return new GetBusinessProfileSmoothListResponse(bpList);
