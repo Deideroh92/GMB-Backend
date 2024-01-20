@@ -12,12 +12,11 @@ namespace GMB.Scanner.Agent
 {
     public class Scanner
     {
-        public static readonly string pathOperationIsFile = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\Files\processed_file_" + DateTime.Today.ToString("MM-dd-yyyy-HH-mm-ss");
-        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Business.Agent\logs\log";
+        private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.ScannerService.Api\logs\log";
 
         public static async Task BusinessScanner(ScannerBusinessRequest request)
         {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             Log.Logger = new LoggerConfiguration()
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
@@ -139,7 +138,7 @@ namespace GMB.Scanner.Agent
         /// <param name="request"></param>
         public static void ScannerUrl(ScannerUrlRequest request)
         {
-            Thread.CurrentThread.CurrentCulture = new CultureInfo("fr-FR");
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
             Log.Logger = new LoggerConfiguration()
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)

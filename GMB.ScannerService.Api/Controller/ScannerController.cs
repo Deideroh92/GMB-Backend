@@ -32,10 +32,6 @@ namespace GMB.ScannerService.Api.Controller
                 using DbLib db = new();
                 int threadNumber = 0;
 
-                /*Log.Logger = new LoggerConfiguration()
-                .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
-                .CreateLogger();*/
-
                 switch (request.OperationType)
                 {
                     case Operation.PROCESSING_STATE:
@@ -47,7 +43,7 @@ namespace GMB.ScannerService.Api.Controller
                         break;
                 }
 
-                int nbThreads = 1;
+                int nbThreads = 8;
 
                 foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
                 {

@@ -21,7 +21,7 @@ namespace GMB.Sdk.Core.Types.Models
             try
             {
                 ChromeOptions chromeOptions = new();
-                //chromeOptions.AddArguments("--headless=new");
+                chromeOptions.AddArguments("--headless=new");
                 chromeOptions.AddArguments("--lang=fr");
                 if (headless)
                 {
