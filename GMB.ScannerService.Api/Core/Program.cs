@@ -29,14 +29,11 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddScoped<AuthorizationPolicyService>();
 
-if (isDevelopment)
-{
-    builder.Services.AddAuthorizationBuilder()
-        .AddPolicy("DevelopmentPolicy", policy =>
-        {
-            policy.RequireAssertion(context => true); // Allow unauthenticated access during development
-        });
-}
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("DevelopmentPolicy", policy =>
+    {
+        policy.RequireAssertion(context => true); // Allow unauthenticated access during development
+    });
 
 if (!isDevelopmentEnvironment)
 {
