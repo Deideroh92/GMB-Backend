@@ -16,4 +16,22 @@
     <ProjectReference Include="..\GMB.Sdk.Core\GMB.Sdk.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ReferentialFiles\Categories.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ReferentialFiles\CpList.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ReferentialFiles\DeptList.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ReferentialFiles\IleDeFrance.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ReferentialFiles\ScriptDetectNewNetwork.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

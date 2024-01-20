@@ -56,8 +56,9 @@ namespace GMB.Sdk.Core
             if (googleDate == null)
                 return DateTime.UtcNow;
 
-            string path = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Sdk.Core\\Files", "GoogleDate.json");
-            string json = File.ReadAllText(path);
+            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Files", "GoogleDate.json");
+
+            string json = File.ReadAllText(filePath);
             Dictionary<string, string>? mapper = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
 
             if (mapper.TryGetValue(googleDate, out string? value) && int.TryParse(value, out int jsonValue))
