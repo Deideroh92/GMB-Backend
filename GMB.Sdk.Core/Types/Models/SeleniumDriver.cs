@@ -16,19 +16,17 @@ namespace GMB.Sdk.Core.Types.Models
         /// <summary>
         /// Create an instance of Selenium Driver.
         /// </summary>
-        public SeleniumDriver(bool headless = true)
+        public SeleniumDriver()
         {
             try
             {
                 ChromeOptions chromeOptions = new();
-                chromeOptions.AddArguments("--headless=new");
+                chromeOptions.AddArguments("--headless");
                 chromeOptions.AddArguments("--lang=fr");
-                if (headless)
-                {
-                    chromeOptions.AddArguments("--disable-gpu");
-                    chromeOptions.AddArguments("--no-sandbox");
-                    chromeOptions.AddArguments("--disable-dev-shm-usage");
-                }
+                chromeOptions.AddArguments("--disable-gpu");
+                chromeOptions.AddArguments("--no-sandbox");
+                chromeOptions.AddArguments("--disable-dev-shm-usage");
+
                 new DriverManager().SetUpDriver(new ChromeConfig());
                 WebDriver = new ChromeDriver(chromeOptions);
             } catch (Exception)
