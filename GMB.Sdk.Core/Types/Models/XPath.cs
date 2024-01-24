@@ -53,7 +53,7 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> toReviewsPage = [By.XPath("//button[@role='tab' and contains(@aria-label, 'Avis')]")];
         public static readonly List<By> sortReviews = [By.XPath("//button[@data-value='Trier']")];
         public static readonly List<By> sortReviews2 = [By.XPath("//li[@data-index='1']"), By.XPath("//div[@data-index='1']")];
-        public static readonly List<By> reviewList = [By.XPath("//div[@jsaction='mouseover:pane.review.in; mouseout:pane.review.out']")];
+        public static readonly List<By> reviewList = [By.XPath("//div[@data-review-id]")];
         public static readonly List<By> scrollingPanel = [By.XPath("//button[@aria-label='Rédiger un avis']")];
 
         // Review info
