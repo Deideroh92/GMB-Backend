@@ -19,7 +19,7 @@ namespace GMB.Sdk.Core.Types.Models
 
         // Profile info
         public static readonly List<By> name = [By.XPath("//div[@role='main' and @aria-label]")];
-        public static readonly List<By> category = [By.XPath("//button[@jsaction='pane.rating.category']"), By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]/following-sibling::span")];
+        public static readonly List<By> category = [By.XPath("//button[contains(@jsaction, 'pane.') and contains(@jsaction, '.category')]"), By.XPath("//button[@jsaction='pane.rating.category']"), By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]/following-sibling::span")];
         public static readonly List<By> adress = [By.XPath("//button[@data-item-id='address']")];
         public static readonly List<By> nbReviews = [By.XPath("//button[contains(@jsaction, 'pane.rating.moreReviews')]"), By.XPath("//span[contains(@arial-label, 'avis')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]")];
         public static readonly List<By> tel = [By.XPath("//button[contains(@aria-label, 'Numéro de téléphone:')]")];
