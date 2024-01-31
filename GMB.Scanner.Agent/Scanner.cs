@@ -53,7 +53,7 @@ namespace GMB.Scanner.Agent
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
 
                     // No business found at this url.
-                    /*if (profile == null)
+                    if (profile == null)
                     {
                         if (request.Operation == Operation.URL_STATE && businessAgent.Guid != null)
                             db.DeleteBusinessUrlByGuid(businessAgent.Guid);
@@ -77,7 +77,7 @@ namespace GMB.Scanner.Agent
 
                     // Insert Business Score if have one.
                     if (score?.Score != null)
-                        db.CreateBusinessScore(score);*/
+                        db.CreateBusinessScore(score);
 
                     // Getting reviews
                     if (request.GetReviews && request.DateLimit != null && score?.Score != null && profile.Category != "Hébergement")
@@ -93,7 +93,7 @@ namespace GMB.Scanner.Agent
                                 {
                                     DbBusinessReview? dbBusinessReview = db.GetBusinessReview(profile.IdEtab, review.IdReview);
 
-                                    /*if (dbBusinessReview == null)
+                                    if (dbBusinessReview == null)
                                     {
                                         db.CreateBusinessReview(review);
                                         continue;
@@ -106,7 +106,7 @@ namespace GMB.Scanner.Agent
                                     {
                                         db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
                                         continue;
-                                    }*/
+                                    }
                                 } catch (Exception e)
                                 {
                                     Log.Error($"Couldn't treat a review : {e.Message}", e);
