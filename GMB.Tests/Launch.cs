@@ -179,7 +179,7 @@ namespace GMB.Tests
                 profile.Category != "Musée d'art" ||
                 profile.Website != "https://www.musee-orangerie.fr/" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipNnUmG5q3sauygk9_d62NoPVFHDP2q77pdFDylN=w426-h240-k-no" ||
+                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipONXsHpu5d_TUKzMzGYv4nQECCvQvNYQA7iwMJz=w408-h270-k-no" ||
                 profile.PlusCode != "8FW4V87F+G3" ||
                 profile.Tel != "01 44 50 43 00" ||
                 score.NbReviews == null ||

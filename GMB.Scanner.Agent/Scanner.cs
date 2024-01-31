@@ -43,7 +43,7 @@ namespace GMB.Scanner.Agent
                     if (businessAgent.IdEtab != null)
                         business = db.GetBusinessByIdEtab(businessAgent.IdEtab);
 
-                    if (!driver.IsDriverAlive())
+                    if (!driver.IsDriverAlive() || count == 1000)
                     {
                         driver.Dispose();
                         driver = new();
@@ -128,8 +128,8 @@ namespace GMB.Scanner.Agent
                     Log.Error(e, $"An exception occurred on BP with id etab = [{businessAgent.IdEtab}], guid = [{businessAgent.Guid}], url = [{businessAgent.Url}] : {e.Message}");
                 }
             }
-            Log.CloseAndFlush();
             driver.Dispose();
+            Log.CloseAndFlush(); 
         }
 
         /// <summary>
