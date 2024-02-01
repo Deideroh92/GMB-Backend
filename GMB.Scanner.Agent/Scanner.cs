@@ -30,6 +30,13 @@ namespace GMB.Scanner.Agent
 
             DateTime time = DateTime.UtcNow;
 
+            if (await scanner.WeeklyTestAsync() == false)
+            {
+                Log.Error($"XPATH was modified, can't scan anything.");
+                return;
+            }
+                
+
             foreach (BusinessAgent businessAgent in request.BusinessList)
             {
                 try
