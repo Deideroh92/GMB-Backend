@@ -328,7 +328,8 @@ namespace GMB.Scanner.Agent.Core
 
                 string userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName)?.GetAttribute("aria-label")?.Replace("Photo de", "").Trim() ?? "";
 
-                int reviewScore = ToolBox.FindElementsSafe(reviewWebElement, XPathReview.score).Count;
+                if (!int.TryParse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score)?.GetAttribute("aria-label")?.Replace("étoile", "").Replace("s", "").Trim(), out int reviewScore))
+                    throw new Exception();
 
                 int userNbReviews = 1;
                 string? userNbReviewsText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)?.Text?.Replace("avis", "").Replace("·", "").Replace("Local Guide", "").Replace(" ", "").Trim();

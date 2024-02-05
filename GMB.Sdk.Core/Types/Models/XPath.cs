@@ -53,13 +53,13 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> toReviewsPage = [By.XPath("//button[@role='tab' and contains(@aria-label, 'Avis')]")];
         public static readonly List<By> sortReviews = [By.XPath("//button[@data-value='Trier']")];
         public static readonly List<By> sortReviews2 = [By.XPath("//li[@data-index='1']"), By.XPath("//div[@data-index='1']")];
-        public static readonly List<By> reviewList = [By.XPath("//div[@data-review-id]")];
+        public static readonly List<By> reviewList = new() { By.XPath("//div[@data-review-id and @aria-label]") };
         public static readonly List<By> scrollingPanel = [By.XPath("//button[@aria-label='Rédiger un avis']")];
 
         // Review info
         public static readonly List<By> googleDate = [By.XPath(".//span[contains(text(), 'il y a')]")];
         public static readonly List<By> userName = [By.XPath(".//a[contains(@aria-label, 'Photo de')]"), By.XPath(".//button[contains(@aria-label, 'Photo de')]")];
-        public static readonly List<By> score = [By.XPath(".//span[contains(@role, 'img')]//img[contains(@src, 'ic_star_rate_14')]")];
+        public static readonly List<By> score = new() { By.XPath(".//span[contains(@role, 'img') and contains(@aria-label, 'étoile')]") };
         public static readonly List<By> userNbReviews = [By.XPath(".//div[contains(text(), 'avis')]")];
         public static readonly List<By> text = [By.XPath(".//div[contains(@class, 'MyEned')]")];
         public static readonly List<By> plusButton = [By.XPath(".//button[contains(@jsaction, 'pane.review.expandReview')]")];
