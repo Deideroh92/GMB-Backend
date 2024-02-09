@@ -22,20 +22,20 @@ namespace GMB.Scanner.Agent
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
             .CreateLogger();
 
-            using DbLib db = new();
-            SeleniumDriver driver = new();
             ScannerFunctions scanner = new();
-
-            int count = 0;
-
-            DateTime time = DateTime.UtcNow;
 
             if (await scanner.WeeklyTestAsync() == false)
             {
                 Log.Error($"XPATH was modified, can't scan anything.");
                 return;
             }
-                
+
+            using DbLib db = new();
+            SeleniumDriver driver = new();
+
+            int count = 0;
+
+            DateTime time = DateTime.UtcNow;
 
             foreach (BusinessAgent businessAgent in request.BusinessList)
             {
@@ -173,7 +173,7 @@ namespace GMB.Scanner.Agent
                     {
                         if (!db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(urlToValidate)))
                         {
-                            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), urlToValidate, textSearch, ToolBox.ComputeMd5Hash(urlToValidate));
+                            DbBusinessUrl businessUrl = new(Guid.NewGuid().ToString("N"), urlToValidate, textSearch);
                             db.CreateBusinessUrl(businessUrl);
                         }
                     }

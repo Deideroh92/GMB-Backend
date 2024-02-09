@@ -47,7 +47,7 @@ namespace GMB.BusinessService.Api.Controller
                     return GenericResponse.Exception("Business Profile (PLACE ID) already exists in DB.");
 
                 string guid = Guid.NewGuid().ToString("N");
-                db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl, "platform", ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)));
+                db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl, "platform"));
 
                 businessProfile.FirstGuid = guid;
 
@@ -115,7 +115,7 @@ namespace GMB.BusinessService.Api.Controller
                     string guid = Guid.NewGuid().ToString("N");
                     businessProfile.FirstGuid = guid;
 
-                    db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl ?? "manually", "platform", ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl ?? "manually")));
+                    db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl ?? "manually", "platform"));
                     db.CreateBusinessProfile(businessProfile);
                     db.CreateBusinessScore(request.BusinessScoreList.Find(x => x.IdEtab == businessProfile.IdEtab)!);
                     idEtabList.Add(businessProfile.IdEtab);
@@ -454,7 +454,7 @@ namespace GMB.BusinessService.Api.Controller
                 DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(urlEncoded);
                 if (businessUrl == null)
                 {
-                    businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", ToolBox.ComputeMd5Hash(url), urlState);
+                    businessUrl = new(Guid.NewGuid().ToString("N"), url, "manually", urlState);
                     db.CreateBusinessUrl(businessUrl);
                 }
                 return new GenericResponse(businessUrl.Id, "Url created successfully.");

@@ -242,7 +242,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 try
                 {
                     urlEncoded = ToolBox.ComputeMd5Hash(url);
-                    string selectCommand = "SELECT GUID, URL, ID_ETAB FROM " + table + " WHERE URL_MD5 = @UrlEncoded";
+                    string selectCommand = "SELECT URL, ID_ETAB, PLACE_ID FROM " + table + " WHERE URL_MD5 = @UrlEncoded";
                     using SqlCommand cmd = new(selectCommand, Connection);
                     cmd.Parameters.AddWithValue("@UrlEncoded", urlEncoded);
                     using SqlDataReader reader = cmd.ExecuteReader();
@@ -250,7 +250,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                     if (reader.Read())
                     {
 
-                        BusinessAgent business = new(reader.GetString(0), reader.GetString(1), reader.GetString(2));
+                        BusinessAgent business = new(null, reader.GetString(0), reader.GetString(1), reader.IsDBNull(2) ? null : reader.GetString(2));
                         businessAgentList.Add(business);
                     }
                 } catch (Exception e)
@@ -292,13 +292,13 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT GUID, URL, URL_MD5 FROM vBUSINESS_URL WHERE URL_MD5 = @UrlEncoded";
+                string selectCommand = "SELECT GUID, URL FROM vBUSINESS_URL WHERE URL_MD5 = @UrlEncoded";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@UrlEncoded", urlEncoded);
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
-                    return new(reader.GetString(0), reader.GetString(1), null, reader.GetString(2));
+                    return new(reader.GetString(0), reader.GetString(1), null);
 
                 return null;
             } catch (Exception e)

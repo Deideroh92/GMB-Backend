@@ -21,7 +21,7 @@ namespace GMB.Sdk.Core.Types.Models
             try
             {
                 ChromeOptions chromeOptions = new();
-                chromeOptions.AddArguments("--headless");
+                //chromeOptions.AddArguments("--headless");
                 chromeOptions.AddArguments("--lang=fr");
                 chromeOptions.AddArguments("--disable-gpu");
                 chromeOptions.AddArguments("--no-sandbox");
