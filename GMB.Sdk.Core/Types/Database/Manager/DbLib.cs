@@ -584,117 +584,6 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             }
         }
         /// <summary>
-        /// Get Business smooth by place id.
-        /// </summary>
-        /// <param name="placeId"></param>
-        /// <returns>Business smooth</returns>
-        public BusinessProfileSmooth? GetBusinessSmoothByPlaceId(string placeId)
-        {
-            try
-            {
-                string selectCommand = "SELECT * FROM vBUSINESS_PROFILE WHERE PLACE_ID = @placeId";
-
-                using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@placeId", placeId);
-                cmd.CommandTimeout = 10000;
-                using SqlDataReader reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    BusinessProfileSmooth businessProfile = new(
-                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
-                        reader["ID_ETAB"].ToString()!,
-                        reader["FIRST_GUID"].ToString()!,
-                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
-                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
-                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
-                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
-                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
-                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
-                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
-                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
-                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
-                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
-                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
-                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
-                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
-                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
-                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
-                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
-                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
-                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
-                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
-                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
-                        (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
-                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
-                        (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null
-                    );
-                    return businessProfile;
-                } else
-                    return null;
-                
-            } catch (Exception e)
-            {
-                throw new Exception($"Error getting BP smooth by place id", e);
-            }
-        }
-        /// <summary>
-        /// Get Business smooth by id etab.
-        /// </summary>
-        /// <param name="idEtab"></param>
-        /// <returns>Business smooth</returns>
-        public BusinessProfileSmooth? GetBusinessSmoothByIdEtab(string idEtab)
-        {
-            try
-            {
-                    string selectCommand = "SELECT * FROM vBUSINESS_PROFILE WHERE ID_ETAB = @idEtab";
-
-                    using SqlCommand cmd = new(selectCommand, Connection);
-                    cmd.Parameters.AddWithValue("@idEtab", idEtab);
-                    cmd.CommandTimeout = 10000;
-                    using SqlDataReader reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    BusinessProfileSmooth businessProfile = new(
-                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
-                        reader["ID_ETAB"].ToString()!,
-                        reader["FIRST_GUID"].ToString()!,
-                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
-                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
-                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
-                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
-                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
-                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
-                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
-                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
-                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
-                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
-                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
-                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
-                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
-                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
-                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
-                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
-                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
-                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
-                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
-                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
-                        (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
-                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
-                        (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null
-                    );
-                    return businessProfile;
-                } else
-                    return null;
-            } catch (Exception e)
-            {
-                throw new Exception($"Error getting BP smooth by id etab", e);
-            }
-        }
-        /// <summary>
         /// Get Business Agent by Url Encoded.
         /// </summary>
         /// <param name="urlEncoded"></param>
@@ -914,6 +803,62 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             }
         }
         /// <summary>
+        /// Get Business by URL.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns>Business or null</returns>
+        public DbBusinessProfile? GetBusinessByUrl(string url)
+        {
+            try
+            {
+                string urlEncoded = ToolBox.ComputeMd5Hash(url);
+                string selectCommand = "SELECT * FROM vBUSINESS_PROFILE WHERE URL = @urlEncoded";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@urlEncoded", urlEncoded);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    DbBusinessProfile businessProfile = new(
+                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
+                        reader["ID_ETAB"].ToString()!,
+                        reader["FIRST_GUID"].ToString()!,
+                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
+                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
+                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
+                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
+                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
+                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
+                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
+                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
+                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
+                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
+                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
+                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
+                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
+                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
+                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
+                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
+                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
+                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
+                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
+                        (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
+                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
+                        (short)reader["PROCESSING"],
+                        (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
+                    return businessProfile;
+                }
+
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting BP by url = [{url}]", e);
+            }
+        }
+        /// <summary>
         /// Get Id Etab by place Id.
         /// </summary>
         /// <param name="placeId"></param>
@@ -1018,49 +963,49 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
-                throw new Exception($"Error updating BP with id_etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
+                throw new Exception($"Error updating BP with id etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
             }
         }
         /// <summary>
-        /// Update Business profile from web portal.
+        /// Update Business from web portal.
         /// </summary>
-        /// <param name="businessProfile"></param>
-        public void UpdateBusinessProfileFromWeb(DbBusinessProfile businessProfile)
+        /// <param name="business"></param>
+        public void UpdateBusinessProfileFromWeb(Business business)
         {
             try
             {
                 string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country, URL_PLACE = @Url, TEL_INT = @TelInt, PROCESSING = @Processing WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
-                cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
-                cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
-                cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
-                cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(businessProfile.Address));
-                cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(businessProfile.PlusCode));
-                cmd.Parameters.AddWithValue("@City", GetValueOrDefault(businessProfile.City));
-                cmd.Parameters.AddWithValue("@CityCode", GetValueOrDefault(businessProfile.CityCode));
-                cmd.Parameters.AddWithValue("@IdBan", GetValueOrDefault(businessProfile.IdBan));
-                cmd.Parameters.AddWithValue("@AddressType", GetValueOrDefault(businessProfile.AddressType));
-                cmd.Parameters.AddWithValue("@Lon", GetValueOrDefault(businessProfile.Lon));
-                cmd.Parameters.AddWithValue("@Lat", GetValueOrDefault(businessProfile.Lat));
-                cmd.Parameters.AddWithValue("@PostCode", GetValueOrDefault(businessProfile.PostCode));
-                cmd.Parameters.AddWithValue("@Category", GetValueOrDefault(businessProfile.Category));
-                cmd.Parameters.AddWithValue("@StreetNumber", GetValueOrDefault(businessProfile.StreetNumber));
-                cmd.Parameters.AddWithValue("@Tel", GetValueOrDefault(businessProfile.Tel));
-                cmd.Parameters.AddWithValue("@Website", GetValueOrDefault(businessProfile.Website));
-                cmd.Parameters.AddWithValue("@UrlPicture", GetValueOrDefault(businessProfile.PictureUrl));
-                cmd.Parameters.AddWithValue("@AddressScore", GetValueOrDefault(businessProfile.AddressScore));
+                cmd.Parameters.AddWithValue("@IdEtab", business.IdEtab);
+                cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(business.PlaceId));
+                cmd.Parameters.AddWithValue("@Name", business.Name);
+                cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(business.GoogleAddress));
+                cmd.Parameters.AddWithValue("@Address", GetValueOrDefault(business.Address));
+                cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(business.PlusCode));
+                cmd.Parameters.AddWithValue("@City", GetValueOrDefault(business.City));
+                cmd.Parameters.AddWithValue("@CityCode", GetValueOrDefault(business.CityCode));
+                cmd.Parameters.AddWithValue("@IdBan", GetValueOrDefault(business.IdBan));
+                cmd.Parameters.AddWithValue("@AddressType", GetValueOrDefault(business.AddressType));
+                cmd.Parameters.AddWithValue("@Lon", GetValueOrDefault(business.Lon));
+                cmd.Parameters.AddWithValue("@Lat", GetValueOrDefault(business.Lat));
+                cmd.Parameters.AddWithValue("@PostCode", GetValueOrDefault(business.PostCode));
+                cmd.Parameters.AddWithValue("@Category", GetValueOrDefault(business.Category));
+                cmd.Parameters.AddWithValue("@StreetNumber", GetValueOrDefault(business.StreetNumber));
+                cmd.Parameters.AddWithValue("@Tel", GetValueOrDefault(business.Tel));
+                cmd.Parameters.AddWithValue("@Website", GetValueOrDefault(business.Website));
+                cmd.Parameters.AddWithValue("@UrlPicture", GetValueOrDefault(business.PictureUrl));
+                cmd.Parameters.AddWithValue("@AddressScore", GetValueOrDefault(business.AddressScore));
                 cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
-                cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
-                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
-                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
-                cmd.Parameters.AddWithValue("@Url", GetValueOrDefault(businessProfile.PlaceUrl));
-                cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(businessProfile.TelInt));
-                cmd.Parameters.AddWithValue("@Processing", GetValueOrDefault(businessProfile.Processing));
+                cmd.Parameters.AddWithValue("@Status", business.Status.ToString());
+                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(business.Geoloc));
+                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(business.Country));
+                cmd.Parameters.AddWithValue("@Url", GetValueOrDefault(business.PlaceUrl));
+                cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(business.TelInt));
+                cmd.Parameters.AddWithValue("@Processing", GetValueOrDefault(business.Processing));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
-                throw new Exception($"Error updating BP from web with id_etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
+                throw new Exception($"Error updating BP from web with id etab = [{business.IdEtab}] and guid = [{business.FirstGuid}]", e);
             }
         }
         /// <summary>

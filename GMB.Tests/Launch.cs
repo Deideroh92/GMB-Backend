@@ -5,7 +5,9 @@ using GMB.ScannerService.Api.Controller;
 using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
+using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GMB.Tests
@@ -102,6 +104,40 @@ namespace GMB.Tests
             foreach (string idEtab in values)
             {
                 db.UpdateBusinessProfileProcessingState(idEtab, 9);
+            }
+        }
+        /// <summary>
+        /// Getting ID etab and place ID from url list.
+        /// </summary>
+        [TestMethod]
+        public async Task GetBPFromUrlListAsync()
+        {
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Sdk.Core\Files\Custom.txt";
+            using DbLib db = new();
+
+            List<string> values = [];
+
+            using (StreamReader reader = new(filePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string? line = reader.ReadLine();
+                    if (line != null)
+                        values.Add(line);
+                }
+            }
+
+            BusinessController controller = new();
+
+            ActionResult<GetBusinessListResponse> response = await controller.GetBusinessListByUrlAsync(values);
+
+            string outputFilePath = "file.csv";
+            using StreamWriter writer = new(outputFilePath);
+
+            foreach(Business? business in response.Value.BusinessList)
+            {
+                if (business != null)
+                    writer.Write(business.IdEtab + ";" + business.PlaceId);
             }
         }
         /// <summary>

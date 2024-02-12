@@ -1,7 +1,6 @@
 ﻿namespace GMB.Sdk.Core.Types.Database.Models
 {
     #region Enums
-
     public enum BusinessStatus
     {
         OPERATIONAL,
@@ -9,11 +8,9 @@
         CLOSED_PERMANENTLY,
         DELETED
     }
-
     #endregion
 
-
-    public class DbBusinessProfile : IEquatable<DbBusinessProfile?>
+    public class DbBusinessProfile
     {
         public long Id { get; set; }
         public string IdEtab { get; set; }
@@ -71,7 +68,7 @@
         /// <param name="addressScore"></param>
         /// <param name="plusCode"></param>
         /// <param name="country"></param>
-        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? urlPlace, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null)
+        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null)
         {
             Id = -500;
             IdEtab = idEtab;
@@ -100,29 +97,51 @@
             AddressScore = addressScore;
             PlusCode = plusCode;
             Country = country;
-            PlaceUrl = urlPlace;
+            PlaceUrl = placeUrl;
             TelInt = telInt;
 
             CheckValidity();
-            TelInt = telInt;
         }
 
-#pragma warning disable CS8618
-        // DO NOT USE
-        public DbBusinessProfile() { }
-#pragma warning restore CS8618
+        public DbBusinessProfile(Business? business) {
+            IdEtab = business.IdEtab;
+            PlaceId = business.PlaceId;
+            FirstGuid = business.FirstGuid;
+            Name = business.Name;
+            Category = business.Category;
+            Geoloc = business.Geoloc;
+            GoogleAddress = business.GoogleAddress;
+            Address = business.Address;
+            PostCode = business.PostCode;
+            City = business.City;
+            CityCode = business.CityCode;
+            Lat = business.Lat;
+            Lon = business.Lon;
+            IdBan = business.IdBan;
+            AddressType = business.AddressType;
+            Tel = business.Tel;
+            Website = business.Website;
+            DateInsert = business.DateInsert;
+            DateUpdate = business.DateUpdate;
+            Status = business.Status;
+            PictureUrl = business.PictureUrl;
+            Processing = business.Processing;
+            StreetNumber = business.StreetNumber;
+            AddressScore = business.AddressScore;
+            PlusCode = business.PlusCode;
+            Country = business.Country;
+            PlaceUrl = business.PlaceUrl;
+            TelInt = business.TelInt;
+
+            CheckValidity();
+        }
 
         public void CheckValidity()
         {
             if (IdEtab == null)
-                throw new NullReferenceException("No IdEtab for this business");
+                throw new NullReferenceException("No id etab for this business");
             if (Name == null)
                 Status = BusinessStatus.DELETED;
-        }
-
-        public override bool Equals(object? obj)
-        {
-            return Equals(obj as DbBusinessProfile);
         }
 
         public bool Equals(DbBusinessProfile? other)
@@ -142,39 +161,6 @@
         public bool AdressEquals(DbBusinessProfile? other)
         {
             return other is not null && GoogleAddress == other.GoogleAddress;
-        }
-
-        public override int GetHashCode()
-        {
-            HashCode hash = new();
-            hash.Add(Id);
-            hash.Add(IdEtab);
-            hash.Add(PlaceId);
-            hash.Add(FirstGuid);
-            hash.Add(Name);
-            hash.Add(Category);
-            hash.Add(Geoloc);
-            hash.Add(GoogleAddress);
-            hash.Add(Address);
-            hash.Add(PostCode);
-            hash.Add(City);
-            hash.Add(CityCode);
-            hash.Add(Lat);
-            hash.Add(Lon);
-            hash.Add(IdBan);
-            hash.Add(StreetNumber);
-            hash.Add(Country);
-            hash.Add(AddressType);
-            hash.Add(AddressScore);
-            hash.Add(Tel);
-            hash.Add(Website);
-            hash.Add(PlusCode);
-            hash.Add(DateInsert);
-            hash.Add(DateUpdate);
-            hash.Add(Status);
-            hash.Add(Processing);
-            hash.Add(PictureUrl);
-            return hash.ToHashCode();
         }
         #endregion
     }

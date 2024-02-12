@@ -1,7 +1,10 @@
+using GMB.BusinessService.Api.Models;
+using GMB.Scanner.Agent.Core;
 using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
+using GMB.Sdk.Core.Types.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
@@ -20,40 +23,45 @@ namespace GMB.BusinessService.Api.Controller
 
         #region Create
         /// <summary>
-        /// Create Business Profile.
+        /// Create new Business.
         /// </summary>
-        /// <param name="businessProfile"></param>
+        /// <param name="business"></param>
         [HttpPost("bp/create")]
         [Authorize]
-        public ActionResult<GenericResponse> CreateNewBusiness([FromBody] DbBusinessProfile businessProfile)
+        public ActionResult<GenericResponse> CreateNewBusiness([FromBody] Business business)
         {
             try
             {
                 using DbLib db = new();
 
-                if (businessProfile.PlaceId == null)
+                if (business.PlaceId == null)
                     return GenericResponse.Exception("No Place ID, can't create the business profile.");
 
-                if (businessProfile.PlaceUrl == null)
+                if (business.PlaceUrl == null)
                     return GenericResponse.Exception("No URL specified, can't create the business profile.");
 
-                if (db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)))
+                if (db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(business.PlaceUrl)))
                     return GenericResponse.Exception("URL already exists in DB.");
 
-                if (db.CheckBusinessProfileExistByIdEtab(businessProfile.IdEtab))
+                if (db.CheckBusinessProfileExistByIdEtab(business.IdEtab))
                     return GenericResponse.Exception("Business Profile (ID ETAB) already exists in DD.");
 
-                if (db.CheckBusinessProfileExistByPlaceId(businessProfile.PlaceId))
+                if (db.CheckBusinessProfileExistByPlaceId(business.PlaceId))
                     return GenericResponse.Exception("Business Profile (PLACE ID) already exists in DB.");
 
                 string guid = Guid.NewGuid().ToString("N");
-                db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl, "platform"));
+                db.CreateBusinessUrl(new DbBusinessUrl(guid, business.PlaceUrl, "platform"));
 
-                businessProfile.FirstGuid = guid;
+                business.FirstGuid = guid;
 
-                db.CreateBusinessProfile(businessProfile);
+                DbBusinessProfile bp = new(business);
 
-                return new GenericResponse(businessProfile.Id, "Business Profile successfully created in DB.");
+                db.CreateBusinessProfile(bp);
+
+                if (business.Score != null && business.NbReviews != null)
+                    db.CreateBusinessScore(new(bp.IdEtab, business.Score, business.NbReviews));
+
+                return new GenericResponse(bp.Id, "Business Profile successfully created in DB.");
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
@@ -61,12 +69,12 @@ namespace GMB.BusinessService.Api.Controller
             }
         }
         /// <summary>
-        /// Create Business Profile list.
+        /// Create new Business Profile list.
         /// </summary>
         /// <param name="request"></param>
         [HttpPost("bp/create-list")]
         [Authorize]
-        public ActionResult<CreateBusinessResponse> CreateNewBusinessList([FromBody] CreateBusinessListRequest request)
+        public ActionResult<CreateBusinessListResponse> CreateNewBusinessList([FromBody] CreateBusinessListRequest request)
         {
             try
             {
@@ -75,59 +83,54 @@ namespace GMB.BusinessService.Api.Controller
                 List<string> errorList = [];
                 List<string?> idEtabList = [];
 
-                foreach (DbBusinessProfile businessProfile in request.BusinessProfileList)
+                foreach (Business business in request.BusinessList)
                 {
-                    if (businessProfile.PlaceUrl == null)
+                    if (business.PlaceUrl == null)
                     {
-                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + " does not have place URL");
+                        errorList.Add($"ID_ETAB: [{business.IdEtab}] - PLACE_ID : [{business.PlaceId}]" + " does not have place URL");
                         idEtabList.Add(null);
                         continue;
                     }
 
-                    if (db.CheckBusinessProfileExistByIdEtab(businessProfile.IdEtab))
+                    if (db.CheckBusinessProfileExistByIdEtab(business.IdEtab))
                     {
-                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" ID_ETAB exist in our DB");
+                        errorList.Add($"ID_ETAB: [{business.IdEtab}] - PLACE_ID : [{business.PlaceId}]" + $" ID_ETAB exist in our DB");
                         idEtabList.Add(null);
                         continue;
                     }
 
-                    if (businessProfile.PlaceId != null && db.CheckBusinessProfileExistByPlaceId(businessProfile.PlaceId))
+                    if (business.PlaceId != null && db.CheckBusinessProfileExistByPlaceId(business.PlaceId))
                     {
-                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" PLACE_ID exist in our DB");
+                        errorList.Add($"ID_ETAB: [{business.IdEtab}] - PLACE_ID : [{business.PlaceId}]" + $" PLACE_ID exist in our DB");
                         idEtabList.Add(null);
                         continue;
                     }
 
-                    if (request.BusinessScoreList.Find(x => x.IdEtab == businessProfile.IdEtab) == null)
+                    if (business.PlaceUrl != null && db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(business.PlaceUrl)))
                     {
-                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + " does not have business score");
-                        idEtabList.Add(null);
-                        continue;
-                    }
-
-                    if (businessProfile.PlaceUrl != null && db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(businessProfile.PlaceUrl)))
-                    {
-                        errorList.Add($"ID_ETAB: [{businessProfile.IdEtab}] - PLACE_ID : [{businessProfile.PlaceId}]" + $" does have an existing URL [{businessProfile.PlaceUrl}] in DB");
+                        errorList.Add($"ID_ETAB: [{business.IdEtab}] - PLACE_ID : [{business.PlaceId}]" + $" does have an existing URL [{business.PlaceUrl}] in DB");
                         idEtabList.Add(null);
                         continue;
                     }
 
                     string guid = Guid.NewGuid().ToString("N");
-                    businessProfile.FirstGuid = guid;
+                    business.FirstGuid = guid;
 
-                    db.CreateBusinessUrl(new DbBusinessUrl(guid, businessProfile.PlaceUrl ?? "manually", "platform"));
-                    db.CreateBusinessProfile(businessProfile);
-                    db.CreateBusinessScore(request.BusinessScoreList.Find(x => x.IdEtab == businessProfile.IdEtab)!);
-                    idEtabList.Add(businessProfile.IdEtab);
+                    DbBusinessProfile bp = new(business);
+
+                    db.CreateBusinessUrl(new DbBusinessUrl(guid, bp.PlaceUrl ?? "manually", "platform"));
+                    db.CreateBusinessProfile(bp);
+                    db.CreateBusinessScore(new(business.IdEtab, business.Score, business.NbReviews));
+                    idEtabList.Add(bp.IdEtab);
                 }
 
-                errorList.Add(request.BusinessProfileList.Count - errorList.Count + "/" + request.BusinessProfileList.Count + " businesses treated.");
+                errorList.Add(request.BusinessList.Count - errorList.Count + "/" + request.BusinessList.Count + " businesses treated.");
 
-                return new CreateBusinessResponse(errorList, idEtabList);
+                return new CreateBusinessListResponse(errorList, idEtabList);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return CreateBusinessResponse.Exception($"Error creating businesses : [{e.Message}]");
+                return CreateBusinessListResponse.Exception($"Error creating business list: [{e.Message}]");
             }
         }
         /// <summary>
@@ -158,92 +161,124 @@ namespace GMB.BusinessService.Api.Controller
         /// <param name="idEtab"></param>
         [HttpPost("bp/id-etab")]
         [Authorize]
-        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByIdEtab([FromBody] string idEtab)
+        public ActionResult<GetBusinessResponse> GetBusinessProfileByIdEtab([FromBody] string idEtab)
         {
             try
             {
                 using DbLib db = new();
-                DbBusinessProfile? businessProfile = db.GetBusinessByIdEtab(idEtab);
-                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(idEtab);
+                string id = idEtab.Trim();
+                DbBusinessProfile? bp = db.GetBusinessByIdEtab(id);
 
-                return new GetBusinessProfileResponse(businessProfile, businessScore);
+                if (bp == null)
+                    return new GetBusinessResponse(null);
+
+                DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(id);
+
+                Business business = new(bp, bs);
+
+                return new GetBusinessResponse(business);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileResponse.Exception($"Error getting business profile by id etab : [{e.Message}]");
+                return GetBusinessResponse.Exception($"Error getting business by id etab : [{e.Message}]");
             }
         }
         /// <summary>
-        /// Get BP by idEtab.
+        /// Get BP smooth list by id etab list.
         /// </summary>
         /// <param name="idEtabList"></param>
         [HttpPost("bp/id-etab-list")]
         [Authorize]
-        public ActionResult<GetBusinessProfileSmoothListResponse> GetBusinessProfileSmoothListByIdEtab([FromBody] List<string> idEtabList)
+        public ActionResult<GetBusinessListResponse> GetBusinessListByIdEtab([FromBody] List<string> idEtabList)
         {
             try
             {
                 using DbLib db = new();
-                List<BusinessProfileSmooth?> bpList = [];
-                foreach ( var idEtab in idEtabList )
+                List<Business>? bpList = [];
+
+                foreach (var idEtab in idEtabList)
                 {
-                    bpList.Add(db.GetBusinessSmoothByIdEtab(idEtab.Trim()));
+                    string id = idEtab.Trim();
+                    DbBusinessProfile? bp = db.GetBusinessByIdEtab(id);
+
+                    if (bp == null)
+                        break;
+
+                    DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(id);
+
+                    Business? business = new(bp, bs);
+                    bpList.Add(business);
                 }
 
-                return new GetBusinessProfileSmoothListResponse(bpList);
+                return new GetBusinessListResponse(bpList);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileSmoothListResponse.Exception($"Error getting business profile smooth list by id etab list : [{e.Message}]");
+                return GetBusinessListResponse.Exception($"Error getting business list by id etab list : [{e.Message}]");
             }
         }
         /// <summary>
-        /// Get BP smooth list by place id.
+        /// Get BP by place id.
         /// </summary>
         /// <param name="placeId"></param>
         [HttpPost("bp/place-id")]
         [Authorize]
-        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByPlaceId([FromBody] string placeId)
+        public ActionResult<GetBusinessResponse> GetBusinessByPlaceId([FromBody] string placeId)
         {
             try
             {
                 using DbLib db = new();
-                DbBusinessProfile? businessProfile = db.GetBusinessByPlaceId(placeId);
+                string id = placeId.Trim();
 
-                if (businessProfile == null)
-                    return new GetBusinessProfileResponse(null, null);
+                DbBusinessProfile? bp = db.GetBusinessByPlaceId(id);
 
-                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
+                if (bp == null)
+                    return new GetBusinessResponse(null);
 
-                return new GetBusinessProfileResponse(businessProfile, businessScore);
+                DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(id);
+
+                Business? business = new(bp, bs);
+
+                return new GetBusinessResponse(business);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileResponse.Exception($"Error getting business profile by place id : [{e.Message}]");
+                return GetBusinessResponse.Exception($"Error getting business by place id : [{e.Message}]");
             }
         }
         /// <summary>
-        /// Get BP smooth list by id etab.
+        /// Get BP smooth list by place id list.
         /// </summary>
         /// <param name="placeIdList"></param>
         [HttpPost("bp/place-id-list")]
         [Authorize]
-        public ActionResult<GetBusinessProfileSmoothListResponse> GetBusinessProfileSmoothListByPlaceId([FromBody] List<string> placeIdList)
+        public ActionResult<GetBusinessListResponse> GetBusinessListByPlaceId([FromBody] List<string> placeIdList)
         {
             try
             {
                 using DbLib db = new();
-                List<BusinessProfileSmooth?> bpList = [];
+                List<Business>? bpList = [];
+
                 foreach (var placeId in placeIdList)
                 {
-                    bpList.Add(db.GetBusinessSmoothByPlaceId(placeId.Trim()));
+                    string id = placeId.Trim();
+                    DbBusinessProfile? bp = db.GetBusinessByPlaceId(id);
+
+                    if (bp == null)
+                        continue;
+
+                    DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(bp.IdEtab);
+
+                    Business business = new(bp, bs);
+
+                    bpList.Add(business);
                 }
 
-                return new GetBusinessProfileSmoothListResponse(bpList);
+                return new GetBusinessListResponse(bpList);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileSmoothListResponse.Exception($"Error getting business profile smooth list by place id list : [{e.Message}]");
+                return GetBusinessListResponse.Exception($"Error getting business list by place id list : [{e.Message}]");
             }
         }
         /// <summary>
@@ -252,24 +287,78 @@ namespace GMB.BusinessService.Api.Controller
         /// <param name="url"></param>
         [HttpPost("bp/url")]
         [Authorize]
-        public ActionResult<GetBusinessProfileResponse> GetBusinessProfileByUrl([FromBody] string url)
+        public async Task<ActionResult<GetBusinessResponse>> GetBusinessByUrlAsync([FromBody] string url)
         {
             try
             {
                 using DbLib db = new();
-                DbBusinessUrl? businessUrl = db.GetBusinessUrlByUrlEncoded(ToolBox.ComputeMd5Hash(url));
 
-                if (businessUrl == null)
-                    return new GetBusinessProfileResponse(null, null);
+                DbBusinessProfile? bp = db.GetBusinessByUrl(url);
 
-                DbBusinessProfile? businessProfile = db.GetBusinessByGuid(businessUrl.Guid);
-                DbBusinessScore? businessScore = db.GetBusinessScoreByIdEtab(businessProfile.IdEtab);
+                if (bp != null)
+                {
+                    DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(bp.IdEtab);
+                    Business? business = new(bp, bs);
+                    return new GetBusinessResponse(business);
+                }
 
-                return new GetBusinessProfileResponse(businessProfile, businessScore);
+                ScannerFunctions scannerFunction = new();
+                SeleniumDriver driver = new();
+
+                GetBusinessProfileRequest request = new(url);
+                (DbBusinessProfile? bp2, DbBusinessScore? bs2) = await scannerFunction.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+
+                DbBusinessProfile? bpInDb = db.GetBusinessByIdEtab(bp2.IdEtab);
+
+                if (bpInDb != null)
+                    return new GetBusinessResponse(new(bpInDb, bs2));
+                else
+                    return new GetBusinessResponse(null);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessProfileResponse.Exception($"Error getting business profile by url : [{e.Message}]");
+                return GetBusinessResponse.Exception($"Error getting business by url : [{url}]. Error : [{e.Message}]");
+            }
+        }
+        /// <summary>
+        /// Get BP list by url list.
+        /// </summary>
+        /// <param name="urlList"></param>
+        [HttpPost("bp/url-list")]
+        [Authorize]
+        public async Task<ActionResult<GetBusinessListResponse>> GetBusinessListByUrlAsync([FromBody] List<string> urlList)
+        {
+            try
+            {
+                using DbLib db = new();
+                List<Business>? bpList = [];
+
+                foreach(string url in urlList)
+                {
+                    DbBusinessProfile? bp = db.GetBusinessByUrl(url);
+
+                    if (bp != null)
+                    {
+                        bpList.Add(new(bp, db.GetBusinessScoreByIdEtab(bp.IdEtab)));
+                        continue;
+                    }
+
+                    ScannerFunctions scannerFunction = new();
+                    SeleniumDriver driver = new();
+
+                    GetBusinessProfileRequest request = new(url);
+                    (DbBusinessProfile? bp2, DbBusinessScore? bs) = await scannerFunction.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+
+                    DbBusinessProfile? bpInDb = db.GetBusinessByIdEtab(bp2.IdEtab);
+
+                    if (bpInDb != null)
+                        bpList.Add(new(bpInDb, db.GetBusinessScoreByIdEtab(bpInDb.IdEtab)));
+                }
+                return new GetBusinessListResponse(bpList);
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetBusinessListResponse.Exception($"Error getting business list by url list. Error : [{e.Message}]");
 
             }
         }
@@ -300,14 +389,14 @@ namespace GMB.BusinessService.Api.Controller
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetIdEtabResponse.Exception($"Error getting business profile by id etab : [{e.Message}]");
+                return GetIdEtabResponse.Exception($"Error getting id etab list by place id list : [{e.Message}]");
             }
         }
         /// <summary>
         /// Get ID ETAB by given Place ID.
         /// </summary>
         /// <param name="placeId"></param>
-        /// <returns>Id etab list with the id etab or empty if not found</returns>
+        /// <returns>Id etab or empty if not found</returns>
         [HttpPost("id-etab/place-id")]
         [Authorize]
         public ActionResult<GetIdEtabResponse> GetIdEtabByPlaceId([FromBody] string placeId)
@@ -326,7 +415,7 @@ namespace GMB.BusinessService.Api.Controller
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetIdEtabResponse.Exception($"Error getting business profile by id etab : [{e.Message}]");
+                return GetIdEtabResponse.Exception($"Error getting id etab by place id : [{e.Message}]");
             }
         }
         #endregion
@@ -335,15 +424,15 @@ namespace GMB.BusinessService.Api.Controller
         /// <summary>
         /// Update BP.
         /// </summary>
-        /// <param name="businessProfile"></param>
+        /// <param name="business"></param>
         [HttpPut("bp/update")]
         [Authorize]
-        public ActionResult<GenericResponse> UpdateBusinessProfile([FromBody] DbBusinessProfile businessProfile)
+        public ActionResult<GenericResponse> UpdateBusinessProfile([FromBody] Business business)
         {
             try
             {
                 using DbLib db = new();
-                db.UpdateBusinessProfileFromWeb(businessProfile);
+                db.UpdateBusinessProfileFromWeb(business);
 
                 return new GenericResponse();
             } catch (Exception e)
