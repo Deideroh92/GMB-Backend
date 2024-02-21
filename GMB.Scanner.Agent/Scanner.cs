@@ -50,7 +50,7 @@ namespace GMB.Scanner.Agent
                     if (businessAgent.IdEtab != null)
                         business = db.GetBusinessByIdEtab(businessAgent.IdEtab);
 
-                    if (!driver.IsDriverAlive() || count == 1000)
+                    if (!driver.IsDriverAlive() || count == 500)
                     {
                         driver.Dispose();
                         driver = new();
