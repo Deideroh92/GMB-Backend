@@ -4,7 +4,7 @@ using GMB.Sdk.Core.Types.Models;
 
 namespace GMB.Sdk.Core.Types.Api
 {
-    public class BusinessScannerRequest(int? entries, int processing, Operation operationType, bool getReviews, DateTime reviewsDate, bool isNetwork = false, bool isIndependant = false, CategoryFamily? categoryFamily = null, string? brand = null, string? category = null, UrlState urlState = UrlState.NEW)
+    public class BusinessScannerRequest(int? entries, int processing, Operation operationType, bool getReviews, DateTime reviewsDate, bool isNetwork = false, bool isIndependant = false, CategoryFamily? categoryFamily = null, string? brand = null, string? category = null, UrlState urlState = UrlState.NEW, bool updateProcessingState = true)
     {
         public int? Entries { get; set; } = entries;
         public int Processing { get; set; } = processing;
@@ -17,5 +17,6 @@ namespace GMB.Sdk.Core.Types.Api
         public string? Brand { get; set; } = brand;
         public string? Category { get; set; } = category;
         public UrlState UrlState { get; set; } = urlState;
+        public bool UpdateProcessingState { get; set; } = updateProcessingState;
     }
 }

@@ -1,4 +1,5 @@
-﻿using OpenQA.Selenium;
+﻿using Microsoft.Extensions.Options;
+using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
@@ -21,14 +22,18 @@ namespace GMB.Sdk.Core.Types.Models
             try
             {
                 ChromeOptions chromeOptions = new();
-                //chromeOptions.AddArguments("--headless");
+                chromeOptions.AddArguments("--headless=new");
                 chromeOptions.AddArguments("--lang=fr");
+                chromeOptions.AddArguments("--window-size=1920,1200");
                 chromeOptions.AddArguments("--disable-gpu");
                 chromeOptions.AddArguments("--no-sandbox");
+                chromeOptions.AddArguments("--ignore-certificate-errors");
+                chromeOptions.AddArguments("--disable-extensions");
                 chromeOptions.AddArguments("--disable-dev-shm-usage");
 
                 new DriverManager().SetUpDriver(new ChromeConfig());
                 WebDriver = new ChromeDriver(chromeOptions);
+
             } catch (Exception)
             {
                 throw new Exception("Failed initializing driver");
@@ -40,14 +45,20 @@ namespace GMB.Sdk.Core.Types.Models
         /// </summary>
         public void AcceptCookies()
         {
-            // Locating button and scrolling to it.
-            ((IJavaScriptExecutor)WebDriver).ExecuteScript("arguments[0].scrollIntoView(true);", ToolBox.FindElementSafe(WebDriver, new List<By>(XPathDriver.acceptCookies)));
+            try
+            {
+                // Locating button and scrolling to it.
+                ((IJavaScriptExecutor)WebDriver).ExecuteScript("arguments[0].scrollIntoView(true);", ToolBox.FindElementSafe(WebDriver, new List<By>(XPathDriver.acceptCookies)));
 
-            // Clicking on accept cookies button.
-            WebDriverWait wait = new(WebDriver, TimeSpan.FromSeconds(2));
-            IWebElement acceptButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(WebDriver, XPathDriver.acceptCookies)));
-            acceptButton.Click();
-            Thread.Sleep(3000);
+                // Clicking on accept cookies button.
+                WebDriverWait wait = new(WebDriver, TimeSpan.FromSeconds(2));
+                IWebElement acceptButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(WebDriver, XPathDriver.acceptCookies)));
+                acceptButton.Click();
+                Thread.Sleep(3000);
+            } catch (Exception)
+            {
+                System.Diagnostics.Debug.WriteLine("No cookie page.");
+            }
         }
 
         /// <summary>

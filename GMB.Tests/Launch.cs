@@ -112,7 +112,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task GetBPFromUrlListAsync()
         {
-            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Sdk.Core\Files\Custom.txt";
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Sdk.Core\Files\Custom2.txt";
             using DbLib db = new();
 
             List<string> values = [];
@@ -129,17 +129,21 @@ namespace GMB.Tests
 
             BusinessController controller = new();
 
+            List<Task> tasks = [];
+
             ActionResult<GetBusinessListResponse> response = await controller.GetBusinessListByUrlAsync(values);
 
             string outputFilePath = "file.csv";
-            using StreamWriter writer = new(outputFilePath);
-
-            foreach(Business? business in response.Value.BusinessList)
+            using StreamWriter writer = new(outputFilePath, true);
+            foreach (Business? business in response.Value.BusinessList)
             {
                 if (business != null)
-                    writer.Write(business.IdEtab + ";" + business.PlaceId);
+                    await writer.WriteAsync(business.Id + ";" + business.IdEtab + ";" + business.PlaceId + Environment.NewLine);
+                else
+                    await writer.WriteAsync(business.Id + ";" + business.IdEtab + ";" + business.PlaceId + "not found" + Environment.NewLine);
             }
         }
+
         /// <summary>
         /// Starting Scanner.
         /// </summary>
@@ -148,7 +152,7 @@ namespace GMB.Tests
         {
             AuthorizationPolicyService policy = new();
             ScannerController scannerController = new(policy);
-            BusinessScannerRequest request = new(100000, 13, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddMonths(-12));
+            BusinessScannerRequest request = new(10000, 4, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddDays(-12), false, false, null, null, null, UrlState.NEW, false);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;

@@ -43,17 +43,18 @@ namespace GMB.ScannerService.Api.Controller
                         break;
                 }
 
-                int nbThreads = 1;
+                int nbThreads = 8;
 
                 foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
                 {
                     threadNumber++;
                     Task newThread = Task.Run(async () =>
                     {
-                        ScannerBusinessRequest scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, false);
+                        ScannerBusinessRequest scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState);
                         await Scanner.Agent.Scanner.BusinessScanner(scannerRequest).ConfigureAwait(false);
                     });
                     tasks.Add(newThread);
+                    Thread.Sleep(15000);
                 }
                 await Task.WhenAll(tasks);
                 return new GenericResponse(1, "Scanner launched sucessfully.");

@@ -1,6 +1,8 @@
-using GMB.Sdk.Core;
+using GMB.BusinessService.Api.Controller;
+using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace GMB.Tests
@@ -10,9 +12,9 @@ namespace GMB.Tests
     {
 
         [TestMethod]
-        public void Main()
+        public async void Main()
         {
-            string filePath = "2024-02-07-URL MAX POUR PLACE ID.txt";
+            string filePath = "input.txt";
             string[] lines = File.ReadAllLines(filePath);
             string outputFilePath = "file.csv";
             using StreamWriter writer = new(outputFilePath);
@@ -21,11 +23,13 @@ namespace GMB.Tests
 
             List<string> stringList = [.. lines];
 
-            List<BusinessAgent> bpList = db.GetBusinessAgentNetworkListByUrlList(stringList, false, false);
+            BusinessController controller = new();
 
-            foreach (BusinessAgent bp in bpList)
+            ActionResult<GetBusinessListResponse> response = await controller.GetBusinessListByUrlAsync(stringList);
+
+            foreach (Business? bp in response.Value.BusinessList)
             {
-                writer.WriteLine(bp.Url + ";" + bp.IdEtab + ";" + bp.PlaceId);
+                writer.WriteLine(bp.PlaceUrl + ";" + bp.IdEtab + ";" + bp.PlaceId);
             }
             return;
         }

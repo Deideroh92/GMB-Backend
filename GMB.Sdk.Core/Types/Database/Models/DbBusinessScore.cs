@@ -33,7 +33,7 @@
         /// </summary>
         public void CheckValidity()
         {
-            if (Score != null && (NbReviews == null || NbReviews == 0) || NbReviews != null && (Score == null || Score == 0))
+            if (Score != null && (NbReviews == null || NbReviews == 0) || NbReviews != null && (Score == null || Score == 0) || Score > 5 || Score < 1)
             {
                 Score = null;
                 NbReviews = null;

@@ -194,7 +194,7 @@ namespace GMB.BusinessService.Api.Controller
             try
             {
                 using DbLib db = new();
-                List<Business>? bpList = [];
+                List<Business?>? bpList = [];
 
                 foreach (var idEtab in idEtabList)
                 {
@@ -257,7 +257,7 @@ namespace GMB.BusinessService.Api.Controller
             try
             {
                 using DbLib db = new();
-                List<Business>? bpList = [];
+                List<Business?>? bpList = [];
 
                 foreach (var placeId in placeIdList)
                 {
@@ -331,29 +331,73 @@ namespace GMB.BusinessService.Api.Controller
             try
             {
                 using DbLib db = new();
-                List<Business>? bpList = [];
+                List<Business?>? bpList = [];
 
-                foreach(string url in urlList)
+                SeleniumDriver driver = new();
+                ScannerFunctions scannerFunction = new();
+                int i = 0;
+
+                string outputFilePath = "file2.csv";
+                using StreamWriter writer = new(outputFilePath, true);
+
+                
+
+                foreach (string url in urlList)
                 {
                     DbBusinessProfile? bp = db.GetBusinessByUrl(url);
 
                     if (bp != null)
                     {
-                        bpList.Add(new(bp, db.GetBusinessScoreByIdEtab(bp.IdEtab)));
+                        Business b = new(bp, db.GetBusinessScoreByIdEtab(bp.IdEtab))
+                        {
+                            Id = url
+                        };
+                        bpList.Add(b);
+                        await writer.WriteAsync(b.Id + ";" + b.IdEtab + ";" + b.PlaceId + Environment.NewLine);
                         continue;
                     }
 
-                    ScannerFunctions scannerFunction = new();
-                    SeleniumDriver driver = new();
+                    if (i == 50)
+                    {
+                        driver.Dispose();
+                        driver = new();
+                        i = 0;
+                    }   
 
-                    GetBusinessProfileRequest request = new(url);
-                    (DbBusinessProfile? bp2, DbBusinessScore? bs) = await scannerFunction.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+                    try
+                    {
+                        GetBusinessProfileRequest request = new(url);
+                        (DbBusinessProfile? bp2, DbBusinessScore? bs) = await scannerFunction.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null, false);
 
-                    DbBusinessProfile? bpInDb = db.GetBusinessByIdEtab(bp2.IdEtab);
+                        DbBusinessProfile? bpInDb = db.GetBusinessByIdEtab(bp2.IdEtab);
 
-                    if (bpInDb != null)
-                        bpList.Add(new(bpInDb, db.GetBusinessScoreByIdEtab(bpInDb.IdEtab)));
+                        if (bpInDb != null)
+                        {
+                            Business b = new(bpInDb, db.GetBusinessScoreByIdEtab(bpInDb.IdEtab))
+                            {
+                                Id = url
+                            };
+                            bpList.Add(b);
+                            await writer.WriteAsync(b.Id + ";" + b.IdEtab + ";" + b.PlaceId + Environment.NewLine);
+                        }
+                        else
+                        {
+                            bpList.Add(null);
+                            await writer.WriteAsync(url + ";" + "nothing found" + Environment.NewLine);
+                        }
+                            
+                        
+                        i++;
+                    }
+                    catch (Exception e)
+                    {
+                        Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                        bpList.Add(null);
+                        await writer.WriteAsync(url + ";" + "nothing found" + Environment.NewLine);
+                    }
                 }
+
+                driver.Dispose();
                 return new GetBusinessListResponse(bpList);
             } catch (Exception e)
             {

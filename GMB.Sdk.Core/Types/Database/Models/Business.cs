@@ -1,16 +1,8 @@
-﻿using GMB.Sdk.Core.Types.Api;
-using Serilog;
-using static System.Formats.Asn1.AsnWriter;
-using System.Diagnostics.Metrics;
-using System.Net.NetworkInformation;
-using System.Net;
-using System.Xml.Linq;
-
-namespace GMB.Sdk.Core.Types.Database.Models
+﻿namespace GMB.Sdk.Core.Types.Database.Models
 {
     public class Business
     {
-        public long Id { get; set; }
+        public string? Id { get; set; }
         public string IdEtab { get; set; }
         public string? PlaceId { get; set; }
         public string FirstGuid { get; set; }

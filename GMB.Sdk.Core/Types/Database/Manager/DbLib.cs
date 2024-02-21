@@ -812,10 +812,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             try
             {
                 string urlEncoded = ToolBox.ComputeMd5Hash(url);
-                string selectCommand = "SELECT * FROM vBUSINESS_PROFILE WHERE URL = @urlEncoded";
+                string selectCommand = "SELECT * FROM vBUSINESS_PROFILE WHERE URL_MD5 = @urlEncoded";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@urlEncoded", urlEncoded);
+                cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())

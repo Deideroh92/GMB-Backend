@@ -77,8 +77,21 @@ namespace GMB.Scanner.Agent.Core
                 #region Score
                 double? parsedScore = null;
 
-                if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null && double.TryParse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim(), out double parsedScoreValue))
-                    parsedScore = parsedScoreValue;
+                if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null)
+                {
+                    string? scoreString = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim();
+
+                    if (scoreString != null)
+                    {
+                        // Replace commas with dots (or dots with commas)
+                        scoreString = scoreString.Replace(',', '.');
+
+                        if (double.TryParse(scoreString, out double parsedScoreValue))
+                        {
+                            parsedScore = parsedScoreValue;
+                        }
+                    }
+                }
 
                 score ??= parsedScore ?? double.Parse(ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hotelScore)?.Text ?? "0");
 
