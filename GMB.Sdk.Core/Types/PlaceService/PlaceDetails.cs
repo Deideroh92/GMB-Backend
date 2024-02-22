@@ -1,4 +1,4 @@
-﻿namespace GMB.Sdk.Core.Types.Models
+﻿namespace GMB.Sdk.Core.Types.PlaceService
 {
     public class PlaceDetails(string placeId, string name, string? firstType, string? address, string? streetNumber, string? postalCode, string? city, double? lat, double? lon, string? country, string? phone, string? phoneInternational, string? website, string? plusCode, string? url, string? status, double? rating, int? userRatingsTotal)
     {

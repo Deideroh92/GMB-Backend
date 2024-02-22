@@ -1,6 +1,7 @@
 ﻿using AngleSharp.Io;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
+using GMB.Sdk.Core.Types.PlaceService;
 using System.Data.SqlClient;
 
 namespace GMB.Sdk.Core.Types.Database.Manager

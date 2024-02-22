@@ -1,4 +1,4 @@
-﻿using GMB.Sdk.Core.Types.Models;
+﻿using GMB.Sdk.Core.Types.PlaceService;
 
 namespace GMB.Sdk.Core.Types.Api
 {

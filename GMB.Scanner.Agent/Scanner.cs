@@ -1,10 +1,10 @@
 ﻿using GMB.BusinessService.Api.Models;
 using GMB.Scanner.Agent.Core;
-using GMB.Scanner.Agent.Models;
 using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
+using GMB.Sdk.Core.Types.ScannerService;
 using Serilog;
 using System.Globalization;
 
@@ -14,7 +14,7 @@ namespace GMB.Scanner.Agent
     {
         private static readonly string logsPath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.ScannerService.Api\logs\log";
 
-        public static async Task BusinessScanner(ScannerBusinessRequest request)
+        public static async Task BusinessScanner(ScannerBusinessParameters request)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 
@@ -23,12 +23,6 @@ namespace GMB.Scanner.Agent
             .CreateLogger();
 
             ScannerFunctions scanner = new();
-
-            if (await scanner.WeeklyTestAsync() == false)
-            {
-                Log.Error($"XPATH was modified, can't scan anything.");
-                return;
-            }
 
             using DbLib db = new();
             SeleniumDriver driver = new();
@@ -143,7 +137,7 @@ namespace GMB.Scanner.Agent
         /// Start the URL Scanner.
         /// </summary>
         /// <param name="request"></param>
-        public static void ScannerUrl(ScannerUrlRequest request)
+        public static void ScannerUrl(ScannerUrlParameters request)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 

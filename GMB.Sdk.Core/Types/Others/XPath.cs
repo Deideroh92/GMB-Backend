@@ -24,7 +24,7 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> nbReviews = [By.XPath("//button[contains(@jsaction, 'pane.rating.moreReviews')]"), By.XPath("//span[contains(@arial-label, 'avis')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]")];
         public static readonly List<By> tel = [By.XPath("//button[contains(@aria-label, 'Numéro de téléphone:')]")];
         public static readonly List<By> website = [By.XPath("//button[contains(@aria-label, 'Site Web:')]"), By.XPath("//a[contains(@aria-label, 'Site Web:')]")];
-        public static readonly List<By> score = [By.XPath("//span[contains(@aria-label, 'étoiles') and contains(@role, 'img')]"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]")];
+        public static readonly List<By> score = [By.XPath("//span[substring(@aria-label, string-length(@aria-label) - string-length('étoiles ') + 1) = 'étoiles ' and contains(@role, 'img')]\r\n"), By.XPath("//button[contains(@jsaction, 'pane.reviewChart.moreReviews')]")];
         public static readonly List<By> status = [By.XPath("//div[contains(@jsaction, 'pane.openhours')]")];
         public static readonly List<By> globalScore = [By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]")];
         public static readonly List<By> img = [By.XPath("//img[contains(@decoding, 'async')]")];
@@ -43,6 +43,7 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> optionsOn = [By.XPath("//div[contains(@aria-label, 'est disponible')]")];
         public static readonly List<By> hotelScore = [By.XPath("//div[contains(@jsan, 'fontDisplayLarge') and @class='fontDisplayLarge']")];
 
+
         // Place ID
         public static readonly List<By> placeId = [By.XPath("//script[contains(text(), 'https://search.google.com/local/reviews?placeid')]")];
     }
@@ -53,20 +54,25 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> toReviewsPage = [By.XPath("//button[@role='tab' and contains(@aria-label, 'Avis')]")];
         public static readonly List<By> sortReviews = [By.XPath("//button[@data-value='Trier']")];
         public static readonly List<By> sortReviews2 = [By.XPath("//li[@data-index='1']"), By.XPath("//div[@data-index='1']")];
-        public static readonly List<By> reviewList = new() { By.XPath("//div[@data-review-id and @aria-label]") };
+        public static readonly List<By> reviewList = [By.XPath("//div[@data-review-id and @aria-label]")];
         public static readonly List<By> scrollingPanel = [By.XPath("//button[@aria-label='Rédiger un avis']")];
 
         // Review info
         public static readonly List<By> googleDate = [By.XPath(".//span[contains(text(), 'il y a')]")];
         public static readonly List<By> userName = [By.XPath(".//a[contains(@aria-label, 'Photo de')]"), By.XPath(".//button[contains(@aria-label, 'Photo de')]")];
-        public static readonly List<By> score = new() { By.XPath(".//span[contains(@role, 'img') and contains(@aria-label, 'étoile')]") };
+        public static readonly List<By> score = [By.XPath(".//span[contains(@role, 'img') and contains(@aria-label, 'étoile')]")];
         public static readonly List<By> userNbReviews = [By.XPath(".//div[contains(text(), 'avis')]")];
         public static readonly List<By> text = [By.XPath(".//div[contains(@class, 'MyEned')]")];
         public static readonly List<By> plusButton = [By.XPath(".//button[contains(@jsaction, 'pane.review.expandReview')]")];
 
-
         // Review reply info
         public static readonly List<By> replyText = [By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::div")];
         public static readonly List<By> replyGoogleDate = [By.XPath(".//span[contains(text(), 'Réponse du propriétaire')]/following::span")];
+
+        // Hotels
+        public static readonly List<By> hotelSortGoogleReviews = [By.XPath("//button[@aria-label='Tous les avis']")];
+        public static readonly List<By> hotelSortPress = [By.XPath("//div[@data-index='1']")];
+        public static readonly List<By> hotelSortReviews = [By.XPath("//button[@aria-label='Avis les plus pertinents']")];
+        public static readonly List<By> hotelScore = [By.XPath(".//span[contains(text(), 'il y a')]/preceding-sibling::span")];
     }
 }

@@ -12,6 +12,12 @@ using System.Text.RegularExpressions;
 
 namespace GMB.Scanner.Agent.Core
 {
+    public class TestResult(bool success, string? message = null)
+    {
+        public bool Success { get; set; } = success;
+        public string? Message { get; set; } = message;
+    }
+
     public class ScannerFunctions
     {
         static void Main() { }
@@ -79,6 +85,7 @@ namespace GMB.Scanner.Agent.Core
 
                 if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null)
                 {
+                    string? test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label");
                     string? scoreString = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim();
 
                     if (scoreString != null)
@@ -198,7 +205,7 @@ namespace GMB.Scanner.Agent.Core
         /// <param name="idEtab"></param>
         /// <param name="dateLimit"></param>
         /// <param name="driver"></param>
-        public static List<DbBusinessReview>? GetReviews(string idEtab, DateTime? dateLimit, SeleniumDriver driver)
+        public static List<DbBusinessReview>? GetReviews(string idEtab, DateTime? dateLimit, SeleniumDriver driver, bool isHotel = false)
         {
 
             try
@@ -206,9 +213,6 @@ namespace GMB.Scanner.Agent.Core
                 WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
                 IWebElement toReviewPage = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[@role='tab' and contains(@aria-label, 'Avis')]")));
                 toReviewPage.Click();
-            } catch (WebDriverTimeoutException)
-            {
-                return null;
             } catch (Exception e)
             {
                 throw new Exception("Couldn't get to review pages", e);
@@ -217,7 +221,17 @@ namespace GMB.Scanner.Agent.Core
             Thread.Sleep(2000);
 
             // Sorting reviews.
-            SortReviews(driver.WebDriver);
+            try
+            {
+                if (isHotel)
+                    SortHotelReviews(driver.WebDriver);
+                else SortReviews(driver.WebDriver);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Couldn't sort Reviews.", e);
+            }
+
 
             Thread.Sleep(1000);
 
@@ -235,7 +249,8 @@ namespace GMB.Scanner.Agent.Core
                         if (businessReview == null)
                             continue;
                         businessReviews.Add(businessReview);
-                    } catch (Exception e)
+                    }
+                    catch (Exception e)
                     {
                         Log.Error($"Couldn't treat a review : {e.Message}. Error : {e.StackTrace}", e);
                     }
@@ -280,7 +295,7 @@ namespace GMB.Scanner.Agent.Core
                         break;
                     }
 
-                    reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Trim();
+                    reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Replace(" sur\r\nGoogle", "").Trim();
                     if (reviewGoogleDate != null)
                     {
                         realDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
@@ -331,9 +346,10 @@ namespace GMB.Scanner.Agent.Core
         {
             try
             {
+                int hotelScore = 0;
                 string idReview = reviewWebElement.GetAttribute("data-review-id")?.Trim() ?? throw new Exception("No review id");
 
-                string? reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate)?.Text?.Trim();
+                string? reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate)?.Text?.Replace(" sur\r\nGoogle", "").Trim();
                 DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
 
                 if (reviewGoogleDate == null || dateLimit.HasValue && reviewDate < dateLimit.Value)
@@ -341,14 +357,23 @@ namespace GMB.Scanner.Agent.Core
 
                 string userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName)?.GetAttribute("aria-label")?.Replace("Photo de", "").Trim() ?? "";
 
-                if (!int.TryParse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score)?.GetAttribute("aria-label")?.Replace("étoile", "").Replace("s", "").Trim(), out int reviewScore))
+                if (!int.TryParse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.score)?.GetAttribute("aria-label")?.Replace("étoile", "").Replace("s", "").Trim(), out int reviewScore) && !int.TryParse(ToolBox.FindElementSafe(reviewWebElement, XPathReview.hotelScore)?.Text?.FirstOrDefault().ToString(), out hotelScore))
                     throw new Exception();
 
                 int userNbReviews = 1;
-                string? userNbReviewsText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)?.Text?.Replace("avis", "").Replace("·", "").Replace("Local Guide", "").Replace(" ", "").Trim();
-                if (!string.IsNullOrEmpty(userNbReviewsText) && int.TryParse(userNbReviewsText, out int parsedUserNbReviews))
+                string? userNbReviewsText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)?.Text;
+                
+                if (userNbReviewsText != null)
                 {
-                    userNbReviews = parsedUserNbReviews;
+                    string pattern = @"\b(\d+)\s*avis\b";
+
+                    // Use Regex.Match to find the first match in the input string
+                    Match match = Regex.Match(userNbReviewsText, pattern);
+
+                    if (match.Success && int.TryParse(match.Groups[1].Value, out int parsedUserNbReviews))
+                    {
+                        userNbReviews = parsedUserNbReviews;
+                    }
                 }
 
                 string? reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
@@ -366,7 +391,7 @@ namespace GMB.Scanner.Agent.Core
                     reviewReplyDate = ToolBox.ComputeDateFromGoogleDate(reviewReplyGoogleDate);
                 }
 
-                return new DbBusinessReview(idEtab, ToolBox.ComputeMd5Hash(idEtab + idReview), idReview, user, reviewScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, reviewReplyDate, reviewReplyGoogleDate);
+                return new DbBusinessReview(idEtab, ToolBox.ComputeMd5Hash(idEtab + idReview), idReview, user, reviewScore > 0 ? reviewScore : hotelScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, reviewReplyDate, reviewReplyGoogleDate);
             } catch (Exception)
             {
                 throw new Exception("Couldn't get review info from a review element");
@@ -393,10 +418,41 @@ namespace GMB.Scanner.Agent.Core
             }
         }
 
-        public async Task<bool> WeeklyTestAsync()
+        /// <summary>
+        /// Sort hotel reviews in ascending date order filtering only Google reviews.
+        /// </summary>
+        /// <param name="driver"></param>
+        private static void SortHotelReviews(IWebDriver driver)
+        {
+            try
+            {
+                WebDriverWait wait = new(driver, TimeSpan.FromSeconds(5));
+
+                IWebElement sortButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.hotelSortGoogleReviews)));
+                sortButton.Click();
+
+                sortButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.hotelSortPress)));
+                sortButton.Click();
+
+                Thread.Sleep(2000);
+
+                sortButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.hotelSortReviews)));
+                sortButton.Click();
+
+                sortButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.hotelSortPress)));
+                sortButton.Click();
+            }
+            catch (Exception e)
+            {
+                throw new Exception("Couldn't sort reviews", e);
+            }
+        }
+
+        public static async Task<TestResult> ScannerTest()
         {
             ScannerFunctions scanner = new();
             SeleniumDriver driver = new();
+            DateTime reviewLimit = DateTime.UtcNow.AddDays(-10);
 
             #region Mairie de Paris
             GetBusinessProfileRequest request = new("https://www.google.fr/maps/place/Mairie+de+Paris/@48.8660828,2.3108754,13z/data=!4m10!1m2!2m1!1smairie+de+paris!3m6!1s0x47e66e23b4333db3:0xbc314dec89c4971!8m2!3d48.8641075!4d2.3421539!15sCg9tYWlyaWUgZGUgcGFyaXNaESIPbWFpcmllIGRlIHBhcmlzkgEJY2l0eV9oYWxsmgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVVEyYzA5MWNrbFJFQUXgAQA!16s%2Fg%2F11c6pn36ph?hl=fr&entry=ttu");
@@ -416,7 +472,22 @@ namespace GMB.Scanner.Agent.Core
                 score.Score <= 1 ||
                 score.Score >= 5 ||
                 score.Score == null)
-                return false;
+                return new(false, "Mairie de Paris - Business Profile error !");
+            
+            driver.GetToPage(request.Url);
+            List<DbBusinessReview>? reviews = GetReviews(profile.IdEtab, reviewLimit, driver);
+
+            if (reviews == null)
+                return new(false, "Mairie de Paris - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Mairie de Paris - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Mairie de Paris - Review global error !");
             #endregion
 
             #region Louvre
@@ -432,12 +503,27 @@ namespace GMB.Scanner.Agent.Core
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipM_ApMgFfAP8CP2ZHJUOb13K7P_SqSkW9sh9MFY=w408-h272-k-no" ||
                 profile.PlusCode != "8FW4V86Q+63" ||
-                profile.Tel != "01 40 20 53 17" ||
+                (profile.Tel != "01 40 20 53 17" && profile.Tel != "+33 1 40 20 53 17") ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
                 score.Score >= 5 ||
                 score.Score == null)
-                return false;
+                return new(false, "Louvre - Business Profile error !");
+
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddHours(-3), driver);
+
+            if (reviews == null)
+                return new(false, "Louvre - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Louvre - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Louvre - Reviews global error !");
             #endregion
 
             #region Gare Montparnasse
@@ -457,47 +543,22 @@ namespace GMB.Scanner.Agent.Core
                 score.Score <= 1 ||
                 score.Score >= 5 ||
                 score.Score == null)
-                return false;
-            #endregion
+                return new(false, "Gare Montparnasse - Business Profile error !");
 
-            #region Gare de Bordeaux
-            request = new("https://www.google.fr/maps/place/Bordeaux+Saint-Jean/@44.8332874,-0.6118573,14z/data=!4m10!1m2!2m1!1sgare+de+bordeaux!3m6!1s0xd552648d40fc247:0x2bc94166a0a4eed6!8m2!3d44.8264574!4d-0.5560982!15sChBnYXJlIGRlIGJvcmRlYXV4kgENdHJhaW5fc3RhdGlvbuABAA!16s%2Fg%2F1pxyc0w63?hl=fr&entry=ttu");
-            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Bordeaux Saint-Jean" ||
-                (profile.GoogleAddress != "Rue Charles Domercq, 33800 Bordeaux" && profile.GoogleAddress != "Rue Charles Domercq, 33800 Bordeaux, France") ||
-                profile.City != "Bordeaux" ||
-                profile.Country != "France" ||
-                profile.Category != "Gare" ||
-                profile.Website != "http://www.gares-sncf.com/fr/gare/frboj/bordeaux-saint-jean" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipNnUmG5q3sauygk9_d62NoPVFHDP2q77pdFDylN=w426-h240-k-no" ||
-                profile.PlusCode != "8CPXRCGV+HH" ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return false;
-            #endregion
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddMonths(-1), driver);
 
-            #region Musée de l'Orangerie
-            request = new("https://www.google.fr/maps/place/Mus%C3%A9e+de+l'Orangerie/@48.8637884,2.3226724,17z/data=!3m1!4b1!4m6!3m5!1s0x47e66e2eeaaaaaa3:0xdc3fd08aa701960a!8m2!3d48.8637884!4d2.3226724!16zL20vMGR0M21s?hl=fr&entry=ttu");
-            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Musée de l'Orangerie" ||
-                (profile.GoogleAddress != "Jardin des Tuileries, 75001 Paris" && profile.GoogleAddress != "Jardin des Tuileries, 75001 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75101" ||
-                profile.Country != "France" ||
-                profile.Category != "Musée d'art" ||
-                profile.Website != "https://www.musee-orangerie.fr/" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipONXsHpu5d_TUKzMzGYv4nQECCvQvNYQA7iwMJz=w408-h270-k-no" ||
-                profile.PlusCode != "8FW4V87F+G3" ||
-                profile.Tel != "01 44 50 43 00" ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return false;
+            if (reviews == null)
+                return new(false, "Gare Montparnasse - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Gare Montparnasse - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1))
+                return new(false, "Gare Montparnasse - Reviews global error !");
             #endregion
 
             #region Tour Eiffel
@@ -517,7 +578,22 @@ namespace GMB.Scanner.Agent.Core
                 score.Score <= 1 ||
                 score.Score >= 5 ||
                 score.Score == null)
-                return false;
+                return new(false, "Tour Eiffel - Business Profile error !");
+
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddHours(-3), driver);
+
+            if (reviews == null)
+                return new(false, "Tour Eiffel - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Tour Eiffel - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Tour Eiffel - Reviews global error !");
             #endregion
 
             #region Hôpital Necker
@@ -534,77 +610,27 @@ namespace GMB.Scanner.Agent.Core
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipMnIqT5LZxbYjW8uj7PooQPlFrhQa_8HloZMmvz=w426-h240-k-no" ||
                 profile.PlusCode != "8FW4R8W8+37" ||
-                profile.Tel != "01 44 49 40 00" ||
+                (profile.Tel != "01 44 49 40 00" && profile.Tel != "+33 1 44 49 40 00") ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
                 score.Score >= 5 ||
                 score.Score == null)
-                return false;
-            #endregion
+                return new(false, "Hôpital Necker - Business Profile error !");
 
-            #region Le Parc des Princes
-            request = new("https://www.google.fr/maps/place/Le+Parc+des+Princes/@48.8414356,2.2530484,17z/data=!3m1!4b1!4m6!3m5!1s0x47e67ac09948a18d:0xdd2450406cef2c5c!8m2!3d48.8414356!4d2.2530484!16zL20vMDM5NXNs?hl=fr&entry=ttu");
-            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Le Parc des Princes" ||
-                (profile.GoogleAddress != "24 Rue du Commandant Guilbaud, 75016 Paris" && profile.GoogleAddress != "24 Rue du Commandant Guilbaud, 75016 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75116" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "24" ||
-                profile.Category != "Stade" ||
-                profile.Website != "http://www.psg.fr/" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipNlF3ZAxh0AbfqGaAEHZKCuqbmDmVUbCEBoOdPa=w408-h254-k-no" ||
-                profile.PlusCode != "8FW4R7R3+H6" ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return false;
-            #endregion
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver);
 
-            #region Banque de France
-            request = new("https://www.google.fr/maps/place/Banque+de+France/@48.8642403,2.3395915,17z/data=!3m1!4b1!4m6!3m5!1s0x47e66e247d40c1cb:0xd9c85f8e2e769217!8m2!3d48.8642403!4d2.3395915!16s%2Fg%2F1w2yt5rt?hl=fr&entry=ttu");
-            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Banque de France" ||
-                (profile.GoogleAddress != "31 Rue Croix des Petits Champs, 75001 Paris" && profile.GoogleAddress != "31 Rue Croix des Petits Champs, 75001 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75101" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "31" ||
-                profile.Category != "Banque" ||
-                profile.Website != "https://www.banque-france.fr/la-banque-de-france/missions/protection-du-consommateur/surendettement.html" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipMUP0ngLIPjME6aQ2uynmPAMv5Sd9ldDFj9QcX2=w408-h272-k-no" ||
-                profile.PlusCode != "8FW4V87Q+MR" ||
-                profile.Tel != "01 42 92 42 92" ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return false;
-            #endregion
+            if (reviews == null)
+                return new(false, "Hôpital Necker - Reviews empty !");
 
-            #region Roland-Garros
-            request = new("https://www.google.fr/maps/place/Stade+Roland-Garros/@48.8459632,2.2525486,18z/data=!4m10!1m2!2m1!1sroland+garros!3m6!1s0x47e67ac59c999975:0x9d40606b40c66989!8m2!3d48.8459632!4d2.2538361!15sCg1yb2xhbmQgZ2Fycm9zWg8iDXJvbGFuZCBnYXJyb3OSAQ5zcG9ydHNfY29tcGxleOABAA!16zL20vMDlodHQy?hl=fr&entry=ttu");
-            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Stade Roland-Garros" ||
-                (profile.GoogleAddress != "2 Av. Gordon Bennett, 75016 Paris" && profile.GoogleAddress != "2 Av. Gordon Bennett, 75016 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75116" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "2" ||
-                profile.Category != "Complexe sportif" ||
-                profile.Website != "http://www.rolandgarros.com/" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipMjz4HbqL38hD7PWlS7FvCP39ko48rW75Z83djk=w408-h272-k-no" ||
-                profile.PlusCode != "8FW4R7W3+9G" ||
-                profile.Tel != "01 47 43 48 00" ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return false;
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Hôpital Necker - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Hôpital Necker - Reviews global error !");
             #endregion
 
             #region Maxim's
@@ -621,17 +647,179 @@ namespace GMB.Scanner.Agent.Core
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipNXcE3vwR3faD97mBv7BmuA_G2A2O0a07QpCT8_=w408-h272-k-no" ||
                 profile.PlusCode != "8FW4V88C+XW" ||
-                profile.Tel != "01 42 65 27 94" ||
+                (profile.Tel != "01 42 65 27 94" && profile.Tel != "+33 1 42 65 27 94") ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
                 score.Score >= 5 ||
                 score.Score == null)
-                return false;
+                return new(false, "Maxim's - Business Profile error !");
+
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver);
+
+            if (reviews == null)
+                return new(false, "Maxim's - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Maxim's - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Maxim's - Reviews global error !");
+            #endregion
+
+            #region Ritz Paris
+            request = new("https://www.google.com/maps/place/Ritz+Paris/@48.8681021,2.3240169,17z/data=!3m2!4b1!5s0x47e66e318913a89d:0x6ff08e4d1a846c6!4m10!3m9!1s0x47e66f50e4922355:0x4e7e02b37682a099!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8680987!4d2.3288932!16zL20vMDU2bjgx?entry=ttu");
+            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+            if (profile.Name != "Ritz Paris" ||
+                (profile.GoogleAddress != "15 Pl. Vendôme, 75001 Paris" && profile.GoogleAddress != "15 Pl. Vendôme, 75001 Paris, France") ||
+                profile.City != "Paris" ||
+                profile.CityCode != "75101" ||
+                profile.Country != "France" ||
+                profile.StreetNumber != "15" ||
+                profile.Category != "Hébergement" ||
+                profile.Website != "https://www.ritzparis.com/?utm_source=google&utm_medium=organic&utm_campaign=gmb_ritz_paris" ||
+                profile.Status != BusinessStatus.OPERATIONAL ||
+                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipMbUejTiZA2XDGnkAQYshkrMM2YuPAMWIYA7lIL=w408-h408-k-no" ||
+                profile.PlusCode != "8FW4V89H+6H" ||
+                (profile.Tel != "01 43 16 30 30" && profile.Tel != "+33 1 43 16 30 30") ||
+                score.NbReviews == null ||
+                score.Score <= 1 ||
+                score.Score >= 5 ||
+                score.Score == null)
+                return new(false, "Ritz Paris - Business Profile error !");
+
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddDays(-5), driver, true);
+
+            if (reviews == null)
+                return new(false, "Ritz Paris - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Ritz Paris - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Ritz Paris - Reviews global error !");
+            #endregion
+
+            #region Lasserre
+            request = new("https://www.google.com/maps/place/Lasserre/@48.8697972,2.2942567,15z/data=!3m1!5s0x47e66fdac6120255:0xb3e6ad148f54b824!4m13!1m5!2m4!1srestaurant+gestronomique+paris!5m2!5m1!1s2024-02-22!3m6!1s0x47e66fdac63417f3:0xcf3ba46dec23641b!8m2!3d48.8663494!4d2.3099175!15sCh5yZXN0YXVyYW50IGdhc3Ryb25vbWlxdWUgcGFyaXMiA6ABAVogIh5yZXN0YXVyYW50IGdhc3Ryb25vbWlxdWUgcGFyaXOSARZmaW5lX2RpbmluZ19yZXN0YXVyYW50mgEkQ2hkRFNVaE5NRzluUzBWSlEwRm5TVU5HYlMxNWVGOW5SUkFC4AEA!16s%2Fg%2F1227jzq5?entry=ttu");
+            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+            if (profile.Name != "Lasserre" ||
+                (profile.GoogleAddress != "17 Av. Franklin Delano Roosevelt, 75008 Paris" && profile.GoogleAddress != "17 Av. Franklin Delano Roosevelt, 75008 Paris, France") ||
+                profile.City != "Paris" ||
+                profile.CityCode != "75108" ||
+                profile.Country != "France" ||
+                profile.StreetNumber != "17" ||
+                profile.Category != "Restaurant gastronomique" ||
+                profile.Website != "http://www.restaurant-lasserre.com/" ||
+                profile.Status != BusinessStatus.OPERATIONAL ||
+                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipOCc6_13xBd7MYW4ckoxyKn-vWRfvYC0s-p1wpl=w80-h92-p-k-no" ||
+                profile.PlusCode != "8FW4V885+GX" ||
+                (profile.Tel != "01 43 59 02 13" && profile.Tel != "+33 1 43 59 02 13") ||
+                score.NbReviews == null ||
+                score.Score <= 1 ||
+                score.Score >= 5 ||
+                score.Score == null)
+                return new(false, "Lasserre - Business Profile error !");
+
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver);
+
+            if (reviews == null)
+                return new(false, "Lasserre - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Lasserre - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Lasserre - Reviews global error !");
+            #endregion
+
+            #region Le Meurice
+            request = new("https://www.google.com/maps/place/Le+Meurice/@48.8672778,2.3185144,17z/data=!3m1!5s0x47e66e2de0435427:0x5a05b1d55da9d3ed!4m22!1m11!3m10!1s0x47e66fd2bde4f80b:0x7b976ab67fe636aa!2sH%C3%B4tel+de+Crillon,+A+Rosewood+Hotel!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8672743!4d2.3210947!16zL20vMDRmY3hs!3m9!1s0x47e66f37dc585251:0xe0a171bc7aaa5c94!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8651888!4d2.3280831!16s%2Fg%2F11j9fyhgz2?entry=ttu");
+            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+            if (profile.Name != "Le Meurice" ||
+                (profile.GoogleAddress != "228 Rue de Rivoli, 75001 Paris" && profile.GoogleAddress != "228 Rue de Rivoli, 75001 Paris, France") ||
+                profile.City != "Paris" ||
+                profile.CityCode != "75101" ||
+                profile.Country != "France" ||
+                profile.StreetNumber != "228" ||
+                profile.Category != "Hébergement" ||
+                profile.Website != "https://www.dorchestercollection.com/paris/le-meurice" ||
+                profile.Status != BusinessStatus.OPERATIONAL ||
+                profile.PlusCode != "8FW4V88H+36" ||
+                (profile.Tel != "01 44 58 10 10" && profile.Tel != "+33 1 44 58 10 10") ||
+                score.NbReviews == null ||
+                score.Score <= 1 ||
+                score.Score >= 5 ||
+                score.Score == null)
+                return new(false, "Le Meurice - Business Profile error !");
+
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddDays(-5), driver, true);
+
+            if (reviews == null)
+                return new(false, "Le Meurice - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Le Meurice - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Le Meurice - Reviews global error !");
+            #endregion
+
+            #region Hôtel de Crillon
+            request = new("https://www.google.com/maps/place/H%C3%B4tel+de+Crillon,+A+Rosewood+Hotel/@48.8672778,2.3185144,17z/data=!3m1!4b1!4m10!3m9!1s0x47e66fd2bde4f80b:0x7b976ab67fe636aa!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8672743!4d2.3210947!16zL20vMDRmY3hs?entry=ttu");
+            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+            if (profile.Name != "Hôtel de Crillon, A Rosewood Hotel" ||
+                (profile.GoogleAddress != "10 Pl. de la Concorde, 75008 Paris" && profile.GoogleAddress != "10 Pl. de la Concorde, 75008 Paris, France") ||
+                profile.City != "Paris" ||
+                profile.CityCode != "75108" ||
+                profile.Country != "France" ||
+                profile.StreetNumber != "10" ||
+                profile.Category != "Hébergement" ||
+                profile.Website != "https://www.rosewoodhotels.com/en/hotel-de-crillon" ||
+                profile.Status != BusinessStatus.OPERATIONAL ||
+                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipPrDQ-iNJMgX4eMb0VllLzJnW-GKN87ySC2kulh=w408-h252-k-no" ||
+                profile.PlusCode != "8FW4V88C+WC" ||
+                (profile.Tel != "01 44 71 15 00" && profile.Tel != "+33 1 44 71 15 00") ||
+                score.NbReviews == null ||
+                score.Score <= 1 ||
+                score.Score >= 5 ||
+                score.Score == null)
+                return new(false, "Hôtel de Crillon - Business Profile error !");
+
+            driver.GetToPage(request.Url);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true);
+
+            if (reviews == null)
+                return new(false, "Hôtel de Crillon - Reviews empty !");
+
+            foreach (DbBusinessReview review in reviews)
+            {
+                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                    return new(false, "Hôtel de Crillon - Review loop error !");
+            }
+
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+                return new(false, "Hôtel de Crillon - Reviews global error !");
             #endregion
 
             driver.Dispose();
 
-            return true;
+            return new(true, "Test executed successfully.");
         }
         #endregion
 

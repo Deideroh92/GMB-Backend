@@ -1,4 +1,5 @@
 using GMB.BusinessService.Api.Controller;
+using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
@@ -31,6 +32,13 @@ namespace GMB.Tests
             {
                 writer.WriteLine(bp.PlaceUrl + ";" + bp.IdEtab + ";" + bp.PlaceId);
             }
+            return;
+        }
+
+        [TestMethod]
+        public void SendMail()
+        {
+            ToolBox.SendEmail("test");
             return;
         }
     }

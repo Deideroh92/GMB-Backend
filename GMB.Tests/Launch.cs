@@ -1,12 +1,12 @@
 using GMB.BusinessService.Api.Controller;
 using GMB.Scanner.Agent.Core;
-using GMB.Scanner.Agent.Models;
 using GMB.ScannerService.Api.Controller;
 using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
+using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -35,7 +35,7 @@ namespace GMB.Tests
 
             foreach (string search in categories)
             {
-                ScannerUrlRequest request = new(locations.Select(s => s.Replace(';', ' ').Replace(' ', '+')).ToList(), search.Trim().Replace(' ', '+'));
+                ScannerUrlParameters request = new(locations.Select(s => s.Replace(';', ' ').Replace(' ', '+')).ToList(), search.Trim().Replace(' ', '+'));
                 Task newThread = Task.Run(async () =>
                 {
                     await semaphore.WaitAsync(); // Wait until there's an available slot to run
@@ -71,12 +71,12 @@ namespace GMB.Tests
         /// Weekly testing for XPATH.
         /// </summary>
         [TestMethod]
-        public async Task WeeklyTestAsync()
+        public async Task ScannerTest()
         {
             ScannerFunctions scanner = new();
             SeleniumDriver driver = new();
 
-            _ = await scanner.WeeklyTestAsync();
+            _ = await ScannerFunctions.ScannerTest();
 
             driver.Dispose();
         }
@@ -145,14 +145,26 @@ namespace GMB.Tests
         }
 
         /// <summary>
-        /// Starting Scanner.
+        /// Starting Scanner Test.
+        /// </summary>
+        [TestMethod]
+        public async Task LaunchScannerTest()
+        {
+            AuthorizationPolicyService policy = new();
+            ScannerController scannerController = new(policy);
+            await scannerController.StartTestAsync();
+            return;
+        }
+
+        /// <summary>
+        /// Starting Business Scanner.
         /// </summary>
         [TestMethod]
         public void LaunchBusinessScanner()
         {
             AuthorizationPolicyService policy = new();
             ScannerController scannerController = new(policy);
-            BusinessScannerRequest request = new(10000, 4, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddDays(-12), false, false, null, null, null, UrlState.NEW, false);
+            BusinessScannerRequest request = new(10000, 8, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddMonths(-12), false, false, null, null, null, UrlState.NEW);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;
