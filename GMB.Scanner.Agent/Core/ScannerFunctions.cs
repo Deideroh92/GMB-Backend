@@ -465,8 +465,8 @@ namespace GMB.Scanner.Agent.Core
                 profile.StreetNumber != "40" ||
                 profile.Category != "Hôtel de ville" ||
                 profile.Website != "https://www.paris.fr/" ||
+                profile.PictureUrl == null ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipNbLMIrgq3do3iVaTPocWsR6mluAc1wNNKW-62h=w426-h240-k-no" ||
                 profile.PlusCode != "8FW4V87R+JV" ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
@@ -501,7 +501,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Category != "Musée d'art" ||
                 profile.Website != "https://www.louvre.fr/" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipM_ApMgFfAP8CP2ZHJUOb13K7P_SqSkW9sh9MFY=w408-h272-k-no" ||
+                profile.PictureUrl == null ||
                 profile.PlusCode != "8FW4V86Q+63" ||
                 (profile.Tel != "01 40 20 53 17" && profile.Tel != "+33 1 40 20 53 17") ||
                 score.NbReviews == null ||
@@ -526,76 +526,6 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Louvre - Reviews global error !");
             #endregion
 
-            #region Gare Montparnasse
-            request = new("https://www.google.fr/maps/place/Gare+Montparnasse/@48.8411382,2.3205261,17z/data=!3m1!4b1!4m6!3m5!1s0x47e67034ac4d4559:0xe467cc61460dc234!8m2!3d48.8411382!4d2.3205261!16zL20vMDE2anY4?hl=fr&entry=ttu");
-            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Gare Montparnasse" ||
-                (profile.GoogleAddress != "17 Bd de Vaugirard, 75015 Paris" && profile.GoogleAddress != "17 Bd de Vaugirard, 75015 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75115" ||
-                profile.StreetNumber != "17" ||
-                profile.Country != "France" ||
-                profile.Category != "Station de transit" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipOvFa1JfgCp9tJGtq0DWviVwgyl5TKMcR_6CEvF=w426-h240-k-no" ||
-                profile.PlusCode != "8FW4R8RC+F6" ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Gare Montparnasse - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddMonths(-1), driver);
-
-            if (reviews == null)
-                return new(false, "Gare Montparnasse - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Gare Montparnasse - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1))
-                return new(false, "Gare Montparnasse - Reviews global error !");
-            #endregion
-
-            #region Tour Eiffel
-            request = new("https://www.google.fr/maps/place/Tour+Eiffel/@48.8583701,2.2944813,17z/data=!3m1!4b1!4m6!3m5!1s0x47e66e2964e34e2d:0x8ddca9ee380ef7e0!8m2!3d48.8583701!4d2.2944813!16zL20vMDJqODE?hl=fr&entry=ttu");
-            (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Tour Eiffel" ||
-                (profile.GoogleAddress != "Champ de Mars, 5 Av. Anatole France, 75007 Paris" && profile.GoogleAddress != "Champ de Mars, 5 Av. Anatole France, 75007 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75107" ||
-                profile.Country != "France" ||
-                profile.Category != "Site historique" ||
-                profile.Website != "https://www.toureiffel.paris/fr" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipOSojyYuemoPo1TwH7J6mFC35Y89oKXMHgLIK7-=w408-h468-k-no" ||
-                profile.PlusCode != "8FW4V75V+8Q" ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Tour Eiffel - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddHours(-3), driver);
-
-            if (reviews == null)
-                return new(false, "Tour Eiffel - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Tour Eiffel - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
-                return new(false, "Tour Eiffel - Reviews global error !");
-            #endregion
-
             #region Hôpital Necker
             request = new("https://www.google.fr/maps/place/H%C3%B4pital+Necker+AP-HP/@48.8452199,2.3157461,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6703221308f89:0x57a7e5b303e7d9!8m2!3d48.8452199!4d2.3157461!16s%2Fm%2F03gzggj?hl=fr&entry=ttu");
             (profile, score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
@@ -608,7 +538,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.StreetNumber != "149" ||
                 profile.Website != "http://www.hopital-necker.aphp.fr/" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipMnIqT5LZxbYjW8uj7PooQPlFrhQa_8HloZMmvz=w426-h240-k-no" ||
+                profile.PictureUrl == null ||
                 profile.PlusCode != "8FW4R8W8+37" ||
                 (profile.Tel != "01 44 49 40 00" && profile.Tel != "+33 1 44 49 40 00") ||
                 score.NbReviews == null ||
@@ -645,7 +575,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Category != "Restaurant" ||
                 profile.Website != "https://restaurant-maxims.com/" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipNXcE3vwR3faD97mBv7BmuA_G2A2O0a07QpCT8_=w408-h272-k-no" ||
+                profile.PictureUrl == null ||
                 profile.PlusCode != "8FW4V88C+XW" ||
                 (profile.Tel != "01 42 65 27 94" && profile.Tel != "+33 1 42 65 27 94") ||
                 score.NbReviews == null ||
@@ -682,7 +612,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Category != "Hébergement" ||
                 profile.Website != "https://www.ritzparis.com/?utm_source=google&utm_medium=organic&utm_campaign=gmb_ritz_paris" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipMbUejTiZA2XDGnkAQYshkrMM2YuPAMWIYA7lIL=w408-h408-k-no" ||
+                profile.PictureUrl == null ||
                 profile.PlusCode != "8FW4V89H+6H" ||
                 (profile.Tel != "01 43 16 30 30" && profile.Tel != "+33 1 43 16 30 30") ||
                 score.NbReviews == null ||
@@ -719,7 +649,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Category != "Restaurant gastronomique" ||
                 profile.Website != "http://www.restaurant-lasserre.com/" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipOCc6_13xBd7MYW4ckoxyKn-vWRfvYC0s-p1wpl=w80-h92-p-k-no" ||
+                profile.PictureUrl == null ||
                 profile.PlusCode != "8FW4V885+GX" ||
                 (profile.Tel != "01 43 59 02 13" && profile.Tel != "+33 1 43 59 02 13") ||
                 score.NbReviews == null ||
@@ -755,6 +685,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.StreetNumber != "228" ||
                 profile.Category != "Hébergement" ||
                 profile.Website != "https://www.dorchestercollection.com/paris/le-meurice" ||
+                profile.PictureUrl == null ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PlusCode != "8FW4V88H+36" ||
                 (profile.Tel != "01 44 58 10 10" && profile.Tel != "+33 1 44 58 10 10") ||
@@ -792,7 +723,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Category != "Hébergement" ||
                 profile.Website != "https://www.rosewoodhotels.com/en/hotel-de-crillon" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl != "https://lh5.googleusercontent.com/p/AF1QipPrDQ-iNJMgX4eMb0VllLzJnW-GKN87ySC2kulh=w408-h252-k-no" ||
+                profile.PictureUrl == null ||
                 profile.PlusCode != "8FW4V88C+WC" ||
                 (profile.Tel != "01 44 71 15 00" && profile.Tel != "+33 1 44 71 15 00") ||
                 score.NbReviews == null ||

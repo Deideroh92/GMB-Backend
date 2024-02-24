@@ -66,8 +66,8 @@ namespace GMB.Sdk.Core
             mailMessage.IsBodyHtml = false; // Set to true if your email body is in HTML format
 
             smtpClient.Send(mailMessage);
-            //smtpClient.Send(mailMessage2);
-            //smtpClient.Send(mailMessage3);
+            smtpClient.Send(mailMessage2);
+            smtpClient.Send(mailMessage3);
         }
 
         /// <summary>
