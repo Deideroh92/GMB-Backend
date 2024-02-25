@@ -17,10 +17,8 @@ namespace GMB.ScannerService.Api.Controller
 {
     [ApiController]
     [Route("api/scanner-service")]
-    public class ScannerController(AuthorizationPolicyService policyService) : ControllerBase
+    public class ScannerController() : ControllerBase
     {
-        private readonly AuthorizationPolicyService _policyService = policyService;
-
         /// <summary>
         /// Start Business Scanner
         /// </summary>
@@ -76,12 +74,12 @@ namespace GMB.ScannerService.Api.Controller
         }
 
         /// <summary>
-        /// Create Url.
+        /// Start Url Scanner.
         /// </summary>
         /// <param name="url"></param>
         [HttpPost("scanner/url")]
         [Authorize(Policy = "DevelopmentPolicy")]
-        public ActionResult<GenericResponse> StartUrlScanner([FromBody] string url, UrlState urlState = UrlState.NEW)
+        public ActionResult<GenericResponse> StartUrlScanner()
         {
             try
             {

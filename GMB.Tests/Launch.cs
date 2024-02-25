@@ -73,7 +73,6 @@ namespace GMB.Tests
         [TestMethod]
         public async Task ScannerTest()
         {
-            ScannerFunctions scanner = new();
             SeleniumDriver driver = new();
 
             _ = await ScannerFunctions.ScannerTest();
@@ -150,8 +149,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task LaunchScannerTest()
         {
-            AuthorizationPolicyService policy = new();
-            ScannerController scannerController = new(policy);
+            ScannerController scannerController = new();
             await scannerController.StartTestAsync();
             return;
         }
@@ -163,7 +161,7 @@ namespace GMB.Tests
         public void LaunchBusinessScanner()
         {
             AuthorizationPolicyService policy = new();
-            ScannerController scannerController = new(policy);
+            ScannerController scannerController = new();
             BusinessScannerRequest request = new(10000, 9, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddDays(-8), false, false, null, null, null, UrlState.NEW, false);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
