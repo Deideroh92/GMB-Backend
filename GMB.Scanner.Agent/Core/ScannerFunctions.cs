@@ -696,7 +696,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Le Meurice - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddDays(-5), driver, true);
+            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddDays(-15), driver, true);
 
             if (reviews == null)
                 return new(false, "Le Meurice - Reviews empty !");
