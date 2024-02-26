@@ -306,7 +306,7 @@ namespace GMB.BusinessService.Api.Controller
                 SeleniumDriver driver = new();
 
                 GetBusinessProfileRequest request = new(url);
-                (DbBusinessProfile? bp2, DbBusinessScore? bs2) = await scannerFunction.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+                (DbBusinessProfile? bp2, DbBusinessScore? bs2) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
 
                 DbBusinessProfile? bpInDb = db.GetBusinessByIdEtab(bp2.IdEtab);
 
@@ -367,7 +367,7 @@ namespace GMB.BusinessService.Api.Controller
                     try
                     {
                         GetBusinessProfileRequest request = new(url);
-                        (DbBusinessProfile? bp2, DbBusinessScore? bs) = await scannerFunction.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null, false);
+                        (DbBusinessProfile? bp2, DbBusinessScore? bs) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null, false);
 
                         DbBusinessProfile? bpInDb = db.GetBusinessByIdEtab(bp2.IdEtab);
 

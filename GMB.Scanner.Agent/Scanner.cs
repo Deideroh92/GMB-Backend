@@ -22,8 +22,6 @@ namespace GMB.Scanner.Agent
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
             .CreateLogger();
 
-            ScannerFunctions scanner = new();
-
             using DbLib db = new();
             SeleniumDriver driver = new();
 
@@ -51,7 +49,7 @@ namespace GMB.Scanner.Agent
                     }
 
                     // Get business profile infos from Google.
-                    (DbBusinessProfile? profile, DbBusinessScore? score) = await scanner.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
+                    (DbBusinessProfile? profile, DbBusinessScore? score) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
 
                     // No business found at this url.
                     if (profile == null)

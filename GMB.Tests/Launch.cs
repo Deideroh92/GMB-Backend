@@ -1,11 +1,9 @@
 using GMB.BusinessService.Api.Controller;
-using GMB.Scanner.Agent.Core;
 using GMB.ScannerService.Api.Controller;
 using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
-using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -67,18 +65,6 @@ namespace GMB.Tests
         #endregion
 
         #region Business
-        /// <summary>
-        /// Weekly testing for XPATH.
-        /// </summary>
-        [TestMethod]
-        public async Task ScannerTest()
-        {
-            SeleniumDriver driver = new();
-
-            _ = await ScannerFunctions.ScannerTest();
-
-            driver.Dispose();
-        }
         /// <summary>
         /// Exporting Hotels info.
         /// </summary>

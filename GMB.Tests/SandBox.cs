@@ -13,7 +13,13 @@ namespace GMB.Tests
     {
 
         [TestMethod]
-        public async void Main()
+        public void Main()
+        {
+            return;
+        }
+
+        [TestMethod]
+        public async void Sand()
         {
             string filePath = "input.txt";
             string[] lines = File.ReadAllLines(filePath);

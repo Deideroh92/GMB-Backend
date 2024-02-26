@@ -1,6 +1,4 @@
-using GMB.Scanner.Agent;
 using GMB.Scanner.Agent.Core;
-using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
@@ -9,9 +7,8 @@ using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
-using System.Net.Mail;
-using System.Net;
 using GMB.Sdk.Core;
+using System.Diagnostics;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -133,9 +130,13 @@ namespace GMB.ScannerService.Api.Controller
         {
             try
             {
+                Stopwatch stopwatch = new();
+                stopwatch.Start();
                 var testResult = await ScannerFunctions.ScannerTest();
-                
-                ToolBox.SendEmail(testResult.Message);
+                stopwatch.Stop();
+                TimeSpan elapsedTime = stopwatch.Elapsed;
+                string message = testResult.Message + " Process took " + elapsedTime.ToString() + " to execute.";
+                ToolBox.SendEmail(message);
 
                 return new GenericResponse(1, "Scanner test finished.");
             }
