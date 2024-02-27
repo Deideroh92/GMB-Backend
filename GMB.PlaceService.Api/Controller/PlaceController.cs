@@ -25,21 +25,19 @@ namespace GMB.PlaceService.Api.Controller
         public async Task<ActionResult<GetBusinessListFromGoogleResponse>> GetPlaceByQuery(string query)
         {
 
-            List<GoogleResponse> businessProfiles = [];
+            List<GoogleResponse> businessList = [];
             Place[]? places = await Core.PlaceService.GetPlacesByQuery(query);
 
             foreach (Place place in places)
             {
-                DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
+                Business? bp = ToolBox.PlaceToB(place);
                 if (bp == null || bp.IdEtab == null)
                 {
-                    businessProfiles.Add(new(query, null, null));
+                    businessList.Add(new(query, null));
                     continue;
                 }
-                DbBusinessScore bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
-                businessProfiles.Add(new(query, bp, bs));
             }
-            return new GetBusinessListFromGoogleResponse(businessProfiles);
+            return new GetBusinessListFromGoogleResponse(businessList);
         }
         /// <summary>
         /// Find GMB list by query (should be name + address).
@@ -50,7 +48,7 @@ namespace GMB.PlaceService.Api.Controller
         [Authorize]
         public async Task<ActionResult<GetBusinessListFromGoogleResponse>> GetPlacesByQueryList(List<string> queryList)
         {
-            List<GoogleResponse> businessProfiles = [];
+            List<GoogleResponse> businessList = [];
 
             try
             {
@@ -60,18 +58,16 @@ namespace GMB.PlaceService.Api.Controller
 
                     if (places != null && places.Length != 0)
                     {
-                        DbBusinessProfile? bp = ToolBox.PlaceToBP(places[0]);
+                        Business? bp = ToolBox.PlaceToB(places[0]);
                         if (bp == null || bp.IdEtab == null)
                         {
-                            businessProfiles.Add(new(query, null, null));
+                            businessList.Add(new(query, null));
                             continue;
                         }
-
-                        DbBusinessScore bs = new(bp.IdEtab, places[0].Rating, places[0].UserRatingCount);
-                        businessProfiles.Add(new(query, bp, bs));
+                        businessList.Add(new(query, bp));
                     }
                 }
-                return new GetBusinessListFromGoogleResponse(businessProfiles);
+                return new GetBusinessListFromGoogleResponse(businessList);
             } catch (Exception ex)
             {
                 return GetBusinessListFromGoogleResponse.Exception(ex.Message);
@@ -91,17 +87,15 @@ namespace GMB.PlaceService.Api.Controller
                 Place? place = await Core.PlaceService.GetPlaceByPlaceId(placeId);
                 if (place == null)
                 {
-                    return new GetBusinessFromGoogleResponse(new(placeId, null, null));
+                    return new GetBusinessFromGoogleResponse(new(placeId, null));
                 }
 
-                DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
+                Business? bp = ToolBox.PlaceToB(place);
                 if (bp == null || bp.IdEtab == null)
                 {
-                    return new GetBusinessFromGoogleResponse(new(placeId, null, null));
+                    return new GetBusinessFromGoogleResponse(new(placeId, null));
                 }
-
-                DbBusinessScore? bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
-                return new GetBusinessFromGoogleResponse(new(placeId, bp, bs));
+                return new GetBusinessFromGoogleResponse(new(placeId, bp));
             } catch (Exception ex)
             {
                 return GetBusinessFromGoogleResponse.Exception(ex.Message);
@@ -126,14 +120,13 @@ namespace GMB.PlaceService.Api.Controller
                     Place? place = await Core.PlaceService.GetPlaceByPlaceId(placeId);
                     if (place != null)
                     {
-                        DbBusinessProfile? bp = ToolBox.PlaceToBP(place);
+                        Business? bp = ToolBox.PlaceToB(place);
                         if (bp == null || bp.IdEtab == null)
                         {
-                            bpList.Add(new(placeId, null, null));
+                            bpList.Add(new(placeId, null));
                             continue;
                         }
-                        DbBusinessScore bs = new(bp.IdEtab, place.Rating, place.UserRatingCount);
-                        bpList.Add(new(placeId, bp, bs));
+                        bpList.Add(new(placeId, bp));
                     }
                 }
 

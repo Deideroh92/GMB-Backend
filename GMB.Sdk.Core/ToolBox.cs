@@ -125,7 +125,7 @@ namespace GMB.Sdk.Core
             {
                 DbBusinessProfile? profile = new(
                 place.PlaceId,
-                ToolBox.ComputeMd5Hash(place.PlaceId),
+                ComputeMd5Hash(place.PlaceId),
                 Guid.NewGuid().ToString("N"),
                 place.DisplayName?.Text,
                 null,
@@ -154,6 +154,56 @@ namespace GMB.Sdk.Core
                 place.InternationalPhoneNumber
                 );
                 return profile;
+            } catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Transform Place class to Business Class
+        /// </summary>
+        /// <param name="place"></param>
+        /// <returns>Business</returns>
+        public static Business? PlaceToB(Place place)
+        {
+            try
+            {
+                Business? business = new(
+                place.PlaceId,
+                ComputeMd5Hash(place.PlaceId),
+                Guid.NewGuid().ToString("N"),
+                place.DisplayName?.Text,
+                null,
+                place.FormattedAddress,
+                place.ShortFormattedAddress,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("postal_code") == true)?.LongText,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("locality") == true)?.LongText,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("postal_code") == true)?.LongText,
+                place.Location.Latitude,
+                place.Location.Longitude,
+                null,
+                null,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("street_number") == true)?.LongText,
+                null,
+                place.NationalPhoneNumber,
+                place.WebsiteUri,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("plus_code") == true)?.LongText,
+                null,
+                (BusinessStatus)Enum.Parse(typeof(BusinessStatus), place.BusinessStatus!),
+                null,
+                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("country") == true)?.LongText,
+                place.GoogleMapsUri,
+                0,
+                place.Location?.Latitude + " , " + place.Location?.Longitude,
+                null,
+                place.InternationalPhoneNumber,
+                place.Rating,
+                place.UserRatingCount,
+                null
+                );
+                return business;
             } catch (Exception e)
             {
                 Console.WriteLine(e.Message);

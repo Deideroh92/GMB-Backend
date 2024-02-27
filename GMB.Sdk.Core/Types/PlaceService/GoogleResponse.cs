@@ -2,10 +2,9 @@
 
 namespace GMB.Sdk.Core.Types.PlaceService
 {
-    public class GoogleResponse(string query, DbBusinessProfile? profile, DbBusinessScore? score)
+    public class GoogleResponse(string query, Business? business)
     {
         public string Query { get; set; } = query;
-        public DbBusinessProfile? Profile { get; set; } = profile;
-        public DbBusinessScore? Score { get; set; } = score;
+        public Business? Business { get; set; } = business;
     }
 }
