@@ -46,6 +46,7 @@ namespace GMB.Scanner.Agent
                     {
                         driver.Dispose();
                         driver = new();
+                        count = 1;
                     }
 
                     // Get business profile infos from Google.
@@ -111,6 +112,13 @@ namespace GMB.Scanner.Agent
                                     Log.Error($"Couldn't treat a review : {e.Message}", e);
                                 }
                             }
+
+                            if (reviews.Count > 300)
+                            {
+                                driver.Dispose();
+                                driver = new();
+                                count = 1;
+                            }
                         }
                     }
 
@@ -121,6 +129,8 @@ namespace GMB.Scanner.Agent
                     // Update Business State when finished
                     if (request.UpdateProcessingState)
                         db.UpdateBusinessProfileProcessingState(profile.IdEtab, 0);
+
+                    
 
                 } catch (Exception e)
                 {
