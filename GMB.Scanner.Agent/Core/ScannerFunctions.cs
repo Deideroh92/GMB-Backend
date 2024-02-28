@@ -49,7 +49,7 @@ namespace GMB.Scanner.Agent.Core
                 try
                 {
                     wait.Until(ExpectedConditions.ElementIsVisible(By.XPath("//div[@role='main' and @aria-label]")));
-                } catch (WebDriverTimeoutException)
+                } catch (Exception)
                 {
                     return (null, null);
                 }
@@ -285,8 +285,16 @@ namespace GMB.Scanner.Agent.Core
 
                 while (reviewListLength != reviewList.Count)
                 {
-                    ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
-                    Thread.Sleep(2000);
+                    try
+                    {
+                        ((IJavaScriptExecutor)driver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
+                        Thread.Sleep(2000);
+                    }
+                    catch (Exception)
+                    {
+                        break;
+                    }
+
                     reviewListLength = reviewList.Count;
                     reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
 
@@ -314,7 +322,8 @@ namespace GMB.Scanner.Agent.Core
                             try
                             {
                                 ToolBox.FindElementSafe(item, XPathReview.plusButton).Click();
-                            } catch
+                            }
+                            catch
                             {
                                 continue;
                             }
@@ -326,13 +335,7 @@ namespace GMB.Scanner.Agent.Core
                 return reviewList;
             } catch (Exception e)
             {
-                if (e.Message.Contains("javascript error: Cannot read properties of null (reading 'parentNode')"))
-                {
-                    return null;
-                } else
-                {
-                    throw new Exception($"Error getting reviews from the Google page : {e.Message}", e);
-                }
+                throw new Exception($"Error getting reviews from the Google page : {e.Message}", e);
             }
         }
         /// <summary>

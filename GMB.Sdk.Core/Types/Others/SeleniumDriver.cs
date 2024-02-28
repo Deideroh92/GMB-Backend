@@ -2,6 +2,9 @@
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
+using System.Diagnostics;
+using System.Management;
+using System.Text.RegularExpressions;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
 
@@ -11,6 +14,7 @@ namespace GMB.Sdk.Core.Types.Models
     public class SeleniumDriver : IDisposable
     {
         public IWebDriver WebDriver { get; set; }
+        public string Id { get; set; }
 
         #region Local
         /// <summary>
@@ -20,6 +24,7 @@ namespace GMB.Sdk.Core.Types.Models
         {
             try
             {
+                Id = Guid.NewGuid().ToString("N");
                 ChromeOptions chromeOptions = new();
                 chromeOptions.AddArguments("--headless=new");
                 chromeOptions.AddArguments("--lang=fr");
@@ -29,6 +34,7 @@ namespace GMB.Sdk.Core.Types.Models
                 chromeOptions.AddArguments("--ignore-certificate-errors");
                 chromeOptions.AddArguments("--disable-extensions");
                 chromeOptions.AddArguments("--disable-dev-shm-usage");
+                chromeOptions.AddArgument("scriptpid-" + Id);
 
                 new DriverManager().SetUpDriver(new ChromeConfig());
                 WebDriver = new ChromeDriver(chromeOptions);
@@ -56,7 +62,7 @@ namespace GMB.Sdk.Core.Types.Models
                 Thread.Sleep(3000);
             } catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine("No cookie page.");
+                Debug.WriteLine("No cookie page.");
             }
         }
 
@@ -74,7 +80,7 @@ namespace GMB.Sdk.Core.Types.Models
                 AcceptCookies();
             } catch (Exception)
             {
-                System.Diagnostics.Debug.WriteLine("Couldn't get to page.");
+                Debug.WriteLine("Couldn't get to page.");
             }
         }
         /// <summary>
@@ -103,8 +109,52 @@ namespace GMB.Sdk.Core.Types.Models
         {
             if (disposing)
             {
+                KillProcesses();
                 WebDriver?.Quit();
                 WebDriver?.Dispose();
+            }
+        }
+
+        protected virtual void KillProcesses()
+        {
+            try
+            {
+                // Find and kill Chrome processes by the given process ID
+                var chromeProcesses = GetChromeProcessesByDriverId();
+
+                foreach (var process in chromeProcesses)
+                {
+                    ManagementObjectSearcher commandLineSearcher = new("SELECT CommandLine FROM Win32_Process WHERE ProcessId = " + process.Id);
+                    String commandLine = "";
+                    foreach (ManagementObject commandLineObject in commandLineSearcher.Get().Cast<ManagementObject>())
+                    {
+                        commandLine += (string)commandLineObject["CommandLine"];
+                    }
+
+                    string script_pid_str = (new Regex("--scriptpid-(.+?) ")).Match(commandLine).Groups[1].Value;
+
+                    if (script_pid_str == Id)
+                        process.Kill();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error killing Chrome processes: {ex.Message}");
+            }
+        }
+
+        static Process[] GetChromeProcessesByDriverId()
+        {
+            try
+            {
+                var chromeProcesses = Process.GetProcessesByName("chrome").ToArray();
+
+                return chromeProcesses;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting Chrome processes: {ex.Message}");
+                return [];
             }
         }
         #endregion

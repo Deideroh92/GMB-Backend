@@ -148,7 +148,7 @@ namespace GMB.Tests
         {
             AuthorizationPolicyService policy = new();
             ScannerController scannerController = new();
-            BusinessScannerRequest request = new(10000, 9, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddDays(-8), false, false, null, null, null, UrlState.NEW, false);
+            BusinessScannerRequest request = new(10000, 1, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddDays(-20), false, false, null, null, null, UrlState.NEW, true);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;

@@ -30,7 +30,6 @@ namespace GMB.ScannerService.Api.Controller
                 List<BusinessAgent> businessList = [];
                 List<Task> tasks = [];
                 using DbLib db = new();
-                int threadNumber = 0;
 
                 var testResult = await ScannerFunctions.ScannerTest();
 
@@ -52,7 +51,6 @@ namespace GMB.ScannerService.Api.Controller
 
                 foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
                 {
-                    threadNumber++;
                     Task newThread = Task.Run(async () =>
                     {
                         ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState);

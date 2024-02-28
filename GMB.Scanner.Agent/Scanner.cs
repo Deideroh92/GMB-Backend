@@ -82,44 +82,54 @@ namespace GMB.Scanner.Agent
                     // Getting reviews
                     if (request.GetReviews && request.DateLimit != null && score?.Score != null && profile.Category != "Hébergement")
                     {
-                        driver.GetToPage(BPRequest.Url);
-                        List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews(profile.IdEtab, request.DateLimit, driver);
-
-                        if (reviews != null)
+                        try
                         {
-                            foreach (DbBusinessReview review in reviews)
+                            driver.GetToPage(BPRequest.Url);
+                            List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews(profile.IdEtab, request.DateLimit, driver);
+
+                            if (reviews != null)
                             {
-                                try
+                                foreach (DbBusinessReview review in reviews)
                                 {
-                                    DbBusinessReview? dbBusinessReview = db.GetBusinessReview(profile.IdEtab, review.IdReview);
-
-                                    if (dbBusinessReview == null)
+                                    try
                                     {
-                                        db.CreateBusinessReview(review);
-                                        continue;
+                                        DbBusinessReview? dbBusinessReview = db.GetBusinessReview(profile.IdEtab, review.IdReview);
+
+                                        if (dbBusinessReview == null)
+                                        {
+                                            db.CreateBusinessReview(review);
+                                            continue;
+                                        }
+
+                                        if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
+                                            db.UpdateBusinessReviewReply(review);
+
+                                        if (!review.Equals(dbBusinessReview))
+                                        {
+                                            db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
+                                            continue;
+                                        }
                                     }
-
-                                    if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
-                                        db.UpdateBusinessReviewReply(review);
-
-                                    if (!review.Equals(dbBusinessReview))
+                                    catch (Exception e)
                                     {
-                                        db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
-                                        continue;
+                                        Log.Error($"Couldn't treat a review : {e.Message}", e);
                                     }
-                                } catch (Exception e)
+                                }
+
+                                if (reviews.Count > 300)
                                 {
-                                    Log.Error($"Couldn't treat a review : {e.Message}", e);
+                                    driver.Dispose();
+                                    driver = new();
+                                    count = 1;
                                 }
                             }
-
-                            if (reviews.Count > 300)
-                            {
-                                driver.Dispose();
-                                driver = new();
-                                count = 1;
-                            }
+                        } catch (Exception e)
+                        {
+                            Log.Error(e, $"An exception occurred when getting reviews from id etab = [{businessAgent.IdEtab}], guid = [{businessAgent.Guid}], url = [{businessAgent.Url}] : {e.Message}");
+                            driver.Dispose();
+                            driver = new();
                         }
+
                     }
 
                     // Update Url state when finished.
@@ -129,8 +139,6 @@ namespace GMB.Scanner.Agent
                     // Update Business State when finished
                     if (request.UpdateProcessingState)
                         db.UpdateBusinessProfileProcessingState(profile.IdEtab, 0);
-
-                    
 
                 } catch (Exception e)
                 {
