@@ -3,10 +3,10 @@
     #region Enums
     public enum BusinessStatus
     {
-        OPERATIONAL,
-        CLOSED_TEMPORARILY,
-        CLOSED_PERMANENTLY,
-        DELETED
+        OPERATIONAL = 0,
+        CLOSED_TEMPORARILY = 1,
+        CLOSED_PERMANENTLY = 2,
+        DELETED = 3
     }
     #endregion
 
