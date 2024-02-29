@@ -1,4 +1,6 @@
-﻿namespace GMB.Sdk.Core.Types.Database.Models
+﻿using System.Text.Json.Serialization;
+
+namespace GMB.Sdk.Core.Types.Database.Models
 {
     public class Business
     {
@@ -64,6 +66,7 @@
         /// <param name="score"></param>
         /// <param name="nbReviews"></param>
         /// <param name="reviews"></param>
+        [JsonConstructor]
         public Business(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, int processing, string? geoloc = null, DateTime? dateInsert = null, string? telInt = null, double? score = null, int? nbReviews = null, List<DbBusinessReview>? reviews = null)
         {
             IdEtab = idEtab;
