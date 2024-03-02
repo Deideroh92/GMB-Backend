@@ -550,7 +550,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Hôpital Necker - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver);
+            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddDays(-30), driver);
 
             if (reviews == null)
                 return new(false, "Hôpital Necker - Reviews empty !");
