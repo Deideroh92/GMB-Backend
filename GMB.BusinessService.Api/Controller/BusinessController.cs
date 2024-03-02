@@ -599,5 +599,32 @@ namespace GMB.BusinessService.Api.Controller
 
         }
         #endregion
+
+        #region STICKERS
+        /// <summary>
+        /// Get STICKER by idEtab.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        [HttpPost("stickers/id-etab")]
+        [Authorize]
+        public ActionResult<GetStickerResponse> GetStickerByIdEtab([FromBody] string idEtab)
+        {
+            try
+            {
+                using DbLib db = new();
+                string id = idEtab.Trim();
+                DbBusinessProfile? bp = db.GetBusinessByIdEtab(id);
+
+                if (bp == null)
+                    return GetStickerResponse.Exception("No business found");
+
+                return new GetStickerResponse();
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GetStickerResponse.Exception($"Error getting sticker for business by id etab : [{e.Message}]");
+            }
+        }
+        #endregion
     }
 }

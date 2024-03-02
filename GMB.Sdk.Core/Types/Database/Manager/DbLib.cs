@@ -1,4 +1,5 @@
 ﻿using AngleSharp.Io;
+using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.PlaceService;
@@ -1545,6 +1546,65 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         }
         #endregion
 
+        #endregion
+
+        #region Stickers
+        /// <summary>
+        /// Get Sticker by Id Etab.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        /// <returns>Business or null</returns>
+        public DbBusinessProfile? GetStickerByIdEtab(string idEtab, string year)
+        {
+            try
+            {
+                
+                string selectCommand = "SELECT SCORE FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_DATE > @year AND REVIEW_DATE < @yearr";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", idEtab);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    DbBusinessProfile businessProfile = new(
+                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
+                        reader["ID_ETAB"].ToString()!,
+                        reader["FIRST_GUID"].ToString()!,
+                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
+                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
+                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
+                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
+                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
+                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
+                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
+                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
+                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
+                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
+                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
+                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
+                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
+                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
+                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
+                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
+                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
+                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
+                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
+                        (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
+                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
+                        (short)reader["PROCESSING"],
+                        (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
+                    return businessProfile;
+                }
+
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting BP by id etab = [{idEtab}]", e);
+            }
+        }
         #endregion
     }
 }

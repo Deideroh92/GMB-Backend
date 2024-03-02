@@ -80,7 +80,7 @@ namespace GMB.Scanner.Agent
                         db.CreateBusinessScore(score);
 
                     // Getting reviews
-                    if (request.GetReviews && request.DateLimit != null && score?.Score != null && profile.Category != "Hébergement")
+                    if (request.GetReviews && request.DateLimit != null && score?.Score != null)
                     {
                         try
                         {

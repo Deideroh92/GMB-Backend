@@ -312,24 +312,23 @@ namespace GMB.Scanner.Agent.Core
                             break;
                         }
                     }
+                }
 
-                    for (int i = index; i < reviewList.Count; i++)
+                for (int i = index; i < reviewList.Count; i++)
+                {
+                    IWebElement item = reviewList[i];
+                    string? reviewText = ToolBox.FindElementSafe(item, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
+                    if (reviewText != null && reviewText.EndsWith("Plus") && ToolBox.Exists(ToolBox.FindElementSafe(item, XPathReview.plusButton)))
                     {
-                        IWebElement item = reviewList[i];
-                        string? reviewText = ToolBox.FindElementSafe(item, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
-                        if (reviewText != null && reviewText.EndsWith("Plus") && ToolBox.Exists(ToolBox.FindElementSafe(item, XPathReview.plusButton)))
+                        try
                         {
-                            try
-                            {
-                                ToolBox.FindElementSafe(item, XPathReview.plusButton).Click();
-                            }
-                            catch
-                            {
-                                continue;
-                            }
+                            ToolBox.FindElementSafe(item, XPathReview.plusButton).Click();
+                        } catch
+                        {
+                            continue;
                         }
-                        index++;
                     }
+                    index++;
                 }
 
                 return reviewList;

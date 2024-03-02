@@ -1,5 +1,5 @@
-﻿using GMB.Sdk.Core.Types.Database.Models;
-using GMB.Sdk.Core.Types.Models;
+﻿using GMB.Sdk.Core.Types.BusinessService;
+using GMB.Sdk.Core.Types.Database.Models;
 
 namespace GMB.Sdk.Core.Types.ScannerService
 {

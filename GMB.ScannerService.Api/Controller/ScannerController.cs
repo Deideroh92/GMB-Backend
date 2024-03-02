@@ -2,13 +2,13 @@ using GMB.Scanner.Agent.Core;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
-using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Serilog;
 using GMB.Sdk.Core;
 using System.Diagnostics;
+using GMB.Sdk.Core.Types.BusinessService;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -47,7 +47,7 @@ namespace GMB.ScannerService.Api.Controller
                         break;
                 }
 
-                int nbThreads = 8;
+                int nbThreads = 1;
 
                 foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
                 {

@@ -1,4 +1,4 @@
-﻿namespace GMB.Sdk.Core.Types.Models
+﻿namespace GMB.Sdk.Core.Types.BusinessService
 {
     #region Enum
     public enum CategoryFamily
