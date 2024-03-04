@@ -36,6 +36,7 @@ namespace GMB.PlaceService.Api.Controller
                     businessList.Add(new(query, null));
                     continue;
                 }
+                businessList.Add(new(query, bp));
             }
             return new GetBusinessListFromGoogleResponse(businessList);
         }

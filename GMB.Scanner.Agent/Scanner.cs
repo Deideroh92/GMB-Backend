@@ -153,7 +153,7 @@ namespace GMB.Scanner.Agent
         /// Start the URL Scanner.
         /// </summary>
         /// <param name="request"></param>
-        public static void ScannerUrl(ScannerUrlParameters request)
+        public static void UrlScanner(ScannerUrlParameters request)
         {
             Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
 

@@ -9,6 +9,8 @@ using Serilog;
 using GMB.Sdk.Core;
 using System.Diagnostics;
 using GMB.Sdk.Core.Types.BusinessService;
+using GMB.Sdk.Core.Types.Models;
+using GMB.PlaceService.Api.Core;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -71,7 +73,6 @@ namespace GMB.ScannerService.Api.Controller
         /// <summary>
         /// Start Url Scanner.
         /// </summary>
-        /// <param name="url"></param>
         [HttpPost("scanner/url")]
         [Authorize(Policy = "DevelopmentPolicy")]
         public ActionResult<GenericResponse> StartUrlScanner()
@@ -101,7 +102,7 @@ namespace GMB.ScannerService.Api.Controller
                         await semaphore.WaitAsync(); // Wait until there's an available slot to run
                         try
                         {
-                            Scanner.Agent.Scanner.ScannerUrl(request);
+                            Scanner.Agent.Scanner.UrlScanner(request);
                         } finally
                         {
                             semaphore.Release(); // Release the slot when the task is done
@@ -142,6 +143,51 @@ namespace GMB.ScannerService.Api.Controller
             {
                 Log.Error(e, $"An exception occurred while starting scanner test.");
                 return GenericResponse.Exception($"An exception occurred while starting scanner test : {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Start Scanner Test.
+        /// </summary>
+        [HttpPost("scanner/sticker")]
+        [Authorize(Policy = "DevelopmentPolicy")]
+        public async Task<ActionResult<GetStickerListResponse>> StartStickerScanner([FromBody] StickerScannerRequest request)
+        {
+            try
+            {
+                var testResult = await ScannerFunctions.ScannerTest();
+
+                if (!testResult.Success)
+                    return GetStickerListResponse.Exception($"XPATH was modified, can't scan anything !");
+
+                List<Sticker> stickers = [];
+
+                if (request.Type == StickerType.PLACE_ID)
+                {
+                    DbLib dbLib = new();
+
+                    foreach(StickerFileRowData record in request.File)
+                    {
+                        DbBusinessProfile? bp = dbLib.GetBusinessByPlaceId(record.Data);
+
+                        if (bp == null)
+                        {
+                            Place? place = await PlaceService.Api.Core.PlaceService.GetPlaceByPlaceId(record.Data);
+                            if (place == null)
+                            {
+                                stickers.Add(new(record.Id, null, null, null));
+                                continue;
+                            }  
+                            bp = ToolBox.PlaceToBP(place);
+                        }
+                    }
+                }
+
+                return new GetStickerListResponse();
+            } catch (Exception e)
+            {
+                Log.Error(e, $"An exception occurred while starting scanner test.");
+                return GetStickerListResponse.Exception($"An exception occurred while starting scanner test : {e.Message}");
             }
         }
     }

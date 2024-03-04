@@ -300,9 +300,10 @@ namespace GMB.BusinessService.Api.Controller
                     DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(bp.IdEtab);
                     Business? business = new(bp, bs);
                     return new GetBusinessResponse(business);
-                }
+                } else
+                    return new GetBusinessResponse(null);
 
-                ScannerFunctions scannerFunction = new();
+                /*ScannerFunctions scannerFunction = new();
                 SeleniumDriver driver = new();
 
                 GetBusinessProfileRequest request = new(url);
@@ -313,7 +314,7 @@ namespace GMB.BusinessService.Api.Controller
                 if (bpInDb != null)
                     return new GetBusinessResponse(new(bpInDb, bs2));
                 else
-                    return new GetBusinessResponse(null);
+                    return new GetBusinessResponse(null);*/
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");

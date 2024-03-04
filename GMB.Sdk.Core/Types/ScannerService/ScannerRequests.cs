@@ -7,7 +7,26 @@ namespace GMB.Sdk.Core.Types.ScannerService
     public enum Operation
     {
         URL_STATE,
-        PROCESSING_STATE,
+        PROCESSING_STATE
+    }
+
+    public enum StickerType
+    {
+        PLACE_ID,
+        COORDINATES
+    }
+    #endregion
+
+    #region SubClasses
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="data"></param>
+    public class StickerFileRowData(string id, string data)
+    {
+        public string Id { get; set; } = id;
+        public string Data { get; set; } = data;
     }
     #endregion
 
@@ -82,6 +101,19 @@ namespace GMB.Sdk.Core.Types.ScannerService
         public string? Category { get; set; } = category;
         public UrlState UrlState { get; set; } = urlState;
         public bool UpdateProcessingState { get; set; } = updateProcessingState;
+    }
+
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="requestId"></param>
+    /// <param name="type"></param>
+    /// <param name="file"></param>
+    public class StickerScannerRequest(string requestId, StickerType type, List<StickerFileRowData> file)
+    {
+        public string RequestId { get; set; } = requestId;
+        public StickerType Type { get; set;} = type;
+        public List<StickerFileRowData> File { get; set; } = file;
     }
     #endregion
 }
