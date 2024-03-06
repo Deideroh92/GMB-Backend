@@ -49,7 +49,7 @@ namespace GMB.ScannerService.Api.Controller
                         break;
                 }
 
-                int nbThreads = 1;
+                int nbThreads = 8;
 
                 foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
                 {
