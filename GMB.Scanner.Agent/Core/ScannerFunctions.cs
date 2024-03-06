@@ -531,7 +531,7 @@ namespace GMB.Scanner.Agent.Core
             #region Hôpital Necker
             request = new("https://www.google.fr/maps/place/H%C3%B4pital+Necker+AP-HP/@48.8452199,2.3157461,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6703221308f89:0x57a7e5b303e7d9!8m2!3d48.8452199!4d2.3157461!16s%2Fm%2F03gzggj?hl=fr&entry=ttu");
             (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Hôpital Necker AP-HP" ||
+            if (profile.Name != "Hôpital Necker Enfants malades - AP-HP" ||
                 (profile.GoogleAddress != "149 Rue de Sèvres, 75015 Paris" && profile.GoogleAddress != "149 Rue de Sèvres, 75015 Paris, France") ||
                 profile.City != "Paris" ||
                 profile.CityCode != "75115" ||
