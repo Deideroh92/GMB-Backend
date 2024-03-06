@@ -39,7 +39,7 @@ namespace GMB.Tests
                     await semaphore.WaitAsync(); // Wait until there's an available slot to run
                     try
                     {
-                        Scanner.Agent.Scanner.ScannerUrl(request);
+                        Scanner.Agent.Scanner.UrlScanner(request);
                     } finally
                     {
                         semaphore.Release(); // Release the slot when the task is done
