@@ -88,7 +88,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 9);
+                db.UpdateBusinessProfileProcessingState(idEtab, 8);
             }
         }
         /// <summary>
@@ -148,7 +148,7 @@ namespace GMB.Tests
         {
             AuthorizationPolicyService policy = new();
             ScannerController scannerController = new();
-            BusinessScannerRequest request = new(100, 1, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddDays(-20), false, false, null, null, null, UrlState.NEW, true);
+            BusinessScannerRequest request = new(100, 0, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddDays(-20), false, false, null, null, null, UrlState.NEW, true);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;

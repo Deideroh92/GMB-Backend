@@ -7,7 +7,9 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using Serilog;
+using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace GMB.Scanner.Agent.Core
@@ -21,6 +23,8 @@ namespace GMB.Scanner.Agent.Core
     public class ScannerFunctions
     {
         static void Main() { }
+
+        private static readonly char[] separator = new[] { ' ', '\t' };
 
         #region Profile & Score
         /// <summary>
@@ -146,10 +150,10 @@ namespace GMB.Scanner.Agent.Core
                     }
                     #endregion
 
-                    #region Address Api
-                    if (googleAddress != null)
+                    #region Address details
+                    if (dbBusinessProfile.GoogleAddress != null)
                     {
-                        AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(googleAddress);
+                        AddressApiResponse? addressResponse = await ToolBox.ApiCallForAddress(dbBusinessProfile.GoogleAddress);
                         if (addressResponse != null)
                         {
                             dbBusinessProfile.Lon = addressResponse.Features[0]?.Geometry?.Coordinates[0];
@@ -157,11 +161,47 @@ namespace GMB.Scanner.Agent.Core
                             dbBusinessProfile.City = addressResponse.Features[0]?.Properties?.City;
                             dbBusinessProfile.PostCode = addressResponse.Features[0]?.Properties?.Postcode;
                             dbBusinessProfile.CityCode = addressResponse.Features[0]?.Properties?.CityCode;
-                            dbBusinessProfile.Address = addressResponse.Features[0]?.Properties?.Street;
+                            dbBusinessProfile.Address = addressResponse.Features[0]?.Properties?.HouseNumber + " " + addressResponse.Features[0]?.Properties?.Street;
                             dbBusinessProfile.AddressType = addressResponse.Features[0]?.Properties?.PropertyType;
                             dbBusinessProfile.IdBan = addressResponse.Features[0]?.Properties?.Id;
                             dbBusinessProfile.StreetNumber = addressResponse.Features[0]?.Properties?.HouseNumber;
                             dbBusinessProfile.AddressScore = (float?)addressResponse.Features[0]?.Properties?.Score;
+                        }
+
+                        if (dbBusinessProfile.PostCode == null || !dbBusinessProfile.GoogleAddress.Contains(dbBusinessProfile.PostCode))
+                        {
+                            string pattern = @"(\d{4,})";
+                            Match match = Regex.Match(dbBusinessProfile.GoogleAddress, pattern, RegexOptions.RightToLeft);
+
+                            if (match.Success && dbBusinessProfile.GoogleAddress.Contains(match.Value))
+                                dbBusinessProfile.PostCode = match.Value;
+
+                            if ((dbBusinessProfile.City == null || !dbBusinessProfile.GoogleAddress.Contains(dbBusinessProfile.City)) && match.Value != null)
+                            {
+                                int index = dbBusinessProfile.GoogleAddress.LastIndexOf(match.Value);
+                                // Check if the consecutive digits were found in the input string
+                                if (index != -1 && index + match.Value.Length < dbBusinessProfile.GoogleAddress.Length)
+                                    // Return the substring after consecutive digits
+                                    dbBusinessProfile.City = dbBusinessProfile.GoogleAddress[(index + match.Value.Length)..].Trim();
+                            }
+                        }
+
+                        if (dbBusinessProfile.Country == null || !dbBusinessProfile.GoogleAddress.Contains(dbBusinessProfile.Country))
+                        {
+                            string[] words = dbBusinessProfile.GoogleAddress.Split(separator, StringSplitOptions.RemoveEmptyEntries);
+
+                            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Files", "CountryList.txt");
+                            string countries = File.ReadAllText(filePath);
+
+                            if (words.Length > 0 && countries.Contains(words[^1]) && dbBusinessProfile.GoogleAddress.Contains(words[^1]))
+                            {
+                                dbBusinessProfile.Country = words[^1];
+                            }
+                        }
+
+                        if (dbBusinessProfile.Address == null || !dbBusinessProfile.GoogleAddress.Contains(dbBusinessProfile.Address))
+                        {
+                            dbBusinessProfile.Address = dbBusinessProfile.GoogleAddress.Replace(", " + dbBusinessProfile.Country, "").Replace(dbBusinessProfile.City ?? "", "").Replace(dbBusinessProfile.PostCode ?? "", "").Trim().TrimEnd(',').Trim();
                         }
                     }
                     #endregion

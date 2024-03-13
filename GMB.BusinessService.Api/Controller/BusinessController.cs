@@ -34,6 +34,9 @@ namespace GMB.BusinessService.Api.Controller
             {
                 using DbLib db = new();
 
+                if (business.Name == null)
+                    return GenericResponse.Exception("No Name, can't create the business profile.");
+
                 if (business.PlaceId == null)
                     return GenericResponse.Exception("No Place ID, can't create the business profile.");
 
@@ -43,11 +46,14 @@ namespace GMB.BusinessService.Api.Controller
                 if (db.CheckBusinessUrlExist(ToolBox.ComputeMd5Hash(business.PlaceUrl)))
                     return GenericResponse.Exception("URL already exists in DB.");
 
+                if (db.CheckBusinessProfileExistByPlaceId(business.PlaceId))
+                    return GenericResponse.Exception("Business Profile (PLACE ID) already exists in DB.");
+
                 if (db.CheckBusinessProfileExistByIdEtab(business.IdEtab))
                     return GenericResponse.Exception("Business Profile (ID ETAB) already exists in DD.");
 
-                if (db.CheckBusinessProfileExistByPlaceId(business.PlaceId))
-                    return GenericResponse.Exception("Business Profile (PLACE ID) already exists in DB.");
+                if (business.Address != null && db.CheckBusinessProfileExistByNameAndAdress(business.Name, business.Address))
+                    return GenericResponse.Exception("Business Profile (ID ETAB) already exists in DD.");
 
                 string guid = Guid.NewGuid().ToString("N");
                 db.CreateBusinessUrl(new DbBusinessUrl(guid, business.PlaceUrl, "platform"));
@@ -484,6 +490,30 @@ namespace GMB.BusinessService.Api.Controller
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
                 return GenericResponse.Exception($"Error updating business profile : [{e.Message}]");
+            }
+        }
+
+        /// <summary>
+        /// Update Processing by Id Etab List.
+        /// </summary>
+        /// <param name="request"></param>
+        [HttpPut("bp/update-list/processing")]
+        [Authorize]
+        public ActionResult<GenericResponse> UpdateBusinessProcessingList([FromBody] UpdateBusinessProcessingListRequest request)
+        {
+            try
+            {
+                using DbLib db = new();
+
+                foreach(string idEtab in request.IdEtabList)
+                {
+                    db.UpdateBusinessProfileProcessingState(idEtab, request.Processing);
+                }
+                return new GenericResponse();
+            } catch (Exception e)
+            {
+                Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception($"Error updating processing state of business list : [{e.Message}]");
             }
         }
         #endregion

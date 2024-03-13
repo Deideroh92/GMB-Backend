@@ -51,6 +51,7 @@ namespace GMB.Scanner.Agent
 
                     // Get business profile infos from Google.
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
+                    Console.WriteLine("test");
 
                     // No business found at this url.
                     if (profile == null)
@@ -73,7 +74,12 @@ namespace GMB.Scanner.Agent
                     if (business == null)
                         db.CreateBusinessProfile(profile);
                     if (business != null && !profile.Equals(business))
-                        db.UpdateBusinessProfile(profile);
+                    {
+                        if (business.GoogleAddress != profile.GoogleAddress)
+                            db.UpdateBusinessProfile(profile);
+                        else
+                            db.UpdateBusinessProfileWithoutAddress(profile);
+                    } 
 
                     // Insert Business Score if have one.
                     if (score?.Score != null)

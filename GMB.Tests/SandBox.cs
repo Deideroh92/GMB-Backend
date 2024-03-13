@@ -19,25 +19,45 @@ namespace GMB.Tests
         }
 
         [TestMethod]
-        public async void Sand()
+        public void Sand()
         {
             string filePath = "input.txt";
             string[] lines = File.ReadAllLines(filePath);
-            string outputFilePath = "file.csv";
+            string outputFilePath = "output.txt";
             using StreamWriter writer = new(outputFilePath);
 
             DbLib db = new();
 
-            List<string> stringList = [.. lines];
-
             BusinessController controller = new();
 
-            ActionResult<GetBusinessListResponse> response = await controller.GetBusinessListByUrlAsync(stringList);
-
-            foreach (Business? bp in response.Value.BusinessList)
+            int i = 0;
+            try
             {
-                writer.WriteLine(bp.PlaceUrl + ";" + bp.IdEtab + ";" + bp.PlaceId);
+                foreach (string line in lines)
+                {
+                    DbBusinessProfile? bp = db.GetBusinessByIdEtab(line);
+
+                    if (bp == null || bp.Name == null || bp.GoogleAddress == null)
+                    {
+                        writer.WriteLine(line + "\n");
+                        continue;
+                    }
+
+                    List<DbBusinessProfile> bpList = db.GetBusinessByNameAndAdress(bp.Name, bp.GoogleAddress);
+                    foreach (DbBusinessProfile bpToDelete in bpList)
+                    {
+                        if (bpToDelete.IdEtab != line)
+                        {
+                            controller.DeleteBusinessProfile(bpToDelete.IdEtab);
+                            i++;
+                        }
+                    }
+                }
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
             }
+
             return;
         }
 

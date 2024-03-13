@@ -10,7 +10,6 @@ using GMB.Sdk.Core;
 using System.Diagnostics;
 using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Models;
-using GMB.PlaceService.Api.Core;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -49,7 +48,7 @@ namespace GMB.ScannerService.Api.Controller
                         break;
                 }
 
-                int nbThreads = 8;
+                int nbThreads = 1;
 
                 foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
                 {

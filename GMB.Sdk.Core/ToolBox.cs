@@ -125,7 +125,7 @@ namespace GMB.Sdk.Core
             {
                 DbBusinessProfile? profile = new(
                 place.PlaceId,
-                ComputeMd5Hash(place.PlaceId),
+                ComputeMd5Hash(place.DisplayName?.Text + place.FormattedAddress),
                 Guid.NewGuid().ToString("N"),
                 place.DisplayName?.Text,
                 null,
@@ -172,7 +172,7 @@ namespace GMB.Sdk.Core
             {
                 Business? business = new(
                 place.PlaceId,
-                ComputeMd5Hash(place.PlaceId),
+                ComputeMd5Hash(place.DisplayName?.Text + place.FormattedAddress),
                 Guid.NewGuid().ToString("N"),
                 place.DisplayName?.Text,
                 null,

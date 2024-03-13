@@ -19,6 +19,9 @@
     <None Update="ChromeDriver\chromedriver.exe">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Files\CountryList.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="Files\Custom.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
