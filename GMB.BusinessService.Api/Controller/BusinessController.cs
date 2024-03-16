@@ -507,7 +507,7 @@ namespace GMB.BusinessService.Api.Controller
 
                 foreach(string idEtab in request.IdEtabList)
                 {
-                    db.UpdateBusinessProfileProcessingState(idEtab, request.Processing);
+                    db.UpdateBusinessProfileProcessingState(idEtab.Trim(), request.Processing);
                 }
                 return new GenericResponse();
             } catch (Exception e)
