@@ -348,13 +348,16 @@ namespace GMB.Scanner.Agent.Core
                         break;
                     }
 
-                    reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Replace(" sur\r\nGoogle", "").Trim();
-                    if (reviewGoogleDate != null)
+                    if (nbLimit == null)
                     {
-                        realDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
-                        if (realDate < dateLimit)
+                        reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Replace(" sur\r\nGoogle", "").Trim();
+                        if (reviewGoogleDate != null)
                         {
-                            break;
+                            realDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
+                            if (realDate < dateLimit)
+                            {
+                                break;
+                            }
                         }
                     }
                 }
