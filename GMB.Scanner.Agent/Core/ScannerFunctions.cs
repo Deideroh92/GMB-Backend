@@ -245,7 +245,7 @@ namespace GMB.Scanner.Agent.Core
         /// <param name="idEtab"></param>
         /// <param name="dateLimit"></param>
         /// <param name="driver"></param>
-        public static List<DbBusinessReview>? GetReviews(string idEtab, DateTime? dateLimit, SeleniumDriver driver, bool isHotel = false)
+        public static List<DbBusinessReview>? GetReviews(string idEtab, DateTime? dateLimit, SeleniumDriver driver, bool isHotel = false, int? nbLimit = null)
         {
 
             try
@@ -276,7 +276,7 @@ namespace GMB.Scanner.Agent.Core
             Thread.Sleep(1000);
 
             // Getting reviews.
-            ReadOnlyCollection<IWebElement>? reviews = GetWebElements(driver.WebDriver, dateLimit);
+            ReadOnlyCollection<IWebElement>? reviews = GetWebElements(driver.WebDriver, dateLimit, nbLimit);
             List<DbBusinessReview>? businessReviews = [];
 
             if (reviews != null)
@@ -304,7 +304,7 @@ namespace GMB.Scanner.Agent.Core
         /// <param name="driver"></param>
         /// <param name="dateLimit"></param>
         /// <returns>Review list</returns>
-        private static ReadOnlyCollection<IWebElement>? GetWebElements(IWebDriver driver, DateTime? dateLimit)
+        private static ReadOnlyCollection<IWebElement>? GetWebElements(IWebDriver driver, DateTime? dateLimit, int? nbLimit)
         {
             try
             {
@@ -323,7 +323,7 @@ namespace GMB.Scanner.Agent.Core
                 DateTime realDate;
                 int index = 0;
 
-                while (reviewListLength != reviewList.Count)
+                while (reviewListLength != reviewList.Count || reviewList.Count < nbLimit)
                 {
                     try
                     {
@@ -339,6 +339,11 @@ namespace GMB.Scanner.Agent.Core
                     reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
 
                     if (reviewList == null)
+                    {
+                        break;
+                    }
+
+                    if (nbLimit != null && reviewList.Count > nbLimit)
                     {
                         break;
                     }
@@ -494,7 +499,7 @@ namespace GMB.Scanner.Agent.Core
         {
             ScannerFunctions scanner = new();
             SeleniumDriver driver = new();
-            DateTime reviewLimit = DateTime.UtcNow.AddDays(-10);
+            DateTime reviewLimit = DateTime.UtcNow.AddDays(-15);
         
             #region Mairie de Paris
             GetBusinessProfileRequest request = new("https://www.google.fr/maps/place/Mairie+de+Paris/@48.8660828,2.3108754,13z/data=!4m10!1m2!2m1!1smairie+de+paris!3m6!1s0x47e66e23b4333db3:0xbc314dec89c4971!8m2!3d48.8641075!4d2.3421539!15sCg9tYWlyaWUgZGUgcGFyaXNaESIPbWFpcmllIGRlIHBhcmlzkgEJY2l0eV9oYWxsmgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVVEyYzA5MWNrbFJFQUXgAQA!16s%2Fg%2F11c6pn36ph?hl=fr&entry=ttu");
@@ -517,7 +522,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Mairie de Paris - Business Profile error !");
             
             driver.GetToPage(request.Url);
-            List<DbBusinessReview>? reviews = GetReviews(profile.IdEtab, reviewLimit, driver);
+            List<DbBusinessReview>? reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
 
             if (reviews == null)
                 return new(false, "Mairie de Paris - Reviews empty !");
@@ -553,7 +558,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Louvre - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddHours(-3), driver);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
 
             if (reviews == null)
                 return new(false, "Louvre - Reviews empty !");
@@ -590,7 +595,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Hôpital Necker - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddDays(-30), driver);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
 
             if (reviews == null)
                 return new(false, "Hôpital Necker - Reviews empty !");
@@ -627,7 +632,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Maxim's - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
 
             if (reviews == null)
                 return new(false, "Maxim's - Reviews empty !");
@@ -664,7 +669,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Ritz Paris - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddDays(-5), driver, true);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 20);
 
             if (reviews == null)
                 return new(false, "Ritz Paris - Reviews empty !");
@@ -701,7 +706,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Lasserre - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
 
             if (reviews == null)
                 return new(false, "Lasserre - Reviews empty !");
@@ -738,7 +743,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Le Meurice - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, DateTime.UtcNow.AddDays(-15), driver, true);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 20);
 
             if (reviews == null)
                 return new(false, "Le Meurice - Reviews empty !");
@@ -775,7 +780,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Hôtel de Crillon - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 20);
 
             if (reviews == null)
                 return new(false, "Hôtel de Crillon - Reviews empty !");
