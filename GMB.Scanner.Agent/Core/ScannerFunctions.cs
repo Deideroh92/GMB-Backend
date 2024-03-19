@@ -201,7 +201,16 @@ namespace GMB.Scanner.Agent.Core
 
                         if (dbBusinessProfile.Address == null || !dbBusinessProfile.GoogleAddress.Contains(dbBusinessProfile.Address))
                         {
-                            dbBusinessProfile.Address = dbBusinessProfile.GoogleAddress.Replace(", " + dbBusinessProfile.Country, "").Replace(dbBusinessProfile.City ?? "", "").Replace(dbBusinessProfile.PostCode ?? "", "").Trim().TrimEnd(',').Trim();
+                            string address = dbBusinessProfile.GoogleAddress;
+
+                            if (dbBusinessProfile.Country != null)
+                                address = address.Replace(", " + dbBusinessProfile.Country, "");
+                            if (dbBusinessProfile.City != null)
+                                address = address.Replace(dbBusinessProfile.City, "");
+                            if (dbBusinessProfile.PostCode != null)
+                                address = address.Replace(dbBusinessProfile.PostCode, "");
+                            address = address.Trim().TrimEnd(',').Trim();
+                            dbBusinessProfile.Address = address;
                         }
                     }
                     #endregion

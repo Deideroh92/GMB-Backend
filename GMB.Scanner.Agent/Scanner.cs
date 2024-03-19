@@ -51,7 +51,6 @@ namespace GMB.Scanner.Agent
 
                     // Get business profile infos from Google.
                     (DbBusinessProfile? profile, DbBusinessScore? score) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, BPRequest, business);
-                    Console.WriteLine("test");
 
                     // No business found at this url.
                     if (profile == null)
