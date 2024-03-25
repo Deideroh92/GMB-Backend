@@ -293,7 +293,7 @@ namespace GMB.BusinessService.Api.Controller
         /// <param name="url"></param>
         [HttpPost("bp/url")]
         [Authorize]
-        public async Task<ActionResult<GetBusinessResponse>> GetBusinessByUrlAsync([FromBody] string url)
+        public ActionResult<GetBusinessResponse> GetBusinessByUrl([FromBody] string url)
         {
             try
             {

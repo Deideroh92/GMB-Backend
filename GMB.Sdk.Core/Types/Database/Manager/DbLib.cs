@@ -1431,7 +1431,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdReview", idReview);
                 using SqlDataReader reader = cmd.ExecuteReader();
@@ -1452,7 +1452,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.GetBoolean(5),
                         null,
                         reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                        reader.IsDBNull(7) ? null : reader.GetString(7));
+                        reader.IsDBNull(7) ? null : reader.GetString(7),
+                        reader.IsDBNull(9) ? null : reader.GetString(9));
 
                 } else
                     return null;
@@ -1471,7 +1472,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 using SqlDataReader reader = cmd.ExecuteReader();
@@ -1493,8 +1494,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.GetBoolean(5),
                         null,
                         reader.IsDBNull(8) ? null : reader.GetDateTime(8),
-                        reader.IsDBNull(7) ? null : reader.GetString(7)));
-
+                        reader.IsDBNull(7) ? null : reader.GetString(7),
+                        reader.IsDBNull(10) ? null : reader.GetString(10)));
                 }
                 return brList;
             } catch (Exception e)
@@ -1668,7 +1669,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="idEtab"></param>
         /// <returns>Business or null</returns>
-        public DbBusinessProfile? GetStickerByIdEtab(string idEtab, string year)
+        public DbBusinessProfile? GetStickerByIdEtab(string idEtab)
         {
             try
             {
@@ -1725,7 +1726,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="placeId"></param>
         /// <returns>Business or null</returns>
-        public DbBusinessProfile? GetStickerByIdPlaceId(string placeId, string year)
+        public DbBusinessProfile? GetStickerByIdPlaceId(string placeId)
         {
             try
             {

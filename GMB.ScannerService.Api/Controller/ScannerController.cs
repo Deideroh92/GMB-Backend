@@ -32,10 +32,10 @@ namespace GMB.ScannerService.Api.Controller
                 List<Task> tasks = [];
                 using DbLib db = new();
 
-                var testResult = await ScannerFunctions.ScannerTest();
+                /*var testResult = await ScannerFunctions.ScannerTest();
 
                 if (!testResult.Success)
-                    return GenericResponse.Exception($"XPATH was modified, can't scan anything !");
+                    return GenericResponse.Exception($"XPATH was modified, can't scan anything !");*/
 
                 switch (request.OperationType)
                 {
@@ -48,7 +48,7 @@ namespace GMB.ScannerService.Api.Controller
                         break;
                 }
 
-                int nbThreads = 8;
+                int nbThreads = 1;
 
                 if (businessList.Count < 10)
                     nbThreads = 1;

@@ -179,7 +179,7 @@ namespace GMB.Scanner.Agent
                 {
                     string textSearch = request.TextSearch + "+" + location;
                     string url = "https://www.google.com/maps/search/" + textSearch;
-                    urls = scanner.GetUrlsFromGooglePage(driver, url);
+                    urls = ScannerFunctions.GetUrlsFromGooglePage(driver, url);
 
                     if (urls == null)
                         continue;

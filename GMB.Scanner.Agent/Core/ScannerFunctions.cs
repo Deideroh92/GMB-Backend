@@ -7,9 +7,7 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using Serilog;
-using System;
 using System.Collections.ObjectModel;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace GMB.Scanner.Agent.Core
@@ -24,7 +22,7 @@ namespace GMB.Scanner.Agent.Core
     {
         static void Main() { }
 
-        private static readonly char[] separator = new[] { ' ', '\t' };
+        private static readonly char[] separator = [' ', '\t'];
 
         #region Profile & Score
         /// <summary>
@@ -450,7 +448,9 @@ namespace GMB.Scanner.Agent.Core
                     reviewReplyDate = ToolBox.ComputeDateFromGoogleDate(reviewReplyGoogleDate);
                 }
 
-                return new DbBusinessReview(idEtab, ToolBox.ComputeMd5Hash(idEtab + idReview), idReview, user, reviewScore > 0 ? reviewScore : hotelScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, reviewReplyDate, reviewReplyGoogleDate);
+                string? visitDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.visitDate)?.Text;
+
+                return new DbBusinessReview(idEtab, ToolBox.ComputeMd5Hash(idEtab + idReview), idReview, user, reviewScore > 0 ? reviewScore : hotelScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, reviewReplyDate, reviewReplyGoogleDate, visitDate);
             } catch (Exception)
             {
                 throw new Exception("Couldn't get review info from a review element");
@@ -545,7 +545,7 @@ namespace GMB.Scanner.Agent.Core
                     return new(false, "Mairie de Paris - Review loop error !");
             }
 
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Mairie de Paris - Review global error !");
             #endregion
             
@@ -581,7 +581,7 @@ namespace GMB.Scanner.Agent.Core
                     return new(false, "Louvre - Review loop error !");
             }
 
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Louvre - Reviews global error !");
             #endregion
 
@@ -618,7 +618,7 @@ namespace GMB.Scanner.Agent.Core
                     return new(false, "Hôpital Necker - Review loop error !");
             }
 
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Hôpital Necker - Reviews global error !");
             #endregion
 
@@ -655,7 +655,7 @@ namespace GMB.Scanner.Agent.Core
                     return new(false, "Maxim's - Review loop error !");
             }
 
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Maxim's - Reviews global error !");
             #endregion
             
@@ -692,7 +692,7 @@ namespace GMB.Scanner.Agent.Core
                     return new(false, "Ritz Paris - Review loop error !");
             }
 
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Ritz Paris - Reviews global error !");
             #endregion
 
@@ -729,7 +729,7 @@ namespace GMB.Scanner.Agent.Core
                     return new(false, "Lasserre - Review loop error !");
             }
 
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Lasserre - Reviews global error !");
             #endregion
 
@@ -766,7 +766,7 @@ namespace GMB.Scanner.Agent.Core
                     return new(false, "Le Meurice - Review loop error !");
             }
 
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Le Meurice - Reviews global error !");
             #endregion
 
@@ -803,7 +803,7 @@ namespace GMB.Scanner.Agent.Core
                     return new(false, "Hôtel de Crillon - Review loop error !");
             }
 
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null))
+            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Hôtel de Crillon - Reviews global error !");
             #endregion
 
@@ -819,7 +819,7 @@ namespace GMB.Scanner.Agent.Core
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="urlToPage"></param>
-        public List<string>? GetUrlsFromGooglePage(SeleniumDriver driver, string urlToPage)
+        public static List<string>? GetUrlsFromGooglePage(SeleniumDriver driver, string urlToPage)
         {
 
             List<string> urls = [];

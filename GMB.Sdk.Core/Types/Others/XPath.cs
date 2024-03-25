@@ -63,6 +63,7 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> score = [By.XPath(".//span[contains(@role, 'img') and contains(@aria-label, 'étoile')]")];
         public static readonly List<By> userNbReviews = [By.XPath(".//div[contains(text(), 'avis')]")];
         public static readonly List<By> text = [By.XPath(".//div[contains(@class, 'MyEned')]")];
+        public static readonly List<By> visitDate = [By.XPath(".//div[contains(@class, 'MyEned')]/parent::*/following-sibling::div")];
         public static readonly List<By> plusButton = [By.XPath(".//button[contains(@jsaction, 'review.expandReview')]"), By.XPath(".//button[@aria-label='Voir plus']")];
 
         // Review reply info
