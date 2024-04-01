@@ -134,7 +134,9 @@ namespace GMB.ScannerService.Api.Controller
             {
                 Stopwatch stopwatch = new();
                 stopwatch.Start();
-                var testResult = await ScannerFunctions.ScannerTest();
+                SeleniumDriver driver = new();
+                var testResult = await ScannerFunctions.ScannerTest(driver);
+                driver.Dispose();
                 stopwatch.Stop();
                 TimeSpan elapsedTime = stopwatch.Elapsed;
                 string message = testResult.Message + " Process took " + elapsedTime.ToString() + " to execute.";

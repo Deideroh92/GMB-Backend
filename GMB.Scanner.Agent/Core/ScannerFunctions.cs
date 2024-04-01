@@ -507,10 +507,9 @@ namespace GMB.Scanner.Agent.Core
             }
         }
 
-        public static async Task<TestResult> ScannerTest()
+        public static async Task<TestResult> ScannerTest(SeleniumDriver driver)
         {
             ScannerFunctions scanner = new();
-            SeleniumDriver driver = new();
             DateTime reviewLimit = DateTime.UtcNow.AddDays(-15);
         
             #region Mairie de Paris
