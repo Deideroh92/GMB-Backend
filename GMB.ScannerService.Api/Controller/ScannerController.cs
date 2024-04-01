@@ -31,8 +31,9 @@ namespace GMB.ScannerService.Api.Controller
                 List<BusinessAgent> businessList = [];
                 List<Task> tasks = [];
                 using DbLib db = new();
-
-                var testResult = await ScannerFunctions.ScannerTest();
+                SeleniumDriver driver = new();
+                var testResult = await ScannerFunctions.ScannerTest(driver);
+                driver.Dispose();
 
                 if (!testResult.Success)
                     return GenericResponse.Exception($"XPATH was modified, can't scan anything !");
