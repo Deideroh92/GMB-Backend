@@ -561,7 +561,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl == null ||
                 profile.PlusCode != "8FW4V86Q+63" ||
-                (profile.Tel != "01 40 20 53 17" && profile.Tel != "+33 1 40 30 53 17") ||
+                (profile.Tel != "01 40 20 53 17" && profile.Tel != "+33 1 40 20 53 17") ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
                 score.Score >= 5 ||
