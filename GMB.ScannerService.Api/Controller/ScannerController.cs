@@ -148,50 +148,5 @@ namespace GMB.ScannerService.Api.Controller
                 return GenericResponse.Exception($"An exception occurred while starting scanner test : {e.Message}");
             }
         }
-
-        /// <summary>
-        /// Start Scanner Test.
-        /// </summary>
-        [HttpPost("scanner/sticker")]
-        [Authorize(Policy = "DevelopmentPolicy")]
-        public async Task<ActionResult<GetStickerListResponse>> StartStickerScanner([FromBody] StickerScannerRequest request)
-        {
-            try
-            {
-                var testResult = await ScannerFunctions.ScannerTest();
-
-                if (!testResult.Success)
-                    return GetStickerListResponse.Exception($"XPATH was modified, can't scan anything !");
-
-                List<Sticker> stickers = [];
-
-                if (request.Type == StickerType.PLACE_ID)
-                {
-                    DbLib dbLib = new();
-
-                    foreach(StickerFileRowData record in request.File)
-                    {
-                        DbBusinessProfile? bp = dbLib.GetBusinessByPlaceId(record.Data);
-
-                        if (bp == null)
-                        {
-                            Place? place = await PlaceService.Api.Core.PlaceService.GetPlaceByPlaceId(record.Data);
-                            if (place == null)
-                            {
-                                stickers.Add(new(record.Id, null, null, null));
-                                continue;
-                            }  
-                            bp = ToolBox.PlaceToBP(place);
-                        }
-                    }
-                }
-
-                return new GetStickerListResponse();
-            } catch (Exception e)
-            {
-                Log.Error(e, $"An exception occurred while starting scanner test.");
-                return GetStickerListResponse.Exception($"An exception occurred while starting scanner test : {e.Message}");
-            }
-        }
     }
 }

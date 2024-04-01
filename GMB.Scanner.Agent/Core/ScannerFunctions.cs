@@ -534,7 +534,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Mairie de Paris - Business Profile error !");
             
             driver.GetToPage(request.Url);
-            List<DbBusinessReview>? reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
+            List<DbBusinessReview>? reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
 
             if (reviews == null)
                 return new(false, "Mairie de Paris - Reviews empty !");
@@ -562,7 +562,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl == null ||
                 profile.PlusCode != "8FW4V86Q+63" ||
-                (profile.Tel != "01 40 20 53 17" && profile.Tel != "+33 1 40 20 53 17") ||
+                (profile.Tel != "01 40 20 53 17" && profile.Tel != "+33 1 40 30 53 17") ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
                 score.Score >= 5 ||
@@ -570,7 +570,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Louvre - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
 
             if (reviews == null)
                 return new(false, "Louvre - Reviews empty !");
@@ -598,7 +598,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Website != "http://www.hopital-necker.aphp.fr/" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4R8W8+37" ||
+                profile.PlusCode != "8FW4R8W8+C8" ||
                 (profile.Tel != "01 44 49 40 00" && profile.Tel != "+33 1 44 49 40 00") ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
@@ -607,7 +607,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Hôpital Necker - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
 
             if (reviews == null)
                 return new(false, "Hôpital Necker - Reviews empty !");
@@ -644,7 +644,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Maxim's - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
 
             if (reviews == null)
                 return new(false, "Maxim's - Reviews empty !");
@@ -681,7 +681,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Ritz Paris - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 20);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 30);
 
             if (reviews == null)
                 return new(false, "Ritz Paris - Reviews empty !");
@@ -718,7 +718,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Lasserre - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 20);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
 
             if (reviews == null)
                 return new(false, "Lasserre - Reviews empty !");
@@ -755,7 +755,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Le Meurice - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 20);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 30);
 
             if (reviews == null)
                 return new(false, "Le Meurice - Reviews empty !");
@@ -792,7 +792,7 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Hôtel de Crillon - Business Profile error !");
 
             driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 20);
+            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 30);
 
             if (reviews == null)
                 return new(false, "Hôtel de Crillon - Reviews empty !");

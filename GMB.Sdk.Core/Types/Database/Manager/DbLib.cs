@@ -1,5 +1,4 @@
-﻿using AngleSharp.Io;
-using GMB.Sdk.Core.Types.BusinessService;
+﻿using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.PlaceService;
@@ -1395,7 +1394,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_DATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId, @ReviewReplyGoogleDate, @ReviewReplyDate)";
+                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_DATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId, @ReviewReplyGoogleDate, @ReviewReplyDate, @VisitDate)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessReview.IdEtab);
                 cmd.Parameters.AddWithValue("@IdReview", businessReview.IdReview);
@@ -1412,6 +1411,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Processing", 0);
                 cmd.Parameters.AddWithValue("@ReviewReplyGoogleDate", GetValueOrDefault(businessReview.ReviewReplyGoogleDate));
                 cmd.Parameters.AddWithValue("@ReviewReplyDate", GetValueOrDefault(businessReview.ReviewReplyDate));
+                cmd.Parameters.AddWithValue("@VisitDate", GetValueOrDefault(businessReview.VisitDate));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
@@ -1556,7 +1556,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             try
             {
                 string changeDateCommand = changeDate ? ", REVIEW_DATE = @ReviewDate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate" : "";
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate";
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, VISIT_DATE = @VisitDate";
                 string whereCommand = " WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand + changeDateCommand + whereCommand, Connection);
                 cmd.Parameters.AddWithValue("@UserName", GetValueOrDefault(review.User.Name));
@@ -1567,6 +1567,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@ReviewAnswered", GetValueOrDefault(review.ReviewReplied));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(review.DateUpdate));
                 cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
+                cmd.Parameters.AddWithValue("@VisitDate", GetValueOrDefault(review.VisitDate));
                 if (changeDate)
                 {
                     cmd.Parameters.AddWithValue("@ReviewDate", GetValueOrDefault(review.ReviewDate));
@@ -1661,122 +1662,6 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         }
         #endregion
 
-        #endregion
-
-        #region Stickers
-        /// <summary>
-        /// Get Sticker by Id Etab.
-        /// </summary>
-        /// <param name="idEtab"></param>
-        /// <returns>Business or null</returns>
-        public DbBusinessProfile? GetStickerByIdEtab(string idEtab)
-        {
-            try
-            {
-                
-                string selectCommand = "SELECT SCORE FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_DATE > @year AND REVIEW_DATE < @yearr";
-
-                using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@IdEtab", idEtab);
-                using SqlDataReader reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    DbBusinessProfile businessProfile = new(
-                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
-                        reader["ID_ETAB"].ToString()!,
-                        reader["FIRST_GUID"].ToString()!,
-                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
-                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
-                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
-                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
-                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
-                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
-                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
-                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
-                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
-                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
-                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
-                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
-                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
-                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
-                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
-                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
-                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
-                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
-                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
-                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
-                        (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
-                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
-                        (short)reader["PROCESSING"],
-                        (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
-                    return businessProfile;
-                }
-
-                return null;
-            } catch (Exception e)
-            {
-                throw new Exception($"Error getting BP by id etab = [{idEtab}]", e);
-            }
-        }
-
-        /// <summary>
-        /// Get Sticker by Place Id.
-        /// </summary>
-        /// <param name="placeId"></param>
-        /// <returns>Business or null</returns>
-        public DbBusinessProfile? GetStickerByIdPlaceId(string placeId)
-        {
-            try
-            {
-
-                string selectCommand = "SELECT SCORE FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_DATE > @year AND REVIEW_DATE < @yearr";
-
-                using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@IdEtab", placeId);
-                using SqlDataReader reader = cmd.ExecuteReader();
-
-                if (reader.Read())
-                {
-                    DbBusinessProfile businessProfile = new(
-                        (reader["PLACE_ID"] != DBNull.Value) ? reader["PLACE_ID"].ToString() : null,
-                        reader["ID_ETAB"].ToString()!,
-                        reader["FIRST_GUID"].ToString()!,
-                        (reader["NAME"] != DBNull.Value) ? reader["NAME"].ToString() : null,
-                        (reader["CATEGORY"] != DBNull.Value) ? reader["CATEGORY"].ToString() : null,
-                        (reader["ADRESS"] != DBNull.Value) ? reader["ADRESS"].ToString() : null,
-                        (reader["A_ADDRESS"] != DBNull.Value) ? reader["A_ADDRESS"].ToString() : null,
-                        (reader["A_POSTCODE"] != DBNull.Value) ? reader["A_POSTCODE"].ToString() : null,
-                        (reader["A_CITY"] != DBNull.Value) ? reader["A_CITY"].ToString() : null,
-                        (reader["A_CITY_CODE"] != DBNull.Value) ? reader["A_CITY_CODE"].ToString() : null,
-                        (reader["A_LAT"] != DBNull.Value) ? Convert.ToDouble(reader["A_LAT"]) : null,
-                        (reader["A_LON"] != DBNull.Value) ? Convert.ToDouble(reader["A_LON"]) : null,
-                        (reader["A_BAN_ID"] != DBNull.Value) ? reader["A_BAN_ID"].ToString() : null,
-                        (reader["A_ADDRESS_TYPE"] != DBNull.Value) ? reader["A_ADDRESS_TYPE"].ToString() : null,
-                        (reader["A_NUMBER"] != DBNull.Value) ? reader["A_NUMBER"].ToString() : null,
-                        (reader["A_SCORE"] != DBNull.Value) ? Convert.ToDouble(reader["A_SCORE"]) : null,
-                        (reader["TEL"] != DBNull.Value) ? reader["TEL"].ToString() : null,
-                        (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
-                        (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
-                        (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
-                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
-                        (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
-                        (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
-                        (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
-                        (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
-                        (short)reader["PROCESSING"],
-                        (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
-                    return businessProfile;
-                }
-
-                return null;
-            } catch (Exception e)
-            {
-                throw new Exception($"Error getting BP by id etab = [{placeId}]", e);
-            }
-        }
         #endregion
     }
 }

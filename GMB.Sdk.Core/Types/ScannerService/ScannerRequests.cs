@@ -102,18 +102,5 @@ namespace GMB.Sdk.Core.Types.ScannerService
         public UrlState UrlState { get; set; } = urlState;
         public bool UpdateProcessingState { get; set; } = updateProcessingState;
     }
-
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="requestId"></param>
-    /// <param name="type"></param>
-    /// <param name="file"></param>
-    public class StickerScannerRequest(string requestId, StickerType type, List<StickerFileRowData> file)
-    {
-        public string RequestId { get; set; } = requestId;
-        public StickerType Type { get; set;} = type;
-        public List<StickerFileRowData> File { get; set; } = file;
-    }
     #endregion
 }
