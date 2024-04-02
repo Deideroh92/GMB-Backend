@@ -284,7 +284,13 @@ namespace GMB.Scanner.Agent.Core
 
             // Getting reviews.
             ReadOnlyCollection<IWebElement>? reviews = GetWebElements(driver.WebDriver, dateLimit, nbLimit);
+
+            if (reviews == null || reviews.Count == 0)
+                return null;
+
             List<DbBusinessReview>? businessReviews = [];
+
+            string? visitDateOldest = null;
 
             if (reviews != null)
             {
@@ -292,9 +298,17 @@ namespace GMB.Scanner.Agent.Core
                 {
                     try
                     {
-                        DbBusinessReview? businessReview = GetReviewFromGooglePage(review, idEtab, dateLimit);
+                        DbBusinessReview? businessReview = GetReviewFromGooglePage(review, idEtab, dateLimit, visitDateOldest);
+
                         if (businessReview == null)
                             continue;
+
+                        if (businessReview.VisitDate != null && businessReview.VisitDate != "")
+                        {
+                            if (visitDateOldest == null || ToolBox.ComputeDateFromVisitDate(visitDateOldest) > ToolBox.ComputeDateFromVisitDate(businessReview.VisitDate))
+                                visitDateOldest = businessReview.VisitDate;
+                        }
+
                         businessReviews.Add(businessReview);
                     }
                     catch (Exception e)
@@ -327,6 +341,7 @@ namespace GMB.Scanner.Agent.Core
 
                 int reviewListLength = 0;
                 string? reviewGoogleDate;
+                string? visitDate;
                 DateTime realDate;
                 int index = 0;
 
@@ -358,9 +373,10 @@ namespace GMB.Scanner.Agent.Core
                     if (nbLimit == null)
                     {
                         reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Replace(" sur\r\nGoogle", "").Trim();
+                        visitDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.visitDate)?.Text?.Replace(" Visité en", "").Trim();
                         if (reviewGoogleDate != null)
                         {
-                            realDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
+                            realDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate, visitDate);
                             if (realDate < dateLimit)
                             {
                                 break;
@@ -399,7 +415,7 @@ namespace GMB.Scanner.Agent.Core
         /// <param name="idEtab"></param>
         /// <param name="dateLimit"></param>
         /// <returns>Business Review</returns>
-        private static DbBusinessReview? GetReviewFromGooglePage(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit)
+        private static DbBusinessReview? GetReviewFromGooglePage(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit, string? visitDateOldest)
         {
             try
             {
@@ -407,7 +423,13 @@ namespace GMB.Scanner.Agent.Core
                 string idReview = reviewWebElement.GetAttribute("data-review-id")?.Trim() ?? throw new Exception("No review id");
 
                 string? reviewGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.googleDate)?.Text?.Replace(" sur\r\nGoogle", "").Trim();
-                DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
+
+                string? visitDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.visitDate)?.Text;
+
+                if (visitDate == null && visitDateOldest != null)
+                    visitDate = visitDateOldest;
+
+                DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate, visitDate);
 
                 if (reviewGoogleDate == null || dateLimit.HasValue && reviewDate < dateLimit.Value)
                     return null;

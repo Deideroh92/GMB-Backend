@@ -80,11 +80,33 @@ namespace GMB.Sdk.Core
         }
 
         /// <summary>
+        /// Compute Date with provided visit date.
+        /// </summary>
+        /// <param name="visitDate"></param>
+        /// <returns>Date</returns>
+        public static DateTime ComputeDateFromVisitDate(string visitDate)
+        {
+            string date = visitDate.Replace("Visité en", "").Trim();
+            string[] parts = date.Trim().Split(' ');
+
+            string month = parts[0].Trim();
+            string yearString = parts.Length > 1 ? parts[1].Trim() : "";
+
+            if (!int.TryParse(yearString, out int year))
+            {
+                // If year is not specified, use current year
+                year = DateTime.Now.Year;
+            }
+            DateTime firstDayOfMonth = new(year, DateTime.ParseExact(month, "MMMM", new System.Globalization.CultureInfo("fr-FR")).Month, 1);
+            return firstDayOfMonth;
+        }
+
+        /// <summary>
         /// Transform a google date into a real date.
         /// </summary>
         /// <param name="googleDate"></param>
         /// <returns>Real date from google date.</returns>
-        public static DateTime ComputeDateFromGoogleDate(string? googleDate)
+        public static DateTime ComputeDateFromGoogleDate(string? googleDate, string? visitDate)
         {
             if (googleDate == null)
                 return DateTime.UtcNow;
@@ -100,9 +122,23 @@ namespace GMB.Sdk.Core
 
 
                 if (googleDate.Contains("moi"))
+                {
+                    if (visitDate != null && visitDate != "")
+                    {
+                        DateTime firstDayOfMonth = ComputeDateFromVisitDate(visitDate);
+                        return firstDayOfMonth;
+                    }
                     return currentDate.AddMonths(-jsonValue);
+                }
                 if (googleDate.Contains("an"))
+                {
+                    if (visitDate != null && visitDate != "")
+                    {
+                        DateTime firstDayOfMonth = ComputeDateFromVisitDate(visitDate);
+                        return firstDayOfMonth;
+                    }
                     return currentDate.AddYears(-jsonValue);
+                }
                 if (googleDate.Contains("semaine"))
                     return currentDate.AddDays(-jsonValue);
                 if (googleDate.Contains("jour"))
@@ -142,7 +178,7 @@ namespace GMB.Sdk.Core
                 null,
                 place.NationalPhoneNumber,
                 place.WebsiteUri,
-                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("plus_code") == true)?.LongText,
+                place.PlusCode?.GlobalCode,
                 null,
                 (BusinessStatus)Enum.Parse(typeof(BusinessStatus), place.BusinessStatus!),
                 null,
@@ -189,7 +225,7 @@ namespace GMB.Sdk.Core
                 null,
                 place.NationalPhoneNumber,
                 place.WebsiteUri,
-                place.AddressComponents?.FirstOrDefault(x => x?.Types?.Contains("plus_code") == true)?.LongText,
+                place.PlusCode?.GlobalCode,
                 null,
                 (BusinessStatus)Enum.Parse(typeof(BusinessStatus), place.BusinessStatus!),
                 null,
