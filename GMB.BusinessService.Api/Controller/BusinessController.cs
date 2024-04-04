@@ -241,7 +241,7 @@ namespace GMB.BusinessService.Api.Controller
                 if (bp == null)
                     return new GetBusinessResponse(null);
 
-                DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(id);
+                DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(bp.IdEtab);
 
                 Business? business = new(bp, bs);
 
