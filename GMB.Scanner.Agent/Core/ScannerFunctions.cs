@@ -30,6 +30,8 @@ namespace GMB.Scanner.Agent.Core
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="request"></param>
+        /// <param name="business"></param>
+        /// <param name="getPlusCode"></param>
         /// <returns>Business Profile and a Business Score if any</returns>
         public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, GetBusinessProfileRequest request, DbBusinessProfile? business, bool getPlusCode = true)
         {
@@ -252,6 +254,8 @@ namespace GMB.Scanner.Agent.Core
         /// <param name="idEtab"></param>
         /// <param name="dateLimit"></param>
         /// <param name="driver"></param>
+        /// <param name="isHotel"></param>
+        /// <param name="nbLimit"></param>
         public static List<DbBusinessReview>? GetReviews(string idEtab, DateTime? dateLimit, SeleniumDriver driver, bool isHotel = false, int? nbLimit = null)
         {
 
@@ -298,7 +302,10 @@ namespace GMB.Scanner.Agent.Core
                 {
                     try
                     {
-                        DbBusinessReview? businessReview = GetReviewFromGooglePage(review, idEtab, dateLimit, visitDateOldest);
+                        if (businessReviews.Count >= nbLimit)
+                            return businessReviews;
+
+                        DbBusinessReview? businessReview = GetReviewFromGooglePage(review, idEtab, dateLimit, visitDateOldest, nbLimit != null);
 
                         if (businessReview == null)
                             continue;
@@ -324,6 +331,7 @@ namespace GMB.Scanner.Agent.Core
         /// </summary>
         /// <param name="driver"></param>
         /// <param name="dateLimit"></param>
+        /// <param name="nbLimit"></param>
         /// <returns>Review list</returns>
         private static ReadOnlyCollection<IWebElement>? GetWebElements(IWebDriver driver, DateTime? dateLimit, int? nbLimit)
         {
@@ -414,8 +422,10 @@ namespace GMB.Scanner.Agent.Core
         /// <param name="reviewWebElement"></param>
         /// <param name="idEtab"></param>
         /// <param name="dateLimit"></param>
+        /// <param name="visitDateOldest"></param>
+        /// <param name="hasNbLimit"></param>
         /// <returns>Business Review</returns>
-        private static DbBusinessReview? GetReviewFromGooglePage(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit, string? visitDateOldest)
+        private static DbBusinessReview? GetReviewFromGooglePage(IWebElement reviewWebElement, string idEtab, DateTime? dateLimit, string? visitDateOldest, bool hasNbLimit = false)
         {
             try
             {
@@ -431,7 +441,7 @@ namespace GMB.Scanner.Agent.Core
 
                 DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate, visitDate);
 
-                if (reviewGoogleDate == null || dateLimit.HasValue && reviewDate < dateLimit.Value)
+                if ((reviewGoogleDate == null || dateLimit.HasValue && reviewDate < dateLimit.Value) && !hasNbLimit)
                     return null;
 
                 string userName = ToolBox.FindElementSafe(reviewWebElement, XPathReview.userName)?.GetAttribute("aria-label")?.Replace("Photo de", "").Trim() ?? "";
