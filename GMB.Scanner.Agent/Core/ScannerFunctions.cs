@@ -467,10 +467,8 @@ namespace GMB.Scanner.Agent.Core
                 if (replied && ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyGoogleDate)))
                 {
                     reviewReplyGoogleDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.replyGoogleDate).Text;
-                    reviewReplyDate = ToolBox.ComputeDateFromGoogleDate(reviewReplyGoogleDate);
+                    reviewReplyDate = ToolBox.ComputeDateFromGoogleDate(reviewReplyGoogleDate, visitDate);
                 }
-
-                string? visitDate = ToolBox.FindElementSafe(reviewWebElement, XPathReview.visitDate)?.Text;
 
                 return new DbBusinessReview(idEtab, ToolBox.ComputeMd5Hash(idEtab + idReview), idReview, user, reviewScore > 0 ? reviewScore : hotelScore, reviewText, reviewGoogleDate, reviewDate, replied, DateTime.UtcNow, reviewReplyDate, reviewReplyGoogleDate, visitDate);
             } catch (Exception)

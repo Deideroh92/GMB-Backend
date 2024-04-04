@@ -105,6 +105,7 @@ namespace GMB.Sdk.Core
         /// Transform a google date into a real date.
         /// </summary>
         /// <param name="googleDate"></param>
+        /// <param name="visitDate"></param>
         /// <returns>Real date from google date.</returns>
         public static DateTime ComputeDateFromGoogleDate(string? googleDate, string? visitDate)
         {
