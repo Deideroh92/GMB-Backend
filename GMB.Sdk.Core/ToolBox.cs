@@ -10,6 +10,7 @@ using System.Runtime.InteropServices;
 using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
+using System.Globalization;
 
 namespace GMB.Sdk.Core
 {
@@ -97,7 +98,7 @@ namespace GMB.Sdk.Core
                 // If year is not specified, use current year
                 year = DateTime.Now.Year;
             }
-            DateTime firstDayOfMonth = new(year, DateTime.ParseExact(month, "MMMM", new System.Globalization.CultureInfo("fr-FR")).Month, 1);
+            DateTime firstDayOfMonth = new(year, DateTime.ParseExact(month, "MMMM", new CultureInfo("fr-FR")).Month, 1);
             return firstDayOfMonth;
         }
 
