@@ -402,16 +402,12 @@ namespace GMB.Scanner.Agent.Core
                 for (int i = index; i < reviewList.Count; i++)
                 {
                     IWebElement item = reviewList[i];
-                    string? reviewText = ToolBox.FindElementSafe(item, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
-                    if (reviewText != null && reviewText.EndsWith("Plus") && ToolBox.Exists(ToolBox.FindElementSafe(item, XPathReview.plusButton)))
+                    try
                     {
-                        try
-                        {
-                            ToolBox.FindElementSafe(item, XPathReview.plusButton).Click();
-                        } catch
-                        {
-                            continue;
-                        }
+                        ToolBox.FindElementSafe(item, XPathReview.plusButton).Click();
+                    } catch
+                    {
+                        continue;
                     }
                     index++;
                 }
@@ -473,7 +469,7 @@ namespace GMB.Scanner.Agent.Core
                     }
                 }
 
-                string? reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", "").Replace("(Traduit par google)", "").Trim();
+                string? reviewText = ToolBox.FindElementSafe(reviewWebElement, XPathReview.text)?.Text?.Replace("\n", " ").Replace("\r", " ").Replace("(Traduit par google)", "").Trim();
 
                 bool localGuide = ToolBox.Exists(ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews)) && ToolBox.FindElementSafe(reviewWebElement, XPathReview.userNbReviews).Text.Contains('·');
                 GoogleUser user = new(userName, userNbReviews, localGuide);
@@ -549,7 +545,7 @@ namespace GMB.Scanner.Agent.Core
         {
             ScannerFunctions scanner = new();
             DateTime reviewLimit = DateTime.UtcNow.AddDays(-15);
-        
+
             #region Mairie de Paris
             GetBusinessProfileRequest request = new("https://www.google.fr/maps/place/Mairie+de+Paris/@48.8660828,2.3108754,13z/data=!4m10!1m2!2m1!1smairie+de+paris!3m6!1s0x47e66e23b4333db3:0xbc314dec89c4971!8m2!3d48.8641075!4d2.3421539!15sCg9tYWlyaWUgZGUgcGFyaXNaESIPbWFpcmllIGRlIHBhcmlzkgEJY2l0eV9oYWxsmgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVVEyYzA5MWNrbFJFQUXgAQA!16s%2Fg%2F11c6pn36ph?hl=fr&entry=ttu");
             (DbBusinessProfile? profile, DbBusinessScore? score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
@@ -585,7 +581,6 @@ namespace GMB.Scanner.Agent.Core
             if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Mairie de Paris - Review global error !");
             #endregion
-            
             #region Louvre
             request = new("https://www.google.fr/maps/place/Mus%C3%A9e+du+Louvre/@48.8606111,2.337644,17z/data=!3m1!4b1!4m6!3m5!1s0x47e671d877937b0f:0xb975fcfa192f84d4!8m2!3d48.8606111!4d2.337644!16zL20vMDRnZHI?hl=fr&entry=ttu");
             (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
