@@ -385,9 +385,13 @@ namespace GMB.Scanner.Agent.Core
                     {
                         reviewGoogleDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.googleDate)?.Text?.Replace(" sur\r\nGoogle", "").Trim();
                         visitDate = ToolBox.FindElementSafe(reviewList.Last(), XPathReview.visitDate)?.Text;
-                        if (!visitDate.Contains("Visité en"))
-                            visitDate = null;
-                        else visitDate = visitDate.Replace("Visité en", "").Trim();
+                        if (visitDate != null)
+                        {
+                            if (!visitDate.Contains("Visité en"))
+                                visitDate = null;
+                            else
+                                visitDate = visitDate.Replace("Visité en", "").Trim();
+                        } 
                         if (reviewGoogleDate != null)
                         {
                             realDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate, visitDate);
