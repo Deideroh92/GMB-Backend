@@ -843,8 +843,6 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Hôtel de Crillon - Reviews global error !");
             #endregion
 
-            driver.Dispose();
-
             return new(true, "Test executed successfully.");
         }
         #endregion
