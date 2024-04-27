@@ -101,7 +101,9 @@ namespace GMB.Sdk.Core.Types.Models
         }
         public void Dispose()
         {
-            Dispose(true);
+            WebDriver.Close();
+            WebDriver?.Quit();
+            //Dispose(true);
             GC.SuppressFinalize(this);
         }
 
