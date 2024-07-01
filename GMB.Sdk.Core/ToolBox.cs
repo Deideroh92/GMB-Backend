@@ -125,20 +125,20 @@ namespace GMB.Sdk.Core
 
                 if (googleDate.Contains("moi"))
                 {
-                    if (visitDate != null && visitDate != "")
+                    /*if (visitDate != null && visitDate != "")
                     {
                         DateTime firstDayOfMonth = ComputeDateFromVisitDate(visitDate);
                         return firstDayOfMonth;
-                    }
+                    }*/
                     return currentDate.AddMonths(-jsonValue);
                 }
                 if (googleDate.Contains("an"))
                 {
-                    if (visitDate != null && visitDate != "")
+                    /*if (visitDate != null && visitDate != "")
                     {
                         DateTime firstDayOfMonth = ComputeDateFromVisitDate(visitDate);
                         return firstDayOfMonth;
-                    }
+                    }*/
                     return currentDate.AddYears(-jsonValue);
                 }
                 if (googleDate.Contains("semaine"))

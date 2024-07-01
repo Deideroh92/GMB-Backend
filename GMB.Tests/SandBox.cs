@@ -15,6 +15,9 @@ namespace GMB.Tests
         [TestMethod]
         public void Main()
         {
+            DbLib db = new();
+
+            bool test = db.CheckBusinessProfileExistByNameAndAdress("Les Mines","Tuilerie Saint-Pierre, 71300 Montceau-les-Mines, France");
             return;
         }
 
