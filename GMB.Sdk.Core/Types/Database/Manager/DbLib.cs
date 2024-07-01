@@ -1394,7 +1394,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_DATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewDate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId, @ReviewReplyGoogleDate, @ReviewReplyDate, @VisitDate)";
+                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_GOOGLE_DATE_UPDATE, REVIEW_DATE, REVIEW_DATE_UPDATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewGoogleDateUpdate, @ReviewDate, @ReviewDateUpdate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId, @ReviewReplyGoogleDate, @ReviewReplyDate, @VisitDate)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessReview.IdEtab);
                 cmd.Parameters.AddWithValue("@IdReview", businessReview.IdReview);
@@ -1404,7 +1404,9 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@UserNbReviews", GetValueOrDefault(businessReview.User.NbReviews));
                 cmd.Parameters.AddWithValue("@Review", GetValueOrDefault(businessReview.ReviewText));
                 cmd.Parameters.AddWithValue("@ReviewGoogleDate", GetValueOrDefault(businessReview.ReviewGoogleDate));
+                cmd.Parameters.AddWithValue("@ReviewGoogleDateUpdate", GetValueOrDefault(businessReview.ReviewGoogleDate));
                 cmd.Parameters.AddWithValue("@ReviewDate", GetValueOrDefault(businessReview.ReviewDate));
+                cmd.Parameters.AddWithValue("@ReviewDateUpdate", GetValueOrDefault(businessReview.ReviewDate));
                 cmd.Parameters.AddWithValue("@ReviewReplied", GetValueOrDefault(businessReview.ReviewReplied));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessReview.DateUpdate));
                 cmd.Parameters.AddWithValue("@GoogleReviewId", businessReview.GoogleReviewId);
@@ -1555,7 +1557,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string changeDateCommand = changeDate ? ", REVIEW_DATE = @ReviewDate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate" : "";
+                string changeDateCommand = changeDate ? ", REVIEW_DATE_UPDATE = @ReviewDate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate" : "";
                 string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, VISIT_DATE = @VisitDate";
                 string whereCommand = " WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand + changeDateCommand + whereCommand, Connection);
@@ -1570,8 +1572,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@VisitDate", GetValueOrDefault(review.VisitDate));
                 if (changeDate)
                 {
-                    cmd.Parameters.AddWithValue("@ReviewDate", GetValueOrDefault(review.ReviewDate));
-                    cmd.Parameters.AddWithValue("@ReviewGoogleDate", GetValueOrDefault(review.ReviewGoogleDate));
+                    cmd.Parameters.AddWithValue("@ReviewDateUpdate", GetValueOrDefault(review.ReviewDate));
+                    cmd.Parameters.AddWithValue("@ReviewGoogleDateUpdate", GetValueOrDefault(review.ReviewGoogleDate));
                 }
                 cmd.ExecuteNonQuery();
             } catch (Exception e)

@@ -109,11 +109,11 @@ namespace GMB.Scanner.Agent
                                         if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
                                             db.UpdateBusinessReviewReply(review);
 
-                                        //if (!review.Equals(dbBusinessReview))
-                                        //{
+                                        if (!review.Equals(dbBusinessReview))
+                                        {
                                             db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
                                             continue;
-                                        //}
+                                        }
                                     }
                                     catch (Exception e)
                                     {
