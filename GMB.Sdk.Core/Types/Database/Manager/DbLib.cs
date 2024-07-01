@@ -1431,7 +1431,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE, REVIEW_DATE, REVIEW_GOOGLE_DATE FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdReview", idReview);
                 using SqlDataReader reader = cmd.ExecuteReader();
@@ -1447,8 +1447,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                             !reader.IsDBNull(1) && reader.GetBoolean(1)),
                         reader.GetInt32(2),
                         reader.IsDBNull(4) ? null : reader.GetString(4),
-                        null,
-                        null,
+                        reader.IsDBNull(11) ? null : reader.GetString(11),
+                        reader.IsDBNull(10) ? null : reader.GetDateTime(10),
                         reader.GetBoolean(5),
                         null,
                         reader.IsDBNull(8) ? null : reader.GetDateTime(8),
