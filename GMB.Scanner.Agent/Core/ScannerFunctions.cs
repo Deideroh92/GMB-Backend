@@ -631,7 +631,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Website != "http://www.hopital-necker.aphp.fr/" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4R8W8+C8" ||
+                profile.PlusCode != "8FW4R8W8+H9" ||
                 (profile.Tel != "01 44 49 40 00" && profile.Tel != "+33 1 44 49 40 00") ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
