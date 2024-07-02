@@ -1174,10 +1174,9 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET PROCESSING = @Processing, DATE_UPDATE = @DateUpdate WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET PROCESSING = @Processing WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@Processing", processing);
-                cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(DateTime.UtcNow));
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
