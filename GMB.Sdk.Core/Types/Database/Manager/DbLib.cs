@@ -1241,6 +1241,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Adress", adress);
                 cmd.Parameters.AddWithValue("@Name", name);
+                cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())

@@ -17,7 +17,7 @@ namespace GMB.Tests
         {
             DbLib db = new();
 
-            bool test = db.CheckBusinessProfileExistByNameAndAdress("Les Mines","Tuilerie Saint-Pierre, 71300 Montceau-les-Mines, France");
+            bool test = db.CheckBusinessProfileExistByNameAndAdress("Relais De Mardie", "RNE 60, 45430 Mardié, France");
             return;
         }
 
