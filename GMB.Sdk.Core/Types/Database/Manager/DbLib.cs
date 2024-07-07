@@ -1474,7 +1474,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 using SqlDataReader reader = cmd.ExecuteReader();
@@ -1491,13 +1491,16 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                             !reader.IsDBNull(1) && reader.GetBoolean(1)),
                         reader.GetInt32(2),
                         reader.IsDBNull(4) ? null : reader.GetString(4),
-                        null,
-                        null,
+                        reader.IsDBNull(11) ? null : reader.GetString(11),
+                        reader.IsDBNull(12) ? null : reader.GetDateTime(12),
                         reader.GetBoolean(5),
-                        null,
+                        reader.IsDBNull(13) ? null : reader.GetDateTime(13),
                         reader.IsDBNull(8) ? null : reader.GetDateTime(8),
                         reader.IsDBNull(7) ? null : reader.GetString(7),
-                        reader.IsDBNull(10) ? null : reader.GetString(10)));
+                        reader.IsDBNull(10) ? null : reader.GetString(10),
+                        null,
+                        reader.IsDBNull(14) ? null : reader.GetDateTime(14)
+                        ));
                 }
                 return brList;
             } catch (Exception e)

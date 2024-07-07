@@ -164,15 +164,16 @@ namespace GMB.BusinessService.Api.Controller
         /// <summary>
         /// Get BP by idEtab.
         /// </summary>
-        /// <param name="idEtab"></param>
+        /// <param name="request"></param>
         [HttpPost("bp/id-etab")]
         [Authorize]
-        public ActionResult<GetBusinessResponse> GetBusinessProfileByIdEtab([FromBody] string idEtab)
+        public ActionResult<GetBusinessResponse> GetBusinessProfileByIdEtab([FromBody] GetBusinessRequest request)
         {
             try
             {
                 using DbLib db = new();
-                string id = idEtab.Trim();
+                List<DbBusinessReview>? reviewList = null;
+                string id = request.Id.Trim();
                 DbBusinessProfile? bp = db.GetBusinessByIdEtab(id);
 
                 if (bp == null)
@@ -182,11 +183,14 @@ namespace GMB.BusinessService.Api.Controller
 
                 Business business = new(bp, bs);
 
-                return new GetBusinessResponse(business);
+                if (request.GetReviews)
+                    reviewList = db.GetBusinessReviewsList(id);
+
+                return new GetBusinessResponse(business, false, reviewList);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessResponse.Exception($"Error getting business by id etab : [{e.Message}]");
+                return GetBusinessRequest.Exception($"Error getting business by id etab : [{e.Message}]");
             }
         }
         /// <summary>
@@ -226,15 +230,16 @@ namespace GMB.BusinessService.Api.Controller
         /// <summary>
         /// Get BP by place id.
         /// </summary>
-        /// <param name="placeId"></param>
+        /// <param name="request"></param>
         [HttpPost("bp/place-id")]
         [Authorize]
-        public ActionResult<GetBusinessResponse> GetBusinessByPlaceId([FromBody] string placeId)
+        public ActionResult<GetBusinessResponse> GetBusinessByPlaceId([FromBody] GetBusinessRequest request)
         {
             try
             {
                 using DbLib db = new();
-                string id = placeId.Trim();
+                List<DbBusinessReview>? reviewList = null;
+                string id = request.Id.Trim();
 
                 DbBusinessProfile? bp = db.GetBusinessByPlaceId(id);
 
@@ -245,11 +250,14 @@ namespace GMB.BusinessService.Api.Controller
 
                 Business? business = new(bp, bs);
 
-                return new GetBusinessResponse(business);
+                if (request.GetReviews)
+                    reviewList = db.GetBusinessReviewsList(bp.IdEtab);
+
+                return new GetBusinessResponse(business, false, reviewList);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessResponse.Exception($"Error getting business by place id : [{e.Message}]");
+                return GetBusinessRequest.Exception($"Error getting business by place id : [{e.Message}]");
             }
         }
         /// <summary>
@@ -324,7 +332,7 @@ namespace GMB.BusinessService.Api.Controller
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessResponse.Exception($"Error getting business by url : [{url}]. Error : [{e.Message}]");
+                return GetBusinessRequest.Exception($"Error getting business by url : [{url}]. Error : [{e.Message}]");
             }
         }
         /// <summary>
