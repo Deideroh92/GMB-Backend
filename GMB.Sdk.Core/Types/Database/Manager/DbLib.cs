@@ -1477,6 +1477,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
+                cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 List<DbBusinessReview> brList = [];
