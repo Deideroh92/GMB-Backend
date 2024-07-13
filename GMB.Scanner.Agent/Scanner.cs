@@ -62,7 +62,8 @@ namespace GMB.Scanner.Agent
                             if (businessAgent.IdEtab != null)
                             {
                                 db.UpdateBusinessProfileStatus(businessAgent.IdEtab, BusinessStatus.DELETED);
-                                db.UpdateBusinessProfileProcessingState(businessAgent.IdEtab, 0);
+                                if (request.UpdateProcessingState)
+                                    db.UpdateBusinessProfileProcessingState(businessAgent.IdEtab, 0);
                             }
                         }
                         continue;
