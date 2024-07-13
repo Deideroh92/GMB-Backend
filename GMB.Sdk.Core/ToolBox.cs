@@ -106,9 +106,8 @@ namespace GMB.Sdk.Core
         /// Transform a google date into a real date.
         /// </summary>
         /// <param name="googleDate"></param>
-        /// <param name="visitDate"></param>
         /// <returns>Real date from google date.</returns>
-        public static DateTime ComputeDateFromGoogleDate(string? googleDate, string? visitDate)
+        public static DateTime ComputeDateFromGoogleDate(string? googleDate)
         {
             if (googleDate == null)
                 return DateTime.UtcNow;
@@ -125,20 +124,10 @@ namespace GMB.Sdk.Core
 
                 if (googleDate.Contains("moi"))
                 {
-                    /*if (visitDate != null && visitDate != "")
-                    {
-                        DateTime firstDayOfMonth = ComputeDateFromVisitDate(visitDate);
-                        return firstDayOfMonth;
-                    }*/
                     return currentDate.AddMonths(-jsonValue);
                 }
                 if (googleDate.Contains("an"))
                 {
-                    /*if (visitDate != null && visitDate != "")
-                    {
-                        DateTime firstDayOfMonth = ComputeDateFromVisitDate(visitDate);
-                        return firstDayOfMonth;
-                    }*/
                     return currentDate.AddYears(-jsonValue);
                 }
                 if (googleDate.Contains("semaine"))
