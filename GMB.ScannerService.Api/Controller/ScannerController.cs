@@ -141,7 +141,7 @@ namespace GMB.ScannerService.Api.Controller
                 stopwatch.Stop();
                 TimeSpan elapsedTime = stopwatch.Elapsed;
                 string message = testResult.Message + " Process took " + elapsedTime.ToString() + " to execute.";
-                ToolBox.SendEmail(message);
+                ToolBox.SendEmail(message, "Scanner daily test result");
 
                 return new GenericResponse(1, "Scanner test finished.");
             }

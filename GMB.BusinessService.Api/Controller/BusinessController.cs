@@ -554,6 +554,9 @@ namespace GMB.BusinessService.Api.Controller
                 db.DeleteBusinessProfile(idEtab);
                 db.DeleteBusinessUrlByGuid(bp.FirstGuid);
 
+                string message = $"Business Profile {bp.Name} with id Etab = [{idEtab}] and place id = [{bp.PlaceId}] was deleted from the DB by the platform MIDI.";
+                ToolBox.SendEmail(message, "Deletion of Business Profile");
+
                 return new GenericResponse(null, $"Deleted BP with idEtab = [{idEtab}]");
 
             } catch (Exception e)

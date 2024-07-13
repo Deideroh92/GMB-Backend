@@ -67,7 +67,7 @@ namespace GMB.Tests
         [TestMethod]
         public void SendMail()
         {
-            ToolBox.SendEmail("test");
+            ToolBox.SendEmail("test", "test");
             return;
         }
     }

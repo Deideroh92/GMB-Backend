@@ -40,15 +40,15 @@ namespace GMB.Sdk.Core
             return BitConverter.ToString(hash).Replace("-", "").ToLower();
         }
 
-        public static void SendEmail(string? message)
+        public static void SendEmail(string? message, string? subject)
         {
             string smtpServer = "smtp.gmail.com";
             int smtpPort = 587; // Change this to your SMTP server's port
             string fromEmail = "maximiliend1998@gmail.com";
             string toEmail = "m.david@vasano.fr";
             string toEmail2 = "jm.chabrol@vasano.fr";
-            string toEmail3 = "m.berger@vasano.fr";
-            string subject = "Scanner Test Result";
+            string toEmail3 = "e.delatte@vasano.fr";
+            string toEmail4 = "dsi@vasano.fr";
             string body = "Test Result as of " + DateTime.UtcNow.ToString() + " : " + message;
 
             // Create a new SmtpClient and set the SMTP server details
@@ -64,11 +64,13 @@ namespace GMB.Sdk.Core
             MailMessage mailMessage = new(fromEmail, toEmail, subject, body);
             MailMessage mailMessage2 = new(fromEmail, toEmail2, subject, body);
             MailMessage mailMessage3 = new(fromEmail, toEmail3, subject, body);
+            MailMessage mailMessage4 = new(fromEmail, toEmail4, subject, body);
             mailMessage.IsBodyHtml = false; // Set to true if your email body is in HTML format
 
             smtpClient.Send(mailMessage);
             smtpClient.Send(mailMessage2);
             smtpClient.Send(mailMessage3);
+            smtpClient.Send(mailMessage4);
         }
 
         /// <summary>
