@@ -15,9 +15,10 @@ namespace GMB.Tests
         [TestMethod]
         public void Main()
         {
-            DbLib db = new();
+            BusinessController businessController = new();
 
-            bool test = db.CheckBusinessProfileExistByNameAndAdress("Relais De Mardie", "RNE 60, 45430 Mardié, France");
+            businessController.DeleteBusinessProfile("0217d46129cf375dce364f84a00d3567");
+
             return;
         }
 
