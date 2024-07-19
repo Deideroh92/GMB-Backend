@@ -101,7 +101,7 @@ namespace GMB.Scanner.Agent
                                 {
                                     try
                                     {
-                                        DbBusinessReview? dbBusinessReview = db.GetBusinessReview(profile.IdEtab, review.IdReview);
+                                        DbBusinessReview? dbBusinessReview = db.GetBusinessReview(review.IdReview);
 
                                         if (dbBusinessReview == null)
                                         {

@@ -1426,14 +1426,13 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// <summary>
         /// Get Business Review.
         /// </summary>
-        /// <param name="idEtab"></param>
         /// <param name="idReview"></param>
         /// <returns>Business Review or Null (doesn't exist)</returns>
-        public DbBusinessReview? GetBusinessReview(string idEtab, string idReview)
+        public DbBusinessReview? GetBusinessReview(string idReview)
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE, REVIEW_DATE, REVIEW_GOOGLE_DATE FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE, REVIEW_DATE, REVIEW_GOOGLE_DATE, ID_ETAB FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdReview", idReview);
                 using SqlDataReader reader = cmd.ExecuteReader();
@@ -1441,7 +1440,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
                 if (reader.Read())
                 {
-                    return new DbBusinessReview(idEtab,
+                    return new DbBusinessReview(reader.GetString(12),
                         idReview,
                         reader.GetString(6),
                         new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0),
@@ -1462,7 +1461,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
             } catch (Exception e)
             {
-                throw new Exception($"Error getting BR with id etab = [{idEtab}] and id review = [{idReview}]", e);
+                throw new Exception($"Error getting BR with id = [{idReview}]", e);
             }
         }
         /// <summary>
@@ -1622,6 +1621,23 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             } catch (Exception e)
             {
                 throw new Exception("Error while deleting BR", e);
+            }
+        }
+        /// <summary>
+        /// Delete Business Review.
+        /// </summary>
+        /// <param name="idReview"></param>
+        public void DeleteBusinessReview(string idReview)
+        {
+            try
+            {
+                string insertCommand = "DELETE FROM BUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(idReview));
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error while deleting BR withd id = [{idReview}]", e);
             }
         }
         /// <summary>

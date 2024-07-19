@@ -641,5 +641,35 @@ namespace GMB.BusinessService.Api.Controller
 
         }
         #endregion
+
+        #region Business Reviews
+        /// <summary>
+        /// Delete business review.
+        /// </summary>
+        /// <param name="reviewId"></param>
+        [HttpPost("bp/br/delete")]
+        [Authorize]
+        public ActionResult<GenericResponse> DeleteBusinessReview([FromBody] string reviewId)
+        {
+            try
+            {
+                DbLib db = new();
+
+                DbBusinessReview? review = db.GetBusinessReview(reviewId);
+                if (review == null)
+                    return GenericResponse.Exception($"No review with id = [{reviewId}]");
+                ;
+                db.DeleteBusinessReviewsFeeling(review.IdReview);
+                db.DeleteBusinessReview(reviewId);
+
+                return new GenericResponse(null, $"Deleted BR with id = [{reviewId}]");
+
+            } catch (Exception e)
+            {
+                Log.Error(e, $"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception($"An exception occurred while deleting BR with id = [{reviewId}] : {e.Message}");
+            }
+        }
+        #endregion
     }
 }
