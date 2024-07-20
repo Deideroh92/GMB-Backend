@@ -187,7 +187,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// <param name="urlState"></param>
         /// <param name="entries"></param>
         /// <returns>List of Bussiness Agent</returns>
-        public List<BusinessAgent> GetBusinessAgentListByUrlState(UrlState urlState, int? entries)
+        public List<BusinessAgent> GetBusinessAgentListByUrlState(UrlState urlState, int? entries, int? processing)
         {
             List<BusinessAgent> businessAgentList = [];
             try
@@ -202,9 +202,10 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                     UrlState.PROCESSING => "vBUSINESS_URL_PROCESSING",
                     _ => "vBUSINESS_URL",
                 };
-                string selectCommand = entries == null ? ("SELECT GUID, URL FROM " + table + " WHERE STATE = @UrlState") : ("SELECT TOP (@Entries) GUID, URL FROM " + table + " WHERE STATE = @UrlState");
+                string selectCommand = entries == null ? ("SELECT GUID, URL FROM " + table + " WHERE STATE = @UrlState AND PROCESSING = @Processing") : ("SELECT TOP (@Entries) GUID, URL FROM " + table + " WHERE STATE = @UrlState AND PROCESSING = @Processing");
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Entries", entries);
+                cmd.Parameters.AddWithValue("@Processing", processing);
                 cmd.Parameters.AddWithValue("@UrlState", urlState.ToString());
                 cmd.CommandTimeout = 10000;
                 using SqlDataReader reader = cmd.ExecuteReader();

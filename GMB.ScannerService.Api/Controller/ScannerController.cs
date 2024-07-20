@@ -45,7 +45,7 @@ namespace GMB.ScannerService.Api.Controller
                         businessList = db.GetBusinessAgentList(businessListRequest);
                         break;
                     case Operation.URL_STATE:
-                        businessList = db.GetBusinessAgentListByUrlState(request.UrlState, request.Entries);
+                        businessList = db.GetBusinessAgentListByUrlState(request.UrlState, request.Entries, request.Processing);
                         break;
                 }
 
