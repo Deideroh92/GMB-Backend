@@ -153,6 +153,19 @@ namespace GMB.Tests
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;
         }
+
+        /// <summary>
+        /// Starting Url Scanner.
+        /// </summary>
+        [TestMethod]
+        public void LaunchUrlScanner()
+        {
+            AuthorizationPolicyService policy = new();
+            ScannerController scannerController = new();
+
+            Task.Run(() => scannerController.StartUrlScanner()).Wait();
+            return;
+        }
         #endregion
     }
 }
