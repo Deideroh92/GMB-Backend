@@ -83,7 +83,7 @@ namespace GMB.ScannerService.Api.Controller
         {
             try
             {
-                string basePath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Scanner.Agent\\ReferentialFiles");
+                string basePath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "source\\repos\\GMB-Backend\\GMB.Scanner.Agent\\ReferentialFiles");
 
                 string[] categories = System.IO.File.ReadAllLines(Path.Combine(basePath, "Categories.txt"));
                 string[] dept = System.IO.File.ReadAllLines(Path.Combine(basePath, "DeptList.txt"));
