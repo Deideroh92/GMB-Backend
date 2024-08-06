@@ -79,19 +79,17 @@ namespace GMB.ScannerService.Api.Controller
         /// </summary>
         [HttpPost("scanner/url")]
         [Authorize(Policy = "DevelopmentPolicy")]
-        public ActionResult<GenericResponse> StartUrlScanner()
+        public async Task<ActionResult<GenericResponse>> StartUrlScanner()
         {
             try
             {
                 string basePath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Scanner.Agent\\ReferentialFiles");
 
                 string[] categories = System.IO.File.ReadAllLines(Path.Combine(basePath, "Categories.txt"));
-                string[] textSearch = System.IO.File.ReadAllLines(Path.Combine(basePath, "UrlTextSearch.txt"));
                 string[] dept = System.IO.File.ReadAllLines(Path.Combine(basePath, "DeptList.txt"));
                 string[] idf = System.IO.File.ReadAllLines(Path.Combine(basePath, "IleDeFrance.txt"));
                 string[] cp = System.IO.File.ReadAllLines(Path.Combine(basePath, "CpList.txt"));
                 string[] towns = System.IO.File.ReadAllLines(Path.Combine(basePath, "TownList.txt"));
-                string[] customLocations = System.IO.File.ReadAllLines(Path.Combine(basePath, "CustomLocations.txt"));
 
                 List<string> locations = new(towns);
                 List<Task> tasks = [];
@@ -114,9 +112,10 @@ namespace GMB.ScannerService.Api.Controller
                         }
                     });
                     tasks.Add(newThread);
+                    Thread.Sleep(15000);
                 }
 
-                Task.WaitAll([.. tasks]);
+                await Task.WhenAll(tasks);
                 return new GenericResponse(1, "Scanner launched successfully.");
             } catch (Exception e)
             {
