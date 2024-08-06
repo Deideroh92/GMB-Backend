@@ -684,6 +684,7 @@ namespace GMB.BusinessService.Api.Controller
                 DbBusinessReview? dbReview = db.GetBusinessReview(review.IdReview);
                 if (review == null)
                     return GenericResponse.Exception($"No review with id = [{review.IdReview}]");
+                review.DateUpdate = DateTime.UtcNow;
                 db.UpdateBusinessReview(review, false);
 
                 return new GenericResponse(null, $"Update BR with id = [{review.IdReview}]");
