@@ -83,13 +83,13 @@ namespace GMB.ScannerService.Api.Controller
         {
             try
             {
-                string basePath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "source\\repos\\GMB-Backend\\GMB.Scanner.Agent\\ReferentialFiles");
+                //string basePath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "ReferentialFiles");
 
-                string[] categories = System.IO.File.ReadAllLines(Path.Combine(basePath, "Categories.txt"));
-                string[] dept = System.IO.File.ReadAllLines(Path.Combine(basePath, "DeptList.txt"));
+                string[] categories = System.IO.File.ReadAllLines("ReferentialFiles\\Categories.txt");
+                /*string[] dept = System.IO.File.ReadAllLines(Path.Combine(basePath, "DeptList.txt"));
                 string[] idf = System.IO.File.ReadAllLines(Path.Combine(basePath, "IleDeFrance.txt"));
-                string[] cp = System.IO.File.ReadAllLines(Path.Combine(basePath, "CpList.txt"));
-                string[] towns = System.IO.File.ReadAllLines(Path.Combine(basePath, "TownList.txt"));
+                string[] cp = System.IO.File.ReadAllLines(Path.Combine(basePath, "CpList.txt"));*/
+                string[] towns = System.IO.File.ReadAllLines("ReferentialFiles\\TownList.txt");
 
                 List<string> locations = new(towns);
                 List<Task> tasks = [];
