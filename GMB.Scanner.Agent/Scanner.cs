@@ -73,6 +73,17 @@ namespace GMB.Scanner.Agent
 
                     business ??= db.GetBusinessByIdEtab(profile.IdEtab);
 
+                    if (business == null && profile.PlaceId != null)
+                    {
+                        business ??= db.GetBusinessByPlaceId(profile.PlaceId);
+                        if (business != null)
+                        {
+                            profile.IdEtab = business.IdEtab;
+                            score.IdEtab = business.IdEtab;
+                        }
+                    }
+                        
+
                     if (business == null)
                         db.CreateBusinessProfile(profile);
                     if (business != null && !profile.Equals(business))
@@ -93,7 +104,7 @@ namespace GMB.Scanner.Agent
                         try
                         {
                             driver.GetToPage(BPRequest.Url);
-                            List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews(profile.IdEtab, request.DateLimit, driver);
+                            List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews(business?.IdEtab ?? profile.IdEtab, request.DateLimit, driver);
 
                             if (reviews != null)
                             {
@@ -101,7 +112,7 @@ namespace GMB.Scanner.Agent
                                 {
                                     try
                                     {
-                                        DbBusinessReview? dbBusinessReview = db.GetBusinessReview(profile.IdEtab, review.IdReview);
+                                        DbBusinessReview? dbBusinessReview = db.GetBusinessReview(review.IdReview);
 
                                         if (dbBusinessReview == null)
                                         {

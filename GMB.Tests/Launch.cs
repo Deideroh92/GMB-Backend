@@ -88,7 +88,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 9);
+                db.UpdateBusinessProfileProcessingState(idEtab, 10);
             }
         }
         /// <summary>
@@ -151,6 +151,19 @@ namespace GMB.Tests
             BusinessScannerRequest request = new(1000, 8, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddMonths(-11), false, false, null, null, null, UrlState.NEW, true);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
+            return;
+        }
+
+        /// <summary>
+        /// Starting Url Scanner.
+        /// </summary>
+        [TestMethod]
+        public void LaunchUrlScanner()
+        {
+            AuthorizationPolicyService policy = new();
+            ScannerController scannerController = new();
+
+            Task.Run(() => scannerController.StartUrlScanner()).Wait();
             return;
         }
         #endregion

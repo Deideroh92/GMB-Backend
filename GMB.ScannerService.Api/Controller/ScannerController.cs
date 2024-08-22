@@ -45,7 +45,7 @@ namespace GMB.ScannerService.Api.Controller
                         businessList = db.GetBusinessAgentList(businessListRequest);
                         break;
                     case Operation.URL_STATE:
-                        businessList = db.GetBusinessAgentListByUrlState(request.UrlState, request.Entries);
+                        businessList = db.GetBusinessAgentListByUrlState(request.UrlState, request.Entries, request.Processing);
                         break;
                 }
 
@@ -79,23 +79,22 @@ namespace GMB.ScannerService.Api.Controller
         /// </summary>
         [HttpPost("scanner/url")]
         [Authorize(Policy = "DevelopmentPolicy")]
-        public ActionResult<GenericResponse> StartUrlScanner()
+        public async Task<ActionResult<GenericResponse>> StartUrlScanner()
         {
             try
             {
-                string basePath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "GMB.Scanner.Agent\\ReferentialFiles");
+                //string basePath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName, "ReferentialFiles");
 
-                string[] categories = System.IO.File.ReadAllLines(Path.Combine(basePath, "Categories.txt"));
-                string[] textSearch = System.IO.File.ReadAllLines(Path.Combine(basePath, "UrlTextSearch.txt"));
-                string[] dept = System.IO.File.ReadAllLines(Path.Combine(basePath, "DeptList.txt"));
+                string[] categories = System.IO.File.ReadAllLines("ReferentialFiles\\Categories.txt");
+                /*string[] dept = System.IO.File.ReadAllLines(Path.Combine(basePath, "DeptList.txt"));
                 string[] idf = System.IO.File.ReadAllLines(Path.Combine(basePath, "IleDeFrance.txt"));
-                string[] cp = System.IO.File.ReadAllLines(Path.Combine(basePath, "CpList.txt"));
-                string[] customLocations = System.IO.File.ReadAllLines(Path.Combine(basePath, "CustomLocations.txt"));
+                string[] cp = System.IO.File.ReadAllLines(Path.Combine(basePath, "CpList.txt"));*/
+                string[] towns = System.IO.File.ReadAllLines("ReferentialFiles\\TownList.txt");
 
-                List<string> locations = new(cp);
+                List<string> locations = new(towns);
                 List<Task> tasks = [];
 
-                int maxConcurrentThreads = 1;
+                int maxConcurrentThreads = 6;
                 SemaphoreSlim semaphore = new(maxConcurrentThreads);
 
                 foreach (string search in categories)
@@ -113,9 +112,10 @@ namespace GMB.ScannerService.Api.Controller
                         }
                     });
                     tasks.Add(newThread);
+                    Thread.Sleep(15000);
                 }
 
-                Task.WaitAll([.. tasks]);
+                await Task.WhenAll(tasks);
                 return new GenericResponse(1, "Scanner launched successfully.");
             } catch (Exception e)
             {

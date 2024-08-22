@@ -20,6 +20,9 @@
     <None Update="ReferentialFiles\Categories.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="ReferentialFiles\TownList.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ReferentialFiles\CpList.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

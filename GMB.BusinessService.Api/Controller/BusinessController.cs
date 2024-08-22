@@ -641,5 +641,60 @@ namespace GMB.BusinessService.Api.Controller
 
         }
         #endregion
+
+        #region Business Reviews
+        /// <summary>
+        /// Delete business review.
+        /// </summary>
+        /// <param name="reviewId"></param>
+        [HttpPost("bp/br/delete")]
+        [Authorize]
+        public ActionResult<GenericResponse> DeleteBusinessReview([FromBody] string reviewId)
+        {
+            try
+            {
+                DbLib db = new();
+
+                DbBusinessReview? review = db.GetBusinessReview(reviewId);
+                if (review == null)
+                    return GenericResponse.Exception($"No review with id = [{reviewId}]");
+                db.DeleteBusinessReviewsFeeling(review.IdReview);
+                db.DeleteBusinessReview(reviewId);
+
+                return new GenericResponse(null, $"Deleted BR with id = [{reviewId}]");
+
+            } catch (Exception e)
+            {
+                Log.Error(e, $"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception($"An exception occurred while deleting BR with id = [{reviewId}] : {e.Message}");
+            }
+        }
+        /// <summary>
+        /// Update business review.
+        /// </summary>
+        /// <param name="review"></param>
+        [HttpPut("bp/br/update")]
+        [Authorize]
+        public ActionResult<GenericResponse> UpdateBusinessReview([FromBody] DbBusinessReview review)
+        {
+            try
+            {
+                DbLib db = new();
+
+                DbBusinessReview? dbReview = db.GetBusinessReview(review.IdReview);
+                if (review == null)
+                    return GenericResponse.Exception($"No review with id = [{review.IdReview}]");
+                review.DateUpdate = DateTime.UtcNow;
+                db.UpdateBusinessReview(review, false);
+
+                return new GenericResponse(null, $"Update BR with id = [{review.IdReview}]");
+
+            } catch (Exception e)
+            {
+                Log.Error(e, $"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
+                return GenericResponse.Exception($"An exception occurred while updating BR with id = [{review.IdReview}] : {e.Message}");
+            }
+        }
+        #endregion
     }
 }

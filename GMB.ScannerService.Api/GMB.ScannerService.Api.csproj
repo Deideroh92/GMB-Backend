@@ -21,4 +21,13 @@
     <ProjectReference Include="..\GMB.Sdk.Core\GMB.Sdk.Core.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="Controller\Categories.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Controller\TownList.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>
