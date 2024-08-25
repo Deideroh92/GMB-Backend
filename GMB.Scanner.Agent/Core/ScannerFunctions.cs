@@ -284,7 +284,7 @@ namespace GMB.Scanner.Agent.Core
             }
 
 
-            Thread.Sleep(1000);
+            Thread.Sleep(2000);
 
             // Getting reviews.
             ReadOnlyCollection<IWebElement>? reviews = GetWebElements(driver.WebDriver, dateLimit, nbLimit);
@@ -789,16 +789,16 @@ namespace GMB.Scanner.Agent.Core
             request = new("https://www.google.com/maps/place/H%C3%B4tel+de+Crillon,+A+Rosewood+Hotel/@48.8672778,2.3185144,17z/data=!3m1!4b1!4m10!3m9!1s0x47e66fd2bde4f80b:0x7b976ab67fe636aa!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8672743!4d2.3210947!16zL20vMDRmY3hs?entry=ttu");
             (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
             if (profile.Name != "Hôtel de Crillon, A Rosewood Hotel" ||
-                (profile.GoogleAddress != "6 Rue Boissy d'Anglas, 75008 Paris, France" && profile.GoogleAddress != "6 Rue Boissy d'Anglas, 75008 Paris") ||
+                (profile.GoogleAddress != "10 Pl. de la Concorde, 75008 Paris, France" && profile.GoogleAddress != "10 Pl. de la Concorde, 75008 Paris") ||
                 profile.City != "Paris" ||
                 profile.CityCode != "75108" ||
                 profile.Country != "France" ||
-                profile.StreetNumber != "6" ||
+                profile.StreetNumber != "10" ||
                 profile.Category != "Hébergement" ||
                 profile.Website != "https://www.rosewoodhotels.com/en/hotel-de-crillon" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4V89C+5R" ||
+                profile.PlusCode != "8FW4V88C+WC" ||
                 (profile.Tel != "01 44 71 15 00" && profile.Tel != "+33 1 44 71 15 00") ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
