@@ -18,12 +18,12 @@ namespace GMB.PlaceService.Api.Core
         /// </summary>
         /// <param name="placeId"></param>
         /// <returns>Place or null if nothing found</returns>
-        public static async Task<Place?> GetPlaceByPlaceId(string placeId)
+        public static async Task<Place?> GetPlaceByPlaceId(string placeId, string lang)
         {
             try
             {
                 using HttpClient client = new();
-                string apiUrl = "https://places.googleapis.com/v1/places/" + placeId;
+                string apiUrl = "https://places.googleapis.com/v1/places/" + placeId + "?language=" + lang;
 
                 HttpRequestMessage request = new(HttpMethod.Get, apiUrl);
 
@@ -88,14 +88,14 @@ namespace GMB.PlaceService.Api.Core
         /// </summary>
         /// <param name="query"></param>
         /// <returns>List of possible matching places</returns>
-        public static async Task<Place[]?> GetPlacesByQuery(string query)
+        public static async Task<Place[]?> GetPlacesByQuery(string query, string lang)
         {
             try
             {
                 using HttpClient client = new();
                 Root? placeResponse = new();
 
-                string apiUrl = "https://places.googleapis.com/v1/places:searchText";
+                string apiUrl = "https://places.googleapis.com/v1/places:searchText?language=" + lang;
                 client.DefaultRequestHeaders.Add("X-Goog-Api-Key", API_KEY);
                 client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.internationalPhoneNumber," +
                     "places.nationalPhoneNumber,places.websiteUri,places.userRatingCount,places.googleMapsUri,places.addressComponents,places.plusCode,places.shortFormattedAddress," +

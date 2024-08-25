@@ -563,6 +563,7 @@ namespace GMB.Scanner.Agent.Core
             if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Mairie de Paris - Review global error !");
             #endregion
+
             #region Louvre
             request = new("https://www.google.fr/maps/place/Mus%C3%A9e+du+Louvre/@48.8606111,2.337644,17z/data=!3m1!4b1!4m6!3m5!1s0x47e671d877937b0f:0xb975fcfa192f84d4!8m2!3d48.8606111!4d2.337644!16zL20vMDRnZHI?hl=fr&entry=ttu");
             (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
