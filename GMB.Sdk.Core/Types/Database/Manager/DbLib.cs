@@ -574,7 +574,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
                         (short)reader["PROCESSING"],
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
+                        (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null
                     );
                     businessList.Add(businessProfile);
                 }
@@ -688,7 +689,9 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
                         (short)reader["PROCESSING"],
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
+                        (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null
+                        );
 
                     bpList.Add(businessProfile);
                 }
@@ -744,7 +747,9 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
                         (short)reader["PROCESSING"],
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
+                        (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null
+                        );
                     return businessProfile;
                 }
 
@@ -799,7 +804,9 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
                         (short)reader["PROCESSING"],
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
+                        (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null
+                        );
                     return businessProfile;
                 }
 
@@ -854,7 +861,9 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
                         (short)reader["PROCESSING"],
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
+                        (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null
+                        );
                     return businessProfile;
                 }
 
@@ -911,7 +920,9 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["GEOLOC"] != DBNull.Value) ? reader["GEOLOC"].ToString() : null,
                         (short)reader["PROCESSING"],
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
-                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null);
+                        (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
+                        (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null
+                        );
                     return businessProfile;
                 }
 
@@ -998,7 +1009,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country, LOCATED_IN = @LocatedIn WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
@@ -1023,6 +1034,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
                 cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
+                cmd.Parameters.AddWithValue("@LocatedIn", GetValueOrDefault(businessProfile.LocatedIn));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
@@ -1037,7 +1049,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_COUNTRY = @Country WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_COUNTRY = @Country, LOCATED_IN = @LocatedIn WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
@@ -1052,6 +1064,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
                 cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
                 cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
+                cmd.Parameters.AddWithValue("@LocatedIn", GetValueOrDefault(businessProfile.LocatedIn));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
@@ -1066,7 +1079,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country, URL_PLACE = @Url, TEL_INT = @TelInt, PROCESSING = @Processing WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country, URL_PLACE = @Url, TEL_INT = @TelInt, PROCESSING = @Processing, LOCATED_IN = @LocatedIn WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", business.IdEtab);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(business.PlaceId));
@@ -1094,6 +1107,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Url", GetValueOrDefault(business.PlaceUrl));
                 cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(business.TelInt));
                 cmd.Parameters.AddWithValue("@Processing", GetValueOrDefault(business.Processing));
+                cmd.Parameters.AddWithValue("@LocatedIn", GetValueOrDefault(business.LocatedIn));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
@@ -1142,7 +1156,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET ADRESS = @GoogleAddress, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, A_SCORE = @AddressScore, DATE_UPDATE = @DateUpdate, A_COUNTRY = @Country WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET ADRESS = @GoogleAddress, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, A_SCORE = @AddressScore, DATE_UPDATE = @DateUpdate, A_COUNTRY = @Country, LOCATED_IN = @LocatedIn WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
@@ -1159,6 +1173,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@StreetNumber", GetValueOrDefault(businessProfile.StreetNumber));
                 cmd.Parameters.AddWithValue("@AddressScore", GetValueOrDefault(businessProfile.AddressScore));
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(businessProfile.DateUpdate));
+                cmd.Parameters.AddWithValue("@LocatedIn", GetValueOrDefault(businessProfile.LocatedIn));
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.ExecuteNonQuery();
             } catch (Exception e)

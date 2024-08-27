@@ -26,7 +26,7 @@ namespace GMB.PlaceService.Api.Controller
         {
 
             List<GoogleResponse> businessList = [];
-            Place[]? places = await Core.PlaceService.GetPlacesByQuery(query.Query, query.Lang);
+            Place[]? places = await Service.PlaceService.GetPlacesByQuery(query.Query, query.Lang);
 
             foreach (Place place in places)
             {
@@ -43,7 +43,7 @@ namespace GMB.PlaceService.Api.Controller
         /// <summary>
         /// Find GMB list by query (should be name + address).
         /// </summary>
-        /// <param name="queryList"></param>
+        /// <param name="query"></param>
         /// <returns>GMB list or null if nothing found</returns>
         [HttpPost("place/find-by-query")]
         [Authorize]
@@ -55,7 +55,7 @@ namespace GMB.PlaceService.Api.Controller
             {
                 foreach (string record in query.Queries)
                 {
-                    Place[]? places = await Core.PlaceService.GetPlacesByQuery(record, query.Lang);
+                    Place[]? places = await Service.PlaceService.GetPlacesByQuery(record, query.Lang);
 
                     if (places != null && places.Length != 0)
                     {
@@ -85,7 +85,10 @@ namespace GMB.PlaceService.Api.Controller
         {
             try
             {
-                Place? place = await Core.PlaceService.GetPlaceByPlaceId(query.Query, query.Lang);
+                Place? place = await Service.PlaceService.GetPlaceByPlaceId(query.Query, query.Lang);
+
+                byte[]? test = await Service.PlaceService.GetPhotoById("AXCi2Q6N3kOdfqi9GaQOq0-4NOaBPCxwjI39VcHvitvNFD4XMuI_8ONn9Tooudy1uCnO3BUgLU9dJaeMpYV1dc11Nfkodaq2JyRO84-9TuNmnLHtatfgeCRgBdFBfmaW4pVpUCgH0-_MAy5wjBujf0PV76PD7TnKUBsgcJij");
+                
                 if (place == null)
                 {
                     return new GetBusinessFromGoogleResponse(new(query.Query, null));
@@ -118,7 +121,7 @@ namespace GMB.PlaceService.Api.Controller
 
                 foreach (string record in query.Queries)
                 {
-                    Place? place = await Core.PlaceService.GetPlaceByPlaceId(record, query.Lang);
+                    Place? place = await Service.PlaceService.GetPlaceByPlaceId(record, query.Lang);
                     if (place != null)
                     {
                         Business? bp = ToolBox.PlaceToB(place);
@@ -148,7 +151,7 @@ namespace GMB.PlaceService.Api.Controller
         {
             try
             {
-                string? placeId = await Core.PlaceService.GetPlaceIdByQuery(query);
+                string? placeId = await Service.PlaceService.GetPlaceIdByQuery(query, "fr");
                 return new GetPlaceIdResponse(placeId);
             } catch (Exception ex)
             {

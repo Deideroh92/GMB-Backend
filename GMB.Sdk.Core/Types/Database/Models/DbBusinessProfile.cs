@@ -35,6 +35,7 @@
         public string? TelInt { get; set; }
         public string? Website { get; set; }
         public string? PlusCode { get; set; }
+        public string? LocatedIn { get; set; }
         public DateTime? DateInsert { get; set; }
         public DateTime? DateUpdate { get; set; }
         public int Processing { get; set; }
@@ -68,7 +69,8 @@
         /// <param name="addressScore"></param>
         /// <param name="plusCode"></param>
         /// <param name="country"></param>
-        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null)
+        /// <param name="locatedIn"></param>
+        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null, string? locatedIn = null)
         {
             Id = -500;
             IdEtab = idEtab;
@@ -99,8 +101,9 @@
             Country = country;
             PlaceUrl = placeUrl;
             TelInt = telInt;
+            LocatedIn = locatedIn;
 
-            CheckValidity();
+            CheckValidity(); 
         }
 
         public DbBusinessProfile(Business? business) {
@@ -155,12 +158,13 @@
                    Website == other.Website &&
                    Status == other.Status &&
                    Country == other.Country &&
-                   PictureUrl == other.PictureUrl;
+                   PictureUrl == other.PictureUrl &&
+                   LocatedIn == other.LocatedIn;
         }
 
         public bool AdressEquals(DbBusinessProfile? other)
         {
-            return other is not null && GoogleAddress == other.GoogleAddress;
+            return other is not null && GoogleAddress == other.GoogleAddress && LocatedIn == other.LocatedIn;
         }
         #endregion
     }

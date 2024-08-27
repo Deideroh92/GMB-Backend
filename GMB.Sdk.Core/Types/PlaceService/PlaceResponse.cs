@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Collections.Generic;
 
 namespace GMB.Sdk.Core.Types.Api
 {
@@ -56,10 +57,26 @@ namespace GMB.Sdk.Core.Types.Api
         public string? PhotoUri { get; set; }
     }
 
+    public class Photo
+    {
+        [JsonProperty("photoReference")]
+        public string? PhotoReference { get; set; }
+
+        [JsonProperty("height")]
+        public int? Height { get; set; }
+
+        [JsonProperty("width")]
+        public int? Width { get; set; }
+
+        [JsonProperty("htmlAttributions")]
+        public List<string>? HtmlAttributions { get; set; }
+    }
+
     public class Place
     {
         [JsonProperty("id")]
         public required string PlaceId { get; set; }
+
         [JsonProperty("nationalPhoneNumber")]
         public string? NationalPhoneNumber { get; set; }
 
@@ -98,6 +115,9 @@ namespace GMB.Sdk.Core.Types.Api
 
         [JsonProperty("shortFormattedAddress")]
         public string? ShortFormattedAddress { get; set; }
+
+        [JsonProperty("photos")]
+        public Photo[]? Photos { get; set; }
 
         public static Place? FromJson(string json)
         {

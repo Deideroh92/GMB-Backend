@@ -64,6 +64,8 @@ namespace GMB.Scanner.Agent.Core
                 else
                     Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),\s-]+|\s{2,}", "");
 
+                string? locatedIn = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.locatedIn).GetAttribute("aria-label")?.Trim();
+
                 string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
 
                 if (category == null && ToolBox.FindElementSafe(driver.WebDriver, [By.XPath("//div[text() = 'VÉRIFIER LA DISPONIBILITÉ']")])?.Text == "VÉRIFIER LA DISPONIBILITÉ")
@@ -135,7 +137,7 @@ namespace GMB.Scanner.Agent.Core
 
                 request.IdEtab ??= ToolBox.ComputeMd5Hash(name + googleAddress);
                 request.Guid ??= Guid.NewGuid().ToString("N");
-                DbBusinessProfile dbBusinessProfile = new(placeId, request.IdEtab, request.Guid, name, category, googleAddress, business?.Address, business?.PostCode, business?.City, business?.CityCode, business?.Lat, business?.Lon, business?.IdBan, business?.AddressType, business?.StreetNumber, business?.AddressScore, tel, website, business?.PlusCode, DateTime.UtcNow, status, img, country, null, geoloc);
+                DbBusinessProfile dbBusinessProfile = new(placeId, request.IdEtab, request.Guid, name, category, googleAddress, business?.Address, business?.PostCode, business?.City, business?.CityCode, business?.Lat, business?.Lon, business?.IdBan, business?.AddressType, business?.StreetNumber, business?.AddressScore, tel, website, business?.PlusCode, DateTime.UtcNow, status, img, country, null, geoloc, 0, null, null, locatedIn);
                 DbBusinessScore? dbBusinessScore = new(request.IdEtab, score, reviews);
 
                 if (business == null || !dbBusinessProfile.AdressEquals(business) || !business.Equals(dbBusinessProfile) || business.Country == null)

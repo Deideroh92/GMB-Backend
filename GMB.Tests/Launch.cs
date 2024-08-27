@@ -88,7 +88,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 10);
+                db.UpdateBusinessProfileProcessingState(idEtab, 11);
             }
         }
         /// <summary>

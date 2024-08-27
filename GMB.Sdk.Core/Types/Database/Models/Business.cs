@@ -35,6 +35,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public int Processing { get; set; }
         public double? Score { get; set; }
         public int? NbReviews { get; set; }
+        public string? LocatedIn { get; set; }
         public List<DbBusinessReview>? Reviews { get; set; }
 
         /// <summary>
@@ -66,8 +67,9 @@ namespace GMB.Sdk.Core.Types.Database.Models
         /// <param name="score"></param>
         /// <param name="nbReviews"></param>
         /// <param name="reviews"></param>
+        /// <param name="locatedIn"></param>
         [JsonConstructor]
-        public Business(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, int processing, string? geoloc = null, DateTime? dateInsert = null, string? telInt = null, double? score = null, int? nbReviews = null, List<DbBusinessReview>? reviews = null)
+        public Business(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, int processing, string? geoloc = null, DateTime? dateInsert = null, string? telInt = null, double? score = null, int? nbReviews = null, List<DbBusinessReview>? reviews = null, string? locatedIn = null)
         {
             IdEtab = idEtab;
             PlaceId = placeId;
@@ -100,6 +102,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
             Score = score;
             NbReviews = nbReviews;
             Reviews = reviews;
+            LocatedIn = locatedIn;
         }
 
         /// <summary>
@@ -140,6 +143,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
             Processing = bp.Processing;
             Score = bs?.Score;
             NbReviews = bs?.NbReviews;
+            LocatedIn = bp?.LocatedIn;
             Reviews = reviews;
         }
     }

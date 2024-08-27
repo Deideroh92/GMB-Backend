@@ -29,6 +29,7 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> globalScore = [By.XPath("//div[contains(@jsaction, 'pane.rating.moreReviews')]")];
         public static readonly List<By> img = [By.XPath("//img[contains(@decoding, 'async')]")];
         public static readonly List<By> plusCode = [By.XPath("//button[contains(@aria-label, 'Plus\u00A0code:')]"), By.XPath("//a[contains(@aria-label, 'Plus\u00A0code:')]")];
+        public static readonly List<By> locatedIn = [By.XPath("//button[@data-item-id='locatedin']")];
 
         // Plus Code
         public static readonly List<By> expand = [By.XPath("//div[contains(@class, 'expand sprite-bg')]")];
