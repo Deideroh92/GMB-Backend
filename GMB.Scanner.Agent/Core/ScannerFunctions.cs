@@ -64,7 +64,7 @@ namespace GMB.Scanner.Agent.Core
                 else
                     Regex.Replace(name, @"[^0-9a-zA-Zçàéè'(),\s-]+|\s{2,}", "");
 
-                string? locatedIn = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.locatedIn).GetAttribute("aria-label")?.Trim();
+                string? locatedIn = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.locatedIn)?.GetAttribute("aria-label")?.Trim();
 
                 string? category = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.category)?.Text?.Replace("·", "").Trim();
 
