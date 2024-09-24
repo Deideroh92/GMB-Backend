@@ -2,6 +2,7 @@
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.PlaceService;
+using Sdk.Core.Types.Models;
 using System.Data.SqlClient;
 
 namespace GMB.Sdk.Core.Types.Database.Manager
@@ -9,6 +10,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
     public class DbLib : IDisposable
     {
         private const string connectionString = @"Data Source=vasano.database.windows.net;Initial Catalog=GMS;User ID=vs-sa;Password=Eu6pkR2J4";
+        private const string connectionStringStickers = @"Data Source=vasano-stickers.database.windows.net;Initial Catalog=STICKERS;User ID=admin-vs-stickers;Password=bHLdtz6a48J2P4";
         private readonly SqlConnection Connection;
 
         #region Local
@@ -16,9 +18,13 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// <summary>
         /// Constructor
         /// </summary>
-        public DbLib()
+        public DbLib(bool stickers = false)
         {
-            Connection = new SqlConnection(connectionString);
+            if (stickers)
+                Connection = new SqlConnection(connectionString);
+            else
+                Connection = new SqlConnection(connectionStringStickers);
+
             ConnectToDB();
         }
 
@@ -1700,6 +1706,107 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         }
         #endregion
 
+        #endregion
+
+        #region Stickers
+        /// <summary>
+        /// Get Sticker by Place Id.
+        /// </summary>
+        /// <param name="placeId"></param>
+        /// <param name="year"></param>
+        /// <returns>Sticker or null</returns>
+        public DbSticker? GetStickerByPlaceId(string placeId, int year)
+        {
+            try
+            {
+                string selectCommand = "SELECT PLACE_ID, SCORE FROM STICKERS WHERE PLACE_ID = @PlaceId AND YEAR = @Year";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@PlaceId", placeId);
+                cmd.Parameters.AddWithValue("@Year", year);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    DbSticker sticker = new
+                        (placeId,
+                        Convert.ToSingle(reader["SCORE"]),
+                        year);
+                    return sticker;
+                }
+
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting sticker for place id = [{placeId}] and year = [{year}]", e);
+            }
+        }
+
+        /// <summary>
+        /// Create Sticker.
+        /// </summary>
+        /// <param name="sticker"></param>
+        public void CreateSticker(DbSticker sticker)
+        {
+            try
+            {
+                string insertCommand = "INSERT INTO STICKERS (PLACE_ID, SCORE, YEAR) VALUES (@PlaceId, @Score, @Year)";
+
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@PlaceId", sticker.PlaceId);
+                cmd.Parameters.AddWithValue("@Score", sticker.Score);
+                cmd.Parameters.AddWithValue("@Year", sticker.Year);
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error creating sticker with place id = [{sticker.PlaceId}] and year = [{sticker.Year}]", e);
+            }
+        }
+
+        /// <summary>
+        /// Delete Sticker by Place Id and Year.
+        /// </summary>
+        /// <param name="placeId"></param>
+        /// <param name="year"></param>
+        public void DeleteStickerByPlaceIdAndYear(string placeId, int year)
+        {
+            try
+            {
+                string deleteCommand = "DELETE FROM STICKERS WHERE PLACE_ID = @PlaceId AND YEAR = @Year";
+                using SqlCommand cmd = new(deleteCommand, Connection);
+                cmd.Parameters.AddWithValue("@PlaceId", placeId);
+                cmd.Parameters.AddWithValue("@Year", year);
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error deleting sticker for place id = [{placeId}] and year = [{year}]", e);
+            }
+        }
+        #endregion
+
+        #region Error Table
+        /// <summary>
+        /// Create Error.
+        /// </summary>
+        /// <param name="placeId"></param>
+        /// <param name="year"></param>
+        /// <param name="message"></param>
+        public void CreateError(string placeId, int year, string message)
+        {
+            try
+            {
+                string insertCommand = "INSERT INTO ERROR (PLACE_ID, YEAR, MESSAGE) VALUES (@PlaceId, @Year, @Message)";
+
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@PlaceId", placeId);
+                cmd.Parameters.AddWithValue("@Year", year);
+                cmd.Parameters.AddWithValue("@Message", message);
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error creating error with place id = [{placeId}] and year = [{year}]", e);
+            }
+        }
         #endregion
     }
 }

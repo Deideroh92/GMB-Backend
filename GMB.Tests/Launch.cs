@@ -7,6 +7,7 @@ using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Sdk.Core.Types.Api;
 
 namespace GMB.Tests
 {
@@ -164,6 +165,61 @@ namespace GMB.Tests
             ScannerController scannerController = new();
 
             Task.Run(() => scannerController.StartUrlScanner()).Wait();
+            return;
+        }
+        #endregion
+
+        #region STICKERS
+        /// <summary>
+        /// Launch Scanner Sticker
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task LaunchScannerStickerAsync()
+        {
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory())?.Parent?.Parent?.Parent?.FullName + @"\Sdk.Core\Files\Custom.txt";
+            int year = 2023;
+            using DbLib db = new();
+            string lang = "FR";
+            int i = 0;
+
+            // TODO : Récupérer les params de la query dans l'order : year, lang, liste place ID
+
+            List<StickerFileRowData> rowDataList = [];
+
+            using (StreamReader reader = new(filePath))
+
+                while (!reader.EndOfStream)
+                {
+                    i++;
+                    string? line = reader.ReadLine();
+                    if (line != null)
+                    {
+                        rowDataList.Add(new StickerFileRowData(i, line));
+                    }
+                }
+            int nbThreads = 4;
+
+            if (rowDataList.Count < 10)
+                nbThreads = 1;
+
+            List<Task> tasks = [];
+
+            foreach (var chunk in rowDataList.Chunk(rowDataList.Count / nbThreads))
+            {
+                Task newThread = Task.Run(async () =>
+                {
+                    ScannerController scannerController = new();
+
+                    // TODO : mettre les paramètres de la commande ici -> lang, year
+                    StickerScannerRequest request = new(Guid.NewGuid().ToString(), new List<StickerFileRowData>(chunk), year, lang);
+
+                    ActionResult<GetStickerListResponse> response = await scannerController.StartStickerScannerAsync(request);
+                });
+                tasks.Add(newThread);
+                Thread.Sleep(15000);
+            }
+            await Task.WhenAll(tasks);
             return;
         }
         #endregion

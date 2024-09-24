@@ -23,9 +23,9 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// </summary>
     /// <param name="id"></param>
     /// <param name="data"></param>
-    public class StickerFileRowData(string id, string data)
+    public class StickerFileRowData(int id, string data)
     {
-        public string Id { get; set; } = id;
+        public int Id { get; set; } = id;
         public string Data { get; set; } = data;
     }
     #endregion
@@ -101,6 +101,30 @@ namespace GMB.Sdk.Core.Types.ScannerService
         public string? Category { get; set; } = category;
         public UrlState UrlState { get; set; } = urlState;
         public bool UpdateProcessingState { get; set; } = updateProcessingState;
+    }
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="businessAgent"></param>
+    /// <param name="year"></param>
+    public class ScannerStickerParameters(BusinessAgent businessAgent, int year)
+    {
+        public BusinessAgent BusinessAgent { get; set; } = businessAgent;
+        public int Year { get; set; } = year;
+    }
+    /// <summary>
+    /// Constructor.
+    /// </summary>
+    /// <param name="requestId"></param>
+    /// <param name="file"></param>
+    /// <param name="year"></param>
+    /// <param name="lang"></param>
+    public class StickerScannerRequest(string requestId, List<StickerFileRowData> file, int year, string lang)
+    {
+        public string RequestId { get; set; } = requestId;
+        public List<StickerFileRowData> File { get; set; } = file;
+        public int Year { get; set; } = year;
+        public string Lang { get; set; } = lang;
     }
     #endregion
 }

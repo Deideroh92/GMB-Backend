@@ -10,6 +10,8 @@ using GMB.Sdk.Core;
 using System.Diagnostics;
 using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Models;
+using Sdk.Core.Types.Api;
+using Sdk.Core.Types.Models;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -149,6 +151,108 @@ namespace GMB.ScannerService.Api.Controller
             {
                 Log.Error(e, $"An exception occurred while starting scanner test.");
                 return GenericResponse.Exception($"An exception occurred while starting scanner test : {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Start Scanner Stickers.
+        /// </summary>
+        [HttpPost("scanner/sticker")]
+        [Authorize(Policy = "DevelopmentPolicy")]
+        public async Task<ActionResult<GetStickerListResponse>> StartStickerScannerAsync([FromBody] StickerScannerRequest request)
+        {
+            try
+            {
+                GetStickerListResponse response = new([]);
+
+                DbLib dbLib = new();
+
+                SeleniumDriver driver = new();
+
+                foreach (StickerFileRowData record in request.File)
+                {
+                    try
+                    {
+                        DbSticker? sticker = dbLib.GetStickerByPlaceId(record.Data, request.Year);
+
+                        // Sticker found
+                        if (sticker != null)
+                        {
+                            response.StickerList?.Add(new(record.Id, sticker));
+                            continue;
+                        }
+
+                        DbBusinessProfile? bp = dbLib.GetBusinessByPlaceId(record.Data);
+
+                        // BP not in our DB
+                        if (bp == null)
+                        {
+                            Place? place = await PlaceService.Api.Service.PlaceService.GetPlaceByPlaceId(record.Data, request.Lang);
+
+                            // Place not found on Google API
+                            if (place == null)
+                            {
+                                response.StickerList?.Add(new(record.Id, null));
+                                continue;
+                            }
+
+                            bp = ToolBox.PlaceToBP(place);
+
+                            // No URL, so we cannot get info
+                            if (bp?.PlaceUrl == null)
+                            {
+                                response.StickerList?.Add(new(record.Id, null));
+                                continue;
+                            }
+
+                            dbLib.CreateBusinessProfile(bp);
+                        }
+
+                        (DbBusinessProfile? scannedBp, DbBusinessScore? bs) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(bp.PlaceUrl, bp.FirstGuid, bp.IdEtab), bp);
+
+                        if (scannedBp != null)
+                            dbLib.UpdateBusinessProfile(scannedBp);
+
+                        if (bs == null || bs.Score == null || bs.NbReviews == null)
+                        {
+                            response.StickerList?.Add(new(record.Id, null));
+                            continue;
+                        } else
+                            dbLib.CreateBusinessScore(bs!);
+
+                        BusinessAgent ba = new(bp.PlaceUrl, bp.PlaceId);
+                        ScannerStickerParameters parameters = new(ba, request.Year);
+
+                        sticker = Scanner.Agent.Scanner.StickerScanner(parameters, driver);
+
+                        if (sticker == null || sticker.Score == 0)
+                        {
+                            response.StickerList?.Add(new(record.Id, null));
+                            continue;
+                        }
+
+                        dbLib.CreateSticker(sticker);
+                        response.StickerList?.Add(new(record.Id, sticker));
+                    } catch (Exception e)
+                    {
+                        Log.Error(e, $"An exception occurred while getting sticker for place id =[{record.Data}].");
+                        dbLib.CreateError(record.Data, request.Year, $"STACKTRACE: [{e.Message}] - MESSAGE [{e.Message}]");
+                        driver.Dispose();
+                        driver = new();
+                        continue;
+                    }
+                }
+                try
+                {
+                    driver.Dispose();
+                } catch (Exception)
+                {
+                }
+                return response;
+            } catch (Exception e)
+            {
+                Log.Error(e, $"An exception occurred while starting scanner sticker.");
+                return GetStickerListResponse.Exception($"An exception occurred while starting scanner sticker : {e.Message}");
             }
         }
     }

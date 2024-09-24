@@ -5,6 +5,7 @@ using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.ScannerService;
+using Sdk.Core.Types.Models;
 using Serilog;
 using System.Globalization;
 
@@ -212,6 +213,68 @@ namespace GMB.Scanner.Agent
                 }
             }
             Log.CloseAndFlush();
+        }
+
+        /// <summary>
+        /// Start Sticker Scanner.
+        /// </summary>
+        /// <param name="request"></param>
+        /// <returns></returns>
+        public static DbSticker? StickerScanner(ScannerStickerParameters request, SeleniumDriver driver)
+        {
+            Thread.CurrentThread.CurrentCulture = CultureInfo.InvariantCulture;
+
+            using DbLib db = new();
+
+            DateTime time = DateTime.UtcNow;
+
+            ToolBox.BreakingHours();
+
+            try
+            {
+                int totalRating = 0;
+
+                driver.GetToPage(request.BusinessAgent.Url);
+
+                // Year
+                List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews(request.BusinessAgent.PlaceId, DateTime.UtcNow.AddMonths(-12), driver);
+
+                if (reviews == null || reviews.Count == 0)
+                    return null;
+
+                foreach (DbBusinessReview review in reviews)
+                {
+                    try
+                    {
+                        DbBusinessReview? dbBusinessReview = db.GetBusinessReview(review.GoogleReviewId);
+
+                        if (dbBusinessReview == null)
+                        {
+                            db.CreateBusinessReview(review);
+                        } else if (!review.Equals(dbBusinessReview))
+                        {
+                            db.UpdateBusinessReview(review, true);
+                        }
+
+                        totalRating += review.Score;
+
+                    } catch (Exception e)
+                    {
+                        Log.Error($"Couldn't treat a review : {e.Message}", e);
+                    }
+                }
+
+                float averageRating = (float)Math.Round((double)totalRating / reviews!.Count, 1);
+
+                DbSticker sticker = new(request.BusinessAgent.PlaceId, averageRating, request.Year);
+                return sticker;
+
+            } catch (Exception e)
+            {
+                Log.Error(e, $"An exception occurred when getting sticker from id etab = [{request.BusinessAgent.PlaceId}], url = [{request.BusinessAgent.Url}] : {e.Message}");
+                throw;
+            }
+
         }
     }
 }
