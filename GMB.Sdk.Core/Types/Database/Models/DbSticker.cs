@@ -1,4 +1,6 @@
-﻿namespace Sdk.Core.Types.Models
+﻿using System.Drawing;
+
+namespace GMB.Sdk.Core.Types.Database.Models
 {
     /// <summary>
     /// Constructor.
@@ -6,10 +8,11 @@
     /// <param name="placeId"></param>
     /// <param name="score"></param>
     /// <param name="year"></param>
-    public class DbSticker(string? placeId, float score, int year)
+    public class DbSticker(string placeId, float score, int year)
     {
-        public string? PlaceId { get; set; } = placeId;
+        public string PlaceId { get; set; } = placeId;
         public float Score { get; set; } = score;
         public int Year { get; set; } = year;
+        //public Bitmap Sticker { get; set; } = sticker;
     }
 }

@@ -1,5 +1,5 @@
 ﻿using GMB.Sdk.Core.Types.Api;
-using Sdk.Core.Types.Models;
+using GMB.Sdk.Core.Types.Database.Models;
 
 namespace Sdk.Core.Types.Api
 {

@@ -11,6 +11,10 @@ using System.Security.Authentication;
 using System.Security.Cryptography;
 using System.Text;
 using System.Globalization;
+using System.Drawing;
+using QRCoder;
+using Serilog;
+using System.Drawing.Text;
 
 namespace GMB.Sdk.Core
 {
@@ -403,6 +407,68 @@ namespace GMB.Sdk.Core
                 Thread.Sleep(3600000);
                 actualTime = DateTime.UtcNow;
             }
+        }
+
+        // Function to generate the QR code
+        private static Bitmap GenerateQrCode(string url)
+        {
+            QRCodeGenerator qrGenerator = new();
+            QRCodeData qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.L);
+            PngByteQRCode qrCode = new(qrCodeData);
+
+            byte[] qrCodeBytes = qrCode.GetGraphic(5, [66, 134, 245], [0, 0, 0], true);
+
+            // Convert byte array to Bitmap
+            using MemoryStream ms = new MemoryStream(qrCodeBytes);
+            return new Bitmap(ms);
+        }
+
+        public static Font LoadCustomFont(string fontPath, float fontSize)
+        {
+            PrivateFontCollection privateFontCollection = new PrivateFontCollection();
+
+            // Load the custom font
+            privateFontCollection.AddFontFile(fontPath);
+
+            // Return the custom font, make sure it's a valid font family
+            return new Font(privateFontCollection.Families[0], fontSize);
+        }
+
+        // Function to create the final sticker image
+        public static Bitmap CreateSticker(string score, string qrUrl, string year)
+        {
+            // Load the sticker template (logo.jpg in your case)
+            string stickerPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "logo.jpg");
+            using Bitmap stickerImg = new(stickerPath);
+            int stickerWidth = stickerImg.Width;
+            int stickerHeight = stickerImg.Height;
+
+            // Generate QR code
+            Bitmap qrCodeImg = GenerateQrCode(qrUrl);
+
+            // Setup fonts
+            string fontPathBold = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Poppins-Bold.ttf");
+            string fontPathMedium = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Poppins-Medium.ttf");
+            Font font = LoadCustomFont(fontPathBold, 36f);
+            Font font2 = LoadCustomFont(fontPathBold, 72f);
+            Font font3 = LoadCustomFont(fontPathMedium, 10f);
+
+            // Draw the text and QR code on the sticker image
+            using (Graphics g = Graphics.FromImage(stickerImg))
+            {
+                g.DrawString($"Notre note\nGoogle\n{year}", font, Brushes.White, new PointF(30, 30));
+                g.DrawString(score, font2, Brushes.White, new PointF(285, 195));
+                g.DrawString("Moyenne des notes relevées entre le 1er janvier 2023 et le 31 décembre 2023", font3, Brushes.Black, new PointF(40, 445));
+                g.DrawString("Certifiée par Vasano | © Tous droits réservés", font3, Brushes.Black, new PointF(132, 458));
+
+                // Paste QR code onto sticker
+                g.DrawImage(qrCodeImg, new Point(55, 210));
+            }
+
+            // Resize the sticker image if needed
+            Bitmap resizedStickerImg = new(stickerImg, stickerWidth, stickerHeight);
+
+            return resizedStickerImg;
         }
         #endregion
     }

@@ -11,7 +11,7 @@ using System.Diagnostics;
 using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Models;
 using Sdk.Core.Types.Api;
-using Sdk.Core.Types.Models;
+using System.Drawing;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -230,6 +230,9 @@ namespace GMB.ScannerService.Api.Controller
                             response.StickerList?.Add(new(record.Id, null));
                             continue;
                         }
+
+                        // TODO : Create the sticker
+                        //Bitmap drawnSitcker = ToolBox.CreateSticker()
 
                         dbLib.CreateSticker(sticker);
                         response.StickerList?.Add(new(record.Id, sticker));

@@ -5,7 +5,6 @@ using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.ScannerService;
-using Sdk.Core.Types.Models;
 using Serilog;
 using System.Globalization;
 
