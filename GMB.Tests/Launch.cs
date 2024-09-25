@@ -1,6 +1,7 @@
 using GMB.BusinessService.Api.Controller;
 using GMB.ScannerService.Api.Controller;
 using GMB.ScannerService.Api.Services;
+using GMB.Sdk.Core;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
@@ -8,6 +9,8 @@ using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdk.Core.Types.Api;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace GMB.Tests
 {
@@ -220,7 +223,26 @@ namespace GMB.Tests
                 Thread.Sleep(15000);
             }
             await Task.WhenAll(tasks);
+
+            
             return;
+        }
+
+
+        [TestMethod]
+        public void GenerateStickers()
+        {
+            // Example usage of the sticker generation function
+            string score = "4,5";
+            string qrUrl = "https://vasano.io";
+            string year = "2023";
+
+            Bitmap stickerImage = ToolBox.CreateSticker(score, qrUrl, year);
+
+            // Save the final sticker image (for demonstration purposes)
+            stickerImage.Save("sticker_output.png", ImageFormat.Png);
+
+            Console.WriteLine("Sticker image generated and saved as sticker_output.png");
         }
         #endregion
     }
