@@ -21,9 +21,9 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         public DbLib(bool stickers = false)
         {
             if (stickers)
-                Connection = new SqlConnection(connectionString);
-            else
                 Connection = new SqlConnection(connectionStringStickers);
+            else
+                Connection = new SqlConnection(connectionString);
 
             ConnectToDB();
         }
