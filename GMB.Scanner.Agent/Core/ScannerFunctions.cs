@@ -534,16 +534,16 @@ namespace GMB.Scanner.Agent.Core
             GetBusinessProfileRequest request = new("https://www.google.fr/maps/place/Mairie+de+Paris/@48.8660828,2.3108754,13z/data=!4m10!1m2!2m1!1smairie+de+paris!3m6!1s0x47e66e23b4333db3:0xbc314dec89c4971!8m2!3d48.8641075!4d2.3421539!15sCg9tYWlyaWUgZGUgcGFyaXNaESIPbWFpcmllIGRlIHBhcmlzkgEJY2l0eV9oYWxsmgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVVEyYzA5MWNrbFJFQUXgAQA!16s%2Fg%2F11c6pn36ph?hl=fr&entry=ttu");
             (DbBusinessProfile? profile, DbBusinessScore? score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
             if (profile.Name != "Mairie de Paris" ||
-                (profile.GoogleAddress != "40 Rue du Louvre, 75001 Paris" && profile.GoogleAddress != "40 Rue du Louvre, 75001 Paris, France") ||
+                (profile.GoogleAddress != "29 Rue de Rivoli, 75004 Paris" && profile.GoogleAddress != "29 Rue de Rivoli, 75004 Paris, France") ||
                 profile.City != "Paris" ||
-                profile.CityCode != "75101" ||
+                profile.CityCode != "75104" ||
                 profile.Country != "France" ||
-                profile.StreetNumber != "40" ||
+                profile.StreetNumber != "29" ||
                 profile.Category != "Hôtel de ville" ||
                 profile.Website != "https://www.paris.fr/" ||
                 profile.PictureUrl == null ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PlusCode != "8FW4V87R+JV" ||
+                profile.PlusCode != "8FW4V943+R5" ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
                 score.Score >= 5 ||
