@@ -15,6 +15,7 @@ using System.Drawing;
 using QRCoder;
 using Serilog;
 using System.Drawing.Text;
+using AngleSharp.Io;
 
 namespace GMB.Sdk.Core
 {
@@ -419,13 +420,13 @@ namespace GMB.Sdk.Core
             byte[] qrCodeBytes = qrCode.GetGraphic(5, [66, 134, 245], [0, 0, 0], true);
 
             // Convert byte array to Bitmap
-            using MemoryStream ms = new MemoryStream(qrCodeBytes);
+            using MemoryStream ms = new(qrCodeBytes);
             return new Bitmap(ms);
         }
 
         public static Font LoadCustomFont(string fontPath, float fontSize)
         {
-            PrivateFontCollection privateFontCollection = new PrivateFontCollection();
+            PrivateFontCollection privateFontCollection = new();
 
             // Load the custom font
             privateFontCollection.AddFontFile(fontPath);
@@ -435,8 +436,11 @@ namespace GMB.Sdk.Core
         }
 
         // Function to create the final sticker image
-        public static Bitmap CreateSticker(string score, string qrUrl, string year)
+        public static Bitmap CreateSticker(string score, string qrUrl, DateTime orderDate)
         {
+
+            DateTime startingDate = orderDate.AddMonths(-12);
+
             // Load the sticker template (logo.jpg in your case)
             string stickerPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "logo.jpg");
             using Bitmap stickerImg = new(stickerPath);
@@ -456,7 +460,7 @@ namespace GMB.Sdk.Core
             // Draw the text and QR code on the sticker image
             using (Graphics g = Graphics.FromImage(stickerImg))
             {
-                g.DrawString($"Notre note\nGoogle\n{year}", font, Brushes.White, new PointF(30, 30));
+                g.DrawString($"Notre note\nGoogle", font, Brushes.White, new PointF(30, 30));
                 g.DrawString(score, font2, Brushes.White, new PointF(285, 195));
                 g.DrawString("Moyenne des notes relevées entre le 1er janvier 2023 et le 31 décembre 2023", font3, Brushes.Black, new PointF(40, 445));
                 g.DrawString("Certifiée par Vasano | © Tous droits réservés", font3, Brushes.Black, new PointF(132, 458));
@@ -469,6 +473,40 @@ namespace GMB.Sdk.Core
             Bitmap resizedStickerImg = new(stickerImg, stickerWidth, stickerHeight);
 
             return resizedStickerImg;
+        }
+
+        /// <summary>
+        /// Craete Certificate
+        /// </summary>
+        /// <param name="score1"></param>
+        /// <param name="score2"></param>
+        /// <param name="score3"></param>
+        /// <param name="score4"></param>
+        /// <param name="score5"></param>
+        /// <param name="averageScore"></param>
+        /// <param name="name"></param>
+        /// <param name="customPhrase"></param>
+        /// <returns>certificate</returns>
+        public static Bitmap CreateCertificate(int score1, int score2, int score3, int score4, int score5, int averageScore, string name, string customPhrase, DateTime orderDate)
+        {
+
+            DateTime startingDate = orderDate.AddMonths(-12);
+            return new Bitmap("test");
+        }
+
+        /// <summary>
+        /// Convert bitmap to byte array
+        /// </summary>
+        /// <param name="bitmap"></param>
+        /// <returns>byte array</returns>
+        public static byte[] BitmapToByteArray(Bitmap bitmap)
+        {
+            using MemoryStream memoryStream = new();
+            // Save the bitmap to the memory stream in a specific format (e.g., PNG)
+            bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
+
+            // Return the byte array from the memory stream
+            return memoryStream.ToArray();
         }
         #endregion
     }

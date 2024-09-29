@@ -9,6 +9,7 @@ using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Sdk.Core.Types.Api;
+using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Drawing.Imaging;
 
@@ -173,7 +174,7 @@ namespace GMB.Tests
         #endregion
 
         #region STICKERS
-        /// <summary>
+        /*/// <summary>
         /// Launch Scanner Sticker
         /// </summary>
         /// <returns></returns>
@@ -217,7 +218,7 @@ namespace GMB.Tests
                     // TODO : mettre les paramètres de la commande ici -> lang, year
                     StickerScannerRequest request = new(Guid.NewGuid().ToString(), new List<StickerFileRowData>(chunk), year, lang);
 
-                    ActionResult<GetStickerListResponse> response = await scannerController.StartStickerScannerAsync(request);
+                    ActionResult<GetStickerListResponse> response = scannerController.StartStickerScanner(request);
                 });
                 tasks.Add(newThread);
                 Thread.Sleep(15000);
@@ -226,18 +227,60 @@ namespace GMB.Tests
 
             
             return;
+        }*/
+
+        [TestMethod]
+        public async void LaunchOrder()
+        {
+            string id = "154313564";
+            
+            DbLib db = new(true);
+
+            DbOrder order = db.GetOrderByID(id);
+
+            //OrderStatus status = OrderStatus.Analyzing;
+            //List<DbOrder> orderList = db.GetOrderByStatus(status);
+
+            List<DbPlace> places = db.GetPlacesFromOrderId(id);
+
+            int nbThreads = 5;
+
+            if (places.Count < 6)
+                nbThreads = 1;
+
+            List<Task> tasks = [];
+
+            foreach (var chunk in places.Chunk(places.Count / nbThreads))
+            {
+                Task newThread = Task.Run(() =>
+                {
+                    ScannerController scannerController = new();
+
+                    StickerScannerRequest request = new(id, places, order.CreatedAt, order.Language);
+
+                    ActionResult<GetStickerListResponse> response = scannerController.StartStickerScanner(request);
+                });
+                tasks.Add(newThread);
+                Thread.Sleep(15000);
+            }
+            await Task.WhenAll(tasks);
+
+
+            return;
         }
 
 
+        /// <summary>
+        ///  For testing the generation of a sticker
+        /// </summary>
         [TestMethod]
         public void GenerateStickers()
         {
             // Example usage of the sticker generation function
             string score = "4,5";
             string qrUrl = "https://vasano.io";
-            string year = "2023";
 
-            Bitmap stickerImage = ToolBox.CreateSticker(score, qrUrl, year);
+            Bitmap stickerImage = ToolBox.CreateSticker(score, qrUrl, DateTime.UtcNow);
 
             // Save the final sticker image (for demonstration purposes)
             stickerImage.Save("sticker_output.png", ImageFormat.Png);

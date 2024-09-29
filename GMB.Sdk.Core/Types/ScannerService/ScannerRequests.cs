@@ -105,26 +105,16 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <summary>
     /// Constructor.
     /// </summary>
-    /// <param name="businessAgent"></param>
-    /// <param name="year"></param>
-    public class ScannerStickerParameters(BusinessAgent businessAgent, int year)
-    {
-        public BusinessAgent BusinessAgent { get; set; } = businessAgent;
-        public int Year { get; set; } = year;
-    }
-    /// <summary>
-    /// Constructor.
-    /// </summary>
-    /// <param name="requestId"></param>
-    /// <param name="file"></param>
-    /// <param name="year"></param>
+    /// <param name="orderId"></param>
+    /// <param name="places"></param>
+    /// <param name="orderDate"></param>
     /// <param name="lang"></param>
-    public class StickerScannerRequest(string requestId, List<StickerFileRowData> file, int year, string lang)
+    public class StickerScannerRequest(string orderId, List<DbPlace> places, DateTime orderDate, Languages lang)
     {
-        public string RequestId { get; set; } = requestId;
-        public List<StickerFileRowData> File { get; set; } = file;
-        public int Year { get; set; } = year;
-        public string Lang { get; set; } = lang;
+        public string OrderId { get; set; } = orderId;
+        public Languages Lang { get; set; } = lang;
+        public DateTime OrderDate { get; set; } = orderDate;
+        public List<DbPlace> Places { get; set; } = places;
     }
     #endregion
 }

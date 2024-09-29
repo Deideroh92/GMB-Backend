@@ -159,7 +159,7 @@ namespace GMB.ScannerService.Api.Controller
         /// </summary>
         [HttpPost("scanner/sticker")]
         [Authorize(Policy = "DevelopmentPolicy")]
-        public async Task<ActionResult<GetStickerListResponse>> StartStickerScannerAsync([FromBody] StickerScannerRequest request)
+        public ActionResult<GetStickerListResponse> StartStickerScanner([FromBody] StickerScannerRequest request)
         {
             try
             {
@@ -169,87 +169,53 @@ namespace GMB.ScannerService.Api.Controller
 
                 SeleniumDriver driver = new();
 
-                foreach (StickerFileRowData record in request.File)
+                foreach (DbPlace record in request.Places)
                 {
                     try
                     {
-                        DbSticker? sticker = dbLib.GetStickerByPlaceId(record.Data, request.Year);
 
-                        // Sticker found
-                        if (sticker != null)
-                        {
-                            response.StickerList?.Add(new(record.Id, sticker));
+                        BusinessAgent ba = new(record.Url, record.Id);
+
+                        driver.GetToPage(record.Url);
+
+                        List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews("none", DateTime.UtcNow.AddMonths(-12), driver);
+
+                        if (reviews == null)
                             continue;
-                        }
 
-                        DbBusinessProfile? bp = dbLib.GetBusinessByPlaceId(record.Data);
+                        // Calculate the count of reviews for each score (1 to 5) using LINQ
+                        int score1 = reviews.Count(r => r.Score == 1);
+                        int score2 = reviews.Count(r => r.Score == 2);
+                        int score3 = reviews.Count(r => r.Score == 3);
+                        int score4 = reviews.Count(r => r.Score == 4);
+                        int score5 = reviews.Count(r => r.Score == 5);
 
-                        // BP not in our DB
-                        if (bp == null)
-                        {
-                            Place? place = await PlaceService.Api.Service.PlaceService.GetPlaceByPlaceId(record.Data, request.Lang);
+                        // Calculate the average score (sum of all scores divided by the number of reviews)
+                        int totalScore = reviews.Sum(r => r.Score);
+                        int numberOfReviews = reviews.Count;
 
-                            // Place not found on Google API
-                            if (place == null)
-                            {
-                                response.StickerList?.Add(new(record.Id, null));
-                                continue;
-                            }
+                        // Avoid division by zero in case there are no reviews
+                        int averageScore = numberOfReviews > 0 ? totalScore / numberOfReviews : 0;
 
-                            bp = ToolBox.PlaceToBP(place);
+                        string name = record.Name;
+                        string customPhrase = "This is a test";
 
-                            // No URL, so we cannot get info
-                            if (bp?.PlaceUrl == null)
-                            {
-                                response.StickerList?.Add(new(record.Id, null));
-                                continue;
-                            }
+                        Bitmap drawnCertificate = ToolBox.CreateCertificate(score1, score2, score3, score4, score5, averageScore, name, customPhrase, request.OrderDate);
+                        Bitmap drawnSticker = ToolBox.CreateSticker(averageScore.ToString(), "test", request.OrderDate);
 
-                            dbLib.CreateBusinessProfile(bp);
-                        }
-
-                        (DbBusinessProfile? scannedBp, DbBusinessScore? bs) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(bp.PlaceUrl, bp.FirstGuid, bp.IdEtab), bp);
-
-                        if (scannedBp != null)
-                            dbLib.UpdateBusinessProfile(scannedBp);
-
-                        if (bs == null || bs.Score == null || bs.NbReviews == null)
-                        {
-                            response.StickerList?.Add(new(record.Id, null));
-                            continue;
-                        } else
-                            dbLib.CreateBusinessScore(bs!);
-
-                        BusinessAgent ba = new(bp.PlaceUrl, bp.PlaceId);
-                        ScannerStickerParameters parameters = new(ba, request.Year);
-
-                        sticker = Scanner.Agent.Scanner.StickerScanner(parameters, driver);
-
-                        if (sticker == null || sticker.Score == 0)
-                        {
-                            response.StickerList?.Add(new(record.Id, null));
-                            continue;
-                        }
-
-                        // TODO : Create the sticker
-                        //Bitmap drawnSitcker = ToolBox.CreateSticker()
+                        DbSticker sticker = new(Guid.NewGuid().ToString("N"), record.Id, averageScore.ToString(), request.OrderDate, ToolBox.BitmapToByteArray(drawnSticker));
+                        DbCertificate certificate = new(sticker.Id, ToolBox.BitmapToByteArray(drawnCertificate));
 
                         dbLib.CreateSticker(sticker);
-                        response.StickerList?.Add(new(record.Id, sticker));
+                        dbLib.CreateCertificate(certificate);
+                        dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Analyzed);
                     } catch (Exception e)
                     {
-                        Log.Error(e, $"An exception occurred while getting sticker for place id =[{record.Data}].");
-                        dbLib.CreateError(record.Data, request.Year, $"STACKTRACE: [{e.Message}] - MESSAGE [{e.Message}]");
+                        Log.Error(e, $"An exception occurred while getting sticker for place id =[{record.Id}].");
                         driver.Dispose();
                         driver = new();
                         continue;
                     }
-                }
-                try
-                {
-                    driver.Dispose();
-                } catch (Exception)
-                {
                 }
                 return response;
             } catch (Exception e)

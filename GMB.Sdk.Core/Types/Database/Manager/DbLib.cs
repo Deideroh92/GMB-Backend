@@ -9,7 +9,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
     public class DbLib : IDisposable
     {
         private const string connectionString = @"Data Source=vasano.database.windows.net;Initial Catalog=GMS;User ID=vs-sa;Password=Eu6pkR2J4";
-        private const string connectionStringStickers = @"Data Source=vasano-stickers.database.windows.net;Initial Catalog=STICKERS;User ID=admin-vs-stickers;Password=bHLdtz6a48J2P4";
+        private const string connectionStringStickers = @"Data Source=vasano.database.windows.net;Initial Catalog=STICKERS;User ID=vs-sa;Password=Eu6pkR2J4";
         private readonly SqlConnection Connection;
 
         #region Local
@@ -1707,40 +1707,211 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
         #endregion
 
-        #region Stickers
+        #region Order
+
         /// <summary>
-        /// Get Sticker by Place Id.
+        /// Get Order by Order Id.
         /// </summary>
-        /// <param name="placeId"></param>
-        /// <param name="year"></param>
-        /// <returns>Sticker or null</returns>
-        public DbSticker? GetStickerByPlaceId(string placeId, int year)
+        /// <param name="orderId"></param>
+        /// <returns>Order or null</returns>
+        public DbOrder? GetOrderByID(string orderId)
         {
             try
             {
-                string selectCommand = "SELECT PLACE_ID, SCORE FROM STICKERS WHERE PLACE_ID = @PlaceId AND YEAR = @Year";
+                string selectCommand = "SELECT * FROM Order WHERE id = @OrderId";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@PlaceId", placeId);
-                cmd.Parameters.AddWithValue("@Year", year);
+                cmd.Parameters.AddWithValue("@OrderId", orderId);
                 using SqlDataReader reader = cmd.ExecuteReader();
 
                 if (reader.Read())
                 {
-                    DbSticker sticker = new
-                        (placeId,
-                        Convert.ToSingle(reader["SCORE"]),
-                        year);
-                    return sticker;
+                    DbOrder order = new
+                        (DateTime.Parse(reader["createdAt"].ToString()!),
+                        DateTime.Parse(reader["updatedAt"].ToString()!),
+                        reader["ownerId"].ToString()!,
+                        (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
+                        (Languages)Enum.Parse(typeof(Languages), reader["language"].ToString()!),
+                        int.Parse(reader["price"].ToString()!),
+                        reader["name"].ToString()!
+                        );
+                    return order;
                 }
 
                 return null;
             } catch (Exception e)
             {
-                throw new Exception($"Error getting sticker for place id = [{placeId}] and year = [{year}]", e);
+                throw new Exception($"Error getting order for id = [{orderId}]", e);
             }
         }
 
+        /// <summary>
+        /// Get Order by Status.
+        /// </summary>
+        /// <param name="status"></param>
+        /// <returns>Order list</returns>
+        public List<DbOrder> GetOrderByStatus(OrderStatus status)
+        {
+            try
+            {
+                string selectCommand = "SELECT * FROM Order WHERE status = @Status";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Status", status);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<DbOrder> orders = new([]);
+
+                while (reader.Read())
+                {
+                    DbOrder order = new
+                        (DateTime.Parse(reader["createdAt"].ToString()!),
+                        DateTime.Parse(reader["updatedAt"].ToString()!),
+                        reader["ownerId"].ToString()!,
+                        (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
+                        (Languages)Enum.Parse(typeof(Languages), reader["language"].ToString()!),
+                        int.Parse(reader["price"].ToString()!),
+                        reader["name"].ToString()!
+                        );
+                    orders.Add(order);
+                }
+                return orders;
+
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting order for status = [{status}]", e);
+            }
+        }
+
+        /// <summary>
+        /// Update Order Status.
+        /// </summary>
+        /// <param name="status"></param>
+        public void UpdateOrderStatus(string id, OrderStatus status)
+        {
+            try
+            {
+                string selectCommand = "UPDATE Order SET Status = @Status WHERE Id = @Id";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Status", status);
+                cmd.Parameters.AddWithValue("@Id", id);
+                using SqlDataReader reader = cmd.ExecuteReader();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error updating order status with id = [{id}]", e);
+            }
+        }
+
+        /// <summary>
+        /// Get Place list from order id
+        /// </summary>
+        /// <param name="orderId"></param>
+        /// <returns>Place list</returns>
+        public List<DbPlace> GetPlacesFromOrderId(string orderId)
+        {
+            try
+            {
+                string selectCommand = "SELECT * FROM Place pl join _OrderToPlace or on or.B = pl.id where or.B = @OrderId";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@OrderId", orderId);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<DbPlace> placeList = new([]);
+
+                while (reader.Read())
+                {
+                    DbPlace place = new(
+                        reader["id"].ToString()!,
+                        reader["name"].ToString()!,
+                        (reader["category"] != DBNull.Value) ? reader["category"].ToString() : null,
+                        (reader["address"] != DBNull.Value) ? reader["address"].ToString() : null,
+                        (reader["postCode"] != DBNull.Value) ? reader["postCode"].ToString() : null,
+                        (reader["city"] != DBNull.Value) ? reader["city"].ToString() : null,
+                        (reader["lat"] != DBNull.Value) ? Convert.ToDouble(reader["lat"]) : null,
+                        (reader["long"] != DBNull.Value) ? Convert.ToDouble(reader["long"]) : null,
+                        (reader["nationalPhoneNumber"] != DBNull.Value) ? reader["nationalPhoneNumber"].ToString() : null,
+                        (reader["internationalPhoneNumber"] != DBNull.Value) ? reader["internationalPhoneNumber"].ToString() : null,
+                        (reader["website"] != DBNull.Value) ? reader["website"].ToString() : null,
+                        (reader["plusCode"] != DBNull.Value) ? reader["plusCode"].ToString() : null,
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["status"].ToString()!),
+                        (reader["country"] != DBNull.Value) ? reader["country"].ToString() : null,
+                        reader["url"].ToString()!,
+                        (reader["score"] != DBNull.Value) ? Convert.ToDouble(reader["score"]) : null,
+                        (reader["nbReviews"] != DBNull.Value) ? int.Parse(reader["nbReviews"].ToString()!) : null,
+                        (reader["dateInsert"] != DBNull.Value) ? DateTime.Parse(reader["dateInsert"].ToString()!) : null,
+                        (reader["dateUpdate"] != DBNull.Value) ? DateTime.Parse(reader["dateUpdate"].ToString()!) : null
+                        );
+
+                    placeList.Add(place);
+                }
+
+                return placeList;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting place list for order id = [{orderId}]", e);
+            }
+
+        }
+
+        /// <summary>
+        /// Get Place by place id
+        /// </summary>
+        /// <param name="placeId"></param>
+        /// <returns>Place</returns>
+        public DbPlace? GetPlaceByPlaceId(string placeId)
+        {
+            try
+            {
+                string selectCommand = "SELECT * FROM Place WHERE Id = @placeId";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@placeId", placeId);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<DbPlace> placeList = new([]);
+
+                if (reader.Read())
+                {
+                    DbPlace place = new(
+                        reader["id"].ToString()!,
+                        reader["name"].ToString()!,
+                        (reader["category"] != DBNull.Value) ? reader["category"].ToString() : null,
+                        (reader["address"] != DBNull.Value) ? reader["address"].ToString() : null,
+                        (reader["postCode"] != DBNull.Value) ? reader["postCode"].ToString() : null,
+                        (reader["city"] != DBNull.Value) ? reader["city"].ToString() : null,
+                        (reader["lat"] != DBNull.Value) ? Convert.ToDouble(reader["lat"]) : null,
+                        (reader["long"] != DBNull.Value) ? Convert.ToDouble(reader["long"]) : null,
+                        (reader["nationalPhoneNumber"] != DBNull.Value) ? reader["nationalPhoneNumber"].ToString() : null,
+                        (reader["internationalPhoneNumber"] != DBNull.Value) ? reader["internationalPhoneNumber"].ToString() : null,
+                        (reader["website"] != DBNull.Value) ? reader["website"].ToString() : null,
+                        (reader["plusCode"] != DBNull.Value) ? reader["plusCode"].ToString() : null,
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["status"].ToString()!),
+                        (reader["country"] != DBNull.Value) ? reader["country"].ToString() : null,
+                        reader["url"].ToString()!,
+                        (reader["score"] != DBNull.Value) ? Convert.ToDouble(reader["score"]) : null,
+                        (reader["nbReviews"] != DBNull.Value) ? int.Parse(reader["nbReviews"].ToString()!) : null,
+                        (reader["dateInsert"] != DBNull.Value) ? DateTime.Parse(reader["dateInsert"].ToString()!) : null,
+                        (reader["dateUpdate"] != DBNull.Value) ? DateTime.Parse(reader["dateUpdate"].ToString()!) : null
+                        );
+
+                    return place;
+                }
+
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting place for id = [{placeId}]", e);
+            }
+
+        }
+
+        #endregion
+
+        #region Stickers
         /// <summary>
         /// Create Sticker.
         /// </summary>
@@ -1749,16 +1920,38 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO STICKERS (PLACE_ID, SCORE, YEAR) VALUES (@PlaceId, @Score, @Year)";
+                string insertCommand = "INSERT INTO STICKERS (Id, PlaceId, Score, CreatedDate, Image) VALUES (@Id, @PlaceId, @Score, @CreatedDate, @Image)";
 
                 using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@Id", sticker.Id);
                 cmd.Parameters.AddWithValue("@PlaceId", sticker.PlaceId);
                 cmd.Parameters.AddWithValue("@Score", sticker.Score);
-                cmd.Parameters.AddWithValue("@Year", sticker.Year);
+                cmd.Parameters.AddWithValue("@CreatedDate", sticker.CreatedDate);
+                cmd.Parameters.AddWithValue("@Image", sticker.Image);
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
-                throw new Exception($"Error creating sticker with place id = [{sticker.PlaceId}] and year = [{sticker.Year}]", e);
+                throw new Exception($"Error creating sticker with id = [{sticker.PlaceId}]", e);
+            }
+        }
+
+        /// <summary>
+        /// Create Certificate.
+        /// </summary>
+        /// <param name="certificate"></param>
+        public void CreateCertificate(DbCertificate certificate)
+        {
+            try
+            {
+                string insertCommand = "INSERT INTO CERTIFICATE (stickerId, image) VALUES (@StickerId, @Image)";
+
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@StickerId", certificate.StickerId);
+                cmd.Parameters.AddWithValue("@Image", certificate.Image);
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error creating certificate with id = [{certificate.StickerId}]", e);
             }
         }
 

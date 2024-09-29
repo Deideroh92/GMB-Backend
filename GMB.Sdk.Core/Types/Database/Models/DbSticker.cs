@@ -1,18 +1,19 @@
-﻿using System.Drawing;
-
-namespace GMB.Sdk.Core.Types.Database.Models
+﻿namespace GMB.Sdk.Core.Types.Database.Models
 {
     /// <summary>
     /// Constructor.
     /// </summary>
+    /// <param name="id"></param>
     /// <param name="placeId"></param>
     /// <param name="score"></param>
-    /// <param name="year"></param>
-    public class DbSticker(string placeId, float score, int year)
+    /// <param name="createdDate"></param>
+    /// <param name="image"></param>
+    public class DbSticker(string id, string placeId, string score, DateTime createdDate, byte[] image)
     {
+        public string Id { get; set; } = id;
         public string PlaceId { get; set; } = placeId;
-        public float Score { get; set; } = score;
-        public int Year { get; set; } = year;
-        //public Bitmap Sticker { get; set; } = sticker;
+        public string Score { get; set; } = score;
+        public byte[] Image { get; set; } = image;
+        public DateTime CreatedDate { get; set; } = createdDate;
     }
 }
