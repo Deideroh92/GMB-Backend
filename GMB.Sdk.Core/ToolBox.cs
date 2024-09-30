@@ -487,7 +487,7 @@ namespace GMB.Sdk.Core
         /// <param name="name"></param>
         /// <param name="customPhrase"></param>
         /// <returns>certificate</returns>
-        public static Bitmap CreateCertificate(int score1, int score2, int score3, int score4, int score5, int averageScore, string name, string customPhrase, DateTime orderDate)
+        public static Bitmap CreateCertificate(int score1, int score2, int score3, int score4, int score5, int averageScore, string name, DateTime orderDate)
         {
 
             DateTime startingDate = orderDate.AddMonths(-12);

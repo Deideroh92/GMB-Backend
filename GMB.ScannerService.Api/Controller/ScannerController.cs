@@ -183,6 +183,33 @@ namespace GMB.ScannerService.Api.Controller
                         if (reviews == null)
                             continue;
 
+                        // Add review to DB or update it
+                        foreach (DbBusinessReview review in reviews)
+                        {
+                            try
+                            {
+                                DbBusinessReview? dbBusinessReview = dbLib.GetBusinessReview(review.IdReview);
+
+                                if (dbBusinessReview == null)
+                                {
+                                    dbLib.CreateBusinessReview(review);
+                                    continue;
+                                }
+
+                                if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
+                                    dbLib.UpdateBusinessReviewReply(review);
+
+                                if (!review.Equals(dbBusinessReview))
+                                {
+                                    dbLib.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
+                                    continue;
+                                }
+                            } catch (Exception e)
+                            {
+                                Log.Error($"Couldn't treat a review : {e.Message}", e);
+                            }
+                        }
+
                         // Calculate the count of reviews for each score (1 to 5) using LINQ
                         int score1 = reviews.Count(r => r.Score == 1);
                         int score2 = reviews.Count(r => r.Score == 2);
@@ -198,9 +225,8 @@ namespace GMB.ScannerService.Api.Controller
                         int averageScore = numberOfReviews > 0 ? totalScore / numberOfReviews : 0;
 
                         string name = record.Name;
-                        string customPhrase = "This is a test";
 
-                        Bitmap drawnCertificate = ToolBox.CreateCertificate(score1, score2, score3, score4, score5, averageScore, name, customPhrase, request.OrderDate);
+                        Bitmap drawnCertificate = ToolBox.CreateCertificate(score1, score2, score3, score4, score5, averageScore, name, request.OrderDate);
                         Bitmap drawnSticker = ToolBox.CreateSticker(averageScore.ToString(), "test", request.OrderDate);
 
                         DbSticker sticker = new(Guid.NewGuid().ToString("N"), record.Id, averageScore.ToString(), request.OrderDate, ToolBox.BitmapToByteArray(drawnSticker));
