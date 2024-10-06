@@ -2,6 +2,7 @@ using GMB.BusinessService.Api.Controller;
 using GMB.ScannerService.Api.Controller;
 using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core;
+using GMB.Sdk.Core.StickerImageGenerator;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
@@ -286,6 +287,19 @@ namespace GMB.Tests
             stickerImage.Save("sticker_output.png", ImageFormat.Png);
 
             Console.WriteLine("Sticker image generated and saved as sticker_output.png");
+        }
+
+        [TestMethod]
+        public async Task GenerateStickersTest()
+        {
+            StickerImageGenerator generator = new();
+            List<long> elapsedTimes = [];
+            foreach (StickerLanguage language in Enum.GetValues(typeof(StickerLanguage)))
+            {
+                byte[] stickerBytes = await generator.Generate(language, 4.5, "https://vasano.io/certificate/sticker_id", DateTime.Now);
+
+                File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Stickers\\sticker_{language}.png", stickerBytes);
+            }
         }
         #endregion
     }
