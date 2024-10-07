@@ -9,7 +9,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
     public class DbLib : IDisposable
     {
         private const string connectionString = @"Data Source=vasano.database.windows.net;Initial Catalog=GMS;User ID=vs-sa;Password=Eu6pkR2J4";
-        private const string connectionStringStickers = @"Data Source=vasano.database.windows.net;Initial Catalog=STICKERS;User ID=vs-sa;Password=Eu6pkR2J4";
+        private const string connectionStringStickers = @"Data Source=vasano.database.windows.net;Initial Catalog=STICKERS_DEV;User ID=vs-sa;Password=Eu6pkR2J4";
         private readonly SqlConnection Connection;
 
         #region Local
@@ -1714,11 +1714,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="orderId"></param>
         /// <returns>Order or null</returns>
-        public DbOrder? GetOrderByID(string orderId)
+        public DbOrder? GetOrderByID(int orderId)
         {
             try
             {
-                string selectCommand = "SELECT * FROM Order WHERE id = @OrderId";
+                string selectCommand = "SELECT * FROM [Order] WHERE id = @OrderId";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@OrderId", orderId);
@@ -1732,7 +1732,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader["ownerId"].ToString()!,
                         (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
                         (Languages)Enum.Parse(typeof(Languages), reader["language"].ToString()!),
-                        int.Parse(reader["price"].ToString()!),
+                        (int)decimal.Parse(reader["price"].ToString()!),
                         reader["name"].ToString()!
                         );
                     return order;
@@ -1754,7 +1754,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT * FROM Order WHERE status = @Status";
+                string selectCommand = "SELECT * FROM [Order] WHERE status = @Status";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Status", status);
@@ -1770,7 +1770,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader["ownerId"].ToString()!,
                         (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
                         (Languages)Enum.Parse(typeof(Languages), reader["language"].ToString()!),
-                        int.Parse(reader["price"].ToString()!),
+                        (int)decimal.Parse(reader["price"].ToString()!),
                         reader["name"].ToString()!
                         );
                     orders.Add(order);
@@ -1787,11 +1787,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// Update Order Status.
         /// </summary>
         /// <param name="status"></param>
-        public void UpdateOrderStatus(string id, OrderStatus status)
+        public void UpdateOrderStatus(int id, OrderStatus status)
         {
             try
             {
-                string selectCommand = "UPDATE Order SET Status = @Status WHERE Id = @Id";
+                string selectCommand = "UPDATE [Order] SET Status = @Status WHERE Id = @Id";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Status", status);
@@ -1808,11 +1808,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// </summary>
         /// <param name="orderId"></param>
         /// <returns>Place list</returns>
-        public List<DbPlace> GetPlacesFromOrderId(string orderId)
+        public List<DbPlace> GetPlacesFromOrderId(int orderId)
         {
             try
             {
-                string selectCommand = "SELECT * FROM Place pl join _OrderToPlace or on or.B = pl.id where or.B = @OrderId";
+                string selectCommand = "SELECT * FROM Place pl join _OrderToPlace ordToPlace on ordToPlace.B = pl.id where ordToPlace.A = @OrderId";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@OrderId", orderId);
@@ -1836,13 +1836,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["internationalPhoneNumber"] != DBNull.Value) ? reader["internationalPhoneNumber"].ToString() : null,
                         (reader["website"] != DBNull.Value) ? reader["website"].ToString() : null,
                         (reader["plusCode"] != DBNull.Value) ? reader["plusCode"].ToString() : null,
-                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["status"].ToString()!),
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["businessStatus"].ToString()!),
                         (reader["country"] != DBNull.Value) ? reader["country"].ToString() : null,
                         reader["url"].ToString()!,
                         (reader["score"] != DBNull.Value) ? Convert.ToDouble(reader["score"]) : null,
-                        (reader["nbReviews"] != DBNull.Value) ? int.Parse(reader["nbReviews"].ToString()!) : null,
-                        (reader["dateInsert"] != DBNull.Value) ? DateTime.Parse(reader["dateInsert"].ToString()!) : null,
-                        (reader["dateUpdate"] != DBNull.Value) ? DateTime.Parse(reader["dateUpdate"].ToString()!) : null
+                        (reader["nbReviews"] != DBNull.Value) ? int.Parse(reader["nbReviews"].ToString()!) : null
                         );
 
                     placeList.Add(place);
@@ -1889,7 +1887,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["internationalPhoneNumber"] != DBNull.Value) ? reader["internationalPhoneNumber"].ToString() : null,
                         (reader["website"] != DBNull.Value) ? reader["website"].ToString() : null,
                         (reader["plusCode"] != DBNull.Value) ? reader["plusCode"].ToString() : null,
-                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["status"].ToString()!),
+                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["businessStatus"].ToString()!),
                         (reader["country"] != DBNull.Value) ? reader["country"].ToString() : null,
                         reader["url"].ToString()!,
                         (reader["score"] != DBNull.Value) ? Convert.ToDouble(reader["score"]) : null,
@@ -1916,42 +1914,32 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// Create Sticker.
         /// </summary>
         /// <param name="sticker"></param>
-        public void CreateSticker(DbSticker sticker)
+        public int CreateSticker(DbSticker sticker)
         {
             try
             {
-                string insertCommand = "INSERT INTO STICKERS (Id, PlaceId, Score, CreatedDate, Image) VALUES (@Id, @PlaceId, @Score, @CreatedDate, @Image)";
+                string insertCommand = @"
+                INSERT INTO Stickers (placeId, score, createdDate, image, orderId, certificate, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5) 
+                VALUES (@PlaceId, @Score, @CreatedDate, @Image, @OrderId, @Certificate, @NbRating1, @NbRating2, @NbRating3, @NbRating4, @NbRating5);
+                SELECT SCOPE_IDENTITY();";
 
                 using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@Id", sticker.Id);
-                cmd.Parameters.AddWithValue("@PlaceId", sticker.PlaceId);
-                cmd.Parameters.AddWithValue("@Score", sticker.Score);
-                cmd.Parameters.AddWithValue("@CreatedDate", sticker.CreatedDate);
-                cmd.Parameters.AddWithValue("@Image", sticker.Image);
+                cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(sticker.PlaceId));
+                cmd.Parameters.AddWithValue("@Score", GetValueOrDefault(sticker.Score));
+                cmd.Parameters.AddWithValue("@CreatedDate", GetValueOrDefault(sticker.CreatedDate));
+                cmd.Parameters.AddWithValue("@Image", GetValueOrDefault(sticker.Image));
+                cmd.Parameters.AddWithValue("@OrderId", GetValueOrDefault(sticker.OrderId));
+                cmd.Parameters.AddWithValue("@Certificate", GetValueOrDefault(sticker.Certificate));
+                cmd.Parameters.AddWithValue("@NbRating1", GetValueOrDefault(sticker.NbRating1));
+                cmd.Parameters.AddWithValue("@NbRating2", GetValueOrDefault(sticker.NbRating2));
+                cmd.Parameters.AddWithValue("@NbRating3", GetValueOrDefault(sticker.NbRating3));
+                cmd.Parameters.AddWithValue("@NbRating4", GetValueOrDefault(sticker.NbRating4));
+                cmd.Parameters.AddWithValue("@NbRating5", GetValueOrDefault(sticker.NbRating5));
                 cmd.ExecuteNonQuery();
+                return Convert.ToInt32(cmd.ExecuteScalar());
             } catch (Exception e)
             {
                 throw new Exception($"Error creating sticker with id = [{sticker.PlaceId}]", e);
-            }
-        }
-
-        /// <summary>
-        /// Create Certificate.
-        /// </summary>
-        /// <param name="certificate"></param>
-        public void CreateCertificate(DbCertificate certificate)
-        {
-            try
-            {
-                string insertCommand = "INSERT INTO CERTIFICATE (stickerId, image) VALUES (@StickerId, @Image)";
-
-                using SqlCommand cmd = new(insertCommand, Connection);
-                cmd.Parameters.AddWithValue("@StickerId", certificate.StickerId);
-                cmd.Parameters.AddWithValue("@Image", certificate.Image);
-                cmd.ExecuteNonQuery();
-            } catch (Exception e)
-            {
-                throw new Exception($"Error creating certificate with id = [{certificate.StickerId}]", e);
             }
         }
 

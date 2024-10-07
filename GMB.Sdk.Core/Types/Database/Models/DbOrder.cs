@@ -6,7 +6,8 @@
         Analyzed,
         Quoted,
         Ordered,
-        Delivered
+        Delivered,
+        Error
     }
 
     public enum Languages

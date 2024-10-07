@@ -485,13 +485,39 @@ namespace GMB.Sdk.Core
         /// <param name="score5"></param>
         /// <param name="averageScore"></param>
         /// <param name="name"></param>
-        /// <param name="customPhrase"></param>
         /// <returns>certificate</returns>
-        public static Bitmap CreateCertificate(int score1, int score2, int score3, int score4, int score5, int averageScore, string name, DateTime orderDate)
+        public static Bitmap CreateCertificate(int score1, int score2, int score3, int score4, int score5, decimal averageScore, string name, DateTime orderDate)
         {
 
-            DateTime startingDate = orderDate.AddMonths(-12);
-            return new Bitmap("test");
+            // Define image size
+            int width = 400;
+            int height = 200;
+
+            // Create a new Bitmap
+            Bitmap bitmap = new(width, height);
+
+            // Create a Graphics object to draw on the bitmap
+            using (Graphics g = Graphics.FromImage(bitmap))
+            {
+                // Set the background color to white
+                g.Clear(Color.White);
+
+                // Set the font and brush for drawing text
+                Font font = new Font("Arial", 24, FontStyle.Bold);
+                Brush brush = new SolidBrush(Color.Black);
+
+                // Draw the average score in the middle of the image
+                string text = $"Average Score: {averageScore.ToString()}";
+                SizeF textSize = g.MeasureString(text, font);
+
+                // Center the text
+                float textX = (width - textSize.Width) / 2;
+                float textY = (height - textSize.Height) / 2;
+
+                g.DrawString(text, font, brush, new PointF(textX, textY));
+            }
+
+            return bitmap;
         }
 
         /// <summary>

@@ -5,9 +5,9 @@
     /// </summary>
     /// <param name="stickerId"></param>
     /// <param name="image"></param>
-    public class DbCertificate(string stickerId, byte[] image)
+    public class DbCertificate(int stickerId, byte[] image)
     {
-        public string StickerId { get; set; } = stickerId;
+        public int StickerId { get; set; } = stickerId;
         public byte[] Image { get; set; } = image;
     }
 }

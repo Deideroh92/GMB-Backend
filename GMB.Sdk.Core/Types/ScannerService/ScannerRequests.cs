@@ -109,9 +109,9 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="places"></param>
     /// <param name="orderDate"></param>
     /// <param name="lang"></param>
-    public class StickerScannerRequest(string orderId, List<DbPlace> places, DateTime orderDate, Languages lang)
+    public class StickerScannerRequest(int orderId, List<DbPlace> places, DateTime orderDate, Languages lang)
     {
-        public string OrderId { get; set; } = orderId;
+        public int OrderId { get; set; } = orderId;
         public Languages Lang { get; set; } = lang;
         public DateTime OrderDate { get; set; } = orderDate;
         public List<DbPlace> Places { get; set; } = places;

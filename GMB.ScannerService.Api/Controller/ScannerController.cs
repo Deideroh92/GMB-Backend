@@ -159,15 +159,16 @@ namespace GMB.ScannerService.Api.Controller
         /// </summary>
         [HttpPost("scanner/sticker")]
         [Authorize(Policy = "DevelopmentPolicy")]
-        public ActionResult<GetStickerListResponse> StartStickerScanner([FromBody] StickerScannerRequest request)
+        public void StartStickerScanner([FromBody] StickerScannerRequest request)
         {
             try
             {
-                GetStickerListResponse response = new([]);
 
                 DbLib dbLib = new();
 
                 SeleniumDriver driver = new();
+
+                bool isError = false;
 
                 foreach (DbPlace record in request.Places)
                 {
@@ -183,71 +184,42 @@ namespace GMB.ScannerService.Api.Controller
                         if (reviews == null)
                             continue;
 
-                        // Add review to DB or update it
-                        foreach (DbBusinessReview review in reviews)
-                        {
-                            try
-                            {
-                                DbBusinessReview? dbBusinessReview = dbLib.GetBusinessReview(review.IdReview);
-
-                                if (dbBusinessReview == null)
-                                {
-                                    dbLib.CreateBusinessReview(review);
-                                    continue;
-                                }
-
-                                if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
-                                    dbLib.UpdateBusinessReviewReply(review);
-
-                                if (!review.Equals(dbBusinessReview))
-                                {
-                                    dbLib.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
-                                    continue;
-                                }
-                            } catch (Exception e)
-                            {
-                                Log.Error($"Couldn't treat a review : {e.Message}", e);
-                            }
-                        }
-
                         // Calculate the count of reviews for each score (1 to 5) using LINQ
-                        int score1 = reviews.Count(r => r.Score == 1);
-                        int score2 = reviews.Count(r => r.Score == 2);
-                        int score3 = reviews.Count(r => r.Score == 3);
-                        int score4 = reviews.Count(r => r.Score == 4);
-                        int score5 = reviews.Count(r => r.Score == 5);
+                        int nbRating1 = reviews.Count(r => r.Score == 1);
+                        int nbRating2 = reviews.Count(r => r.Score == 2);
+                        int nbRating3 = reviews.Count(r => r.Score == 3);
+                        int nbRating4 = reviews.Count(r => r.Score == 4);
+                        int nbRating5 = reviews.Count(r => r.Score == 5);
 
                         // Calculate the average score (sum of all scores divided by the number of reviews)
-                        int totalScore = reviews.Sum(r => r.Score);
-                        int numberOfReviews = reviews.Count;
+                        float totalScore = reviews.Sum(r => r.Score);
+                        float numberOfReviews = reviews.Count;
 
                         // Avoid division by zero in case there are no reviews
-                        int averageScore = numberOfReviews > 0 ? totalScore / numberOfReviews : 0;
+                        decimal averageScore = numberOfReviews > 0 ? (decimal)Math.Round(totalScore / numberOfReviews, 1) : 0;
 
                         string name = record.Name;
 
-                        Bitmap drawnCertificate = ToolBox.CreateCertificate(score1, score2, score3, score4, score5, averageScore, name, request.OrderDate);
+                        Bitmap drawnCertificate = ToolBox.CreateCertificate(nbRating1, nbRating2, nbRating3, nbRating4, nbRating5, averageScore, name, request.OrderDate);
                         Bitmap drawnSticker = ToolBox.CreateSticker(averageScore.ToString(), "test", request.OrderDate);
 
-                        DbSticker sticker = new(Guid.NewGuid().ToString("N"), record.Id, averageScore.ToString(), request.OrderDate, ToolBox.BitmapToByteArray(drawnSticker));
-                        DbCertificate certificate = new(sticker.Id, ToolBox.BitmapToByteArray(drawnCertificate));
-
+                        DbSticker sticker = new(record.Id, averageScore, request.OrderDate, ToolBox.BitmapToByteArray(drawnSticker), ToolBox.BitmapToByteArray(drawnSticker), request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
                         dbLib.CreateSticker(sticker);
-                        dbLib.CreateCertificate(certificate);
-                        dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Analyzed);
                     } catch (Exception e)
                     {
                         Log.Error(e, $"An exception occurred while getting sticker for place id =[{record.Id}].");
                         driver.Dispose();
                         driver = new();
+                        dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Error);
+                        isError = true;
                         continue;
                     }
                 }
-                return response;
+                if (!isError)
+                    dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Analyzed);
             } catch (Exception e)
             {
-                Log.Error(e, $"An exception occurred while starting scanner sticker.");
-                return GetStickerListResponse.Exception($"An exception occurred while starting scanner sticker : {e.Message}");
+                Log.Error(e, $"An exception occurred while starting scanner sticker : {e.Message}");
             }
         }
     }

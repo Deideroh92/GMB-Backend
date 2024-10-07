@@ -231,18 +231,24 @@ namespace GMB.Tests
         }*/
 
         [TestMethod]
-        public async void LaunchOrder()
+        public async Task LaunchOrder()
         {
-            string id = "154313564";
+            int id = 2;
             
             DbLib db = new(true);
 
-            DbOrder order = db.GetOrderByID(id);
+            DbOrder? order = db.GetOrderByID(id);
+
+            if (order == null)
+                return;
 
             //OrderStatus status = OrderStatus.Analyzing;
             //List<DbOrder> orderList = db.GetOrderByStatus(status);
 
             List<DbPlace> places = db.GetPlacesFromOrderId(id);
+
+            if (places.Count == 0)
+                return;
 
             int nbThreads = 5;
 
@@ -259,7 +265,7 @@ namespace GMB.Tests
 
                     StickerScannerRequest request = new(id, places, order.CreatedAt, order.Language);
 
-                    ActionResult<GetStickerListResponse> response = scannerController.StartStickerScanner(request);
+                    scannerController.StartStickerScanner(request);
                 });
                 tasks.Add(newThread);
                 Thread.Sleep(15000);
