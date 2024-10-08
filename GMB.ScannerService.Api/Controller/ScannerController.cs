@@ -164,7 +164,7 @@ namespace GMB.ScannerService.Api.Controller
             try
             {
 
-                DbLib dbLib = new();
+                DbLib dbLib = new(true);
 
                 SeleniumDriver driver = new();
 

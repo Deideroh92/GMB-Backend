@@ -237,6 +237,8 @@ namespace GMB.Tests
             
             DbLib db = new(true);
 
+            db.selectsticker();
+
             DbOrder? order = db.GetOrderByID(id);
 
             if (order == null)

@@ -2,6 +2,7 @@
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.PlaceService;
+using System.Data;
 using System.Data.SqlClient;
 
 namespace GMB.Sdk.Core.Types.Database.Manager
@@ -1914,7 +1915,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// Create Sticker.
         /// </summary>
         /// <param name="sticker"></param>
-        public int CreateSticker(DbSticker sticker)
+        public void CreateSticker(DbSticker sticker)
         {
             try
             {
@@ -1927,19 +1928,49 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(sticker.PlaceId));
                 cmd.Parameters.AddWithValue("@Score", GetValueOrDefault(sticker.Score));
                 cmd.Parameters.AddWithValue("@CreatedDate", GetValueOrDefault(sticker.CreatedDate));
-                cmd.Parameters.AddWithValue("@Image", GetValueOrDefault(sticker.Image));
                 cmd.Parameters.AddWithValue("@OrderId", GetValueOrDefault(sticker.OrderId));
-                cmd.Parameters.AddWithValue("@Certificate", GetValueOrDefault(sticker.Certificate));
                 cmd.Parameters.AddWithValue("@NbRating1", GetValueOrDefault(sticker.NbRating1));
                 cmd.Parameters.AddWithValue("@NbRating2", GetValueOrDefault(sticker.NbRating2));
                 cmd.Parameters.AddWithValue("@NbRating3", GetValueOrDefault(sticker.NbRating3));
                 cmd.Parameters.AddWithValue("@NbRating4", GetValueOrDefault(sticker.NbRating4));
                 cmd.Parameters.AddWithValue("@NbRating5", GetValueOrDefault(sticker.NbRating5));
+
+                cmd.Parameters.Add("@Image", SqlDbType.VarBinary).Value = (object?)sticker.Image ?? DBNull.Value;
+                cmd.Parameters.Add("@Certificate", SqlDbType.VarBinary).Value = (object?)sticker.Certificate ?? DBNull.Value;
+
                 cmd.ExecuteNonQuery();
-                return Convert.ToInt32(cmd.ExecuteScalar());
             } catch (Exception e)
             {
                 throw new Exception($"Error creating sticker with id = [{sticker.PlaceId}]", e);
+            }
+        }
+        public void selectsticker()
+        {
+            try
+            {
+                string selectCommand = "SELECT * FROM Stickers";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                if (reader.Read())
+                {
+                    DbOrder order = new
+                        (DateTime.Parse(reader["createdAt"].ToString()!),
+                        DateTime.Parse(reader["updatedAt"].ToString()!),
+                        reader["ownerId"].ToString()!,
+                        (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
+                        (Languages)Enum.Parse(typeof(Languages), reader["language"].ToString()!),
+                        (int)decimal.Parse(reader["price"].ToString()!),
+                        reader["name"].ToString()!
+                        );
+                    return;
+                }
+
+                return;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting order for", e);
             }
         }
 
