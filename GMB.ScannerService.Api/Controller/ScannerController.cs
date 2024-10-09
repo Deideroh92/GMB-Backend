@@ -192,11 +192,11 @@ namespace GMB.ScannerService.Api.Controller
                         int nbRating5 = reviews.Count(r => r.Score == 5);
 
                         // Calculate the average score (sum of all scores divided by the number of reviews)
-                        float totalScore = reviews.Sum(r => r.Score);
-                        float numberOfReviews = reviews.Count;
+                        int totalScore = reviews.Sum(r => r.Score);
+                        int numberOfReviews = reviews.Count;
 
                         // Avoid division by zero in case there are no reviews
-                        decimal averageScore = numberOfReviews > 0 ? (decimal)Math.Round(totalScore / numberOfReviews, 1) : 0;
+                        decimal averageScore = numberOfReviews > 0 ? (decimal)Math.Round((double)(totalScore / numberOfReviews), 1) : 0;
 
                         string name = record.Name;
 

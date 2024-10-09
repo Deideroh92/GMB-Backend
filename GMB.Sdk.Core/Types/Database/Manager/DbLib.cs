@@ -1795,7 +1795,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 string selectCommand = "UPDATE [Order] SET Status = @Status WHERE Id = @Id";
 
                 using SqlCommand cmd = new(selectCommand, Connection);
-                cmd.Parameters.AddWithValue("@Status", status);
+                cmd.Parameters.AddWithValue("@Status", status.ToString());
                 cmd.Parameters.AddWithValue("@Id", id);
                 using SqlDataReader reader = cmd.ExecuteReader();
             } catch (Exception e)
