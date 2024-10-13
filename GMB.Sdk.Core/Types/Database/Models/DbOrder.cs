@@ -1,4 +1,6 @@
-﻿namespace GMB.Sdk.Core.Types.Database.Models
+﻿using GMB.Sdk.Core.StickerImageGenerator;
+
+namespace GMB.Sdk.Core.Types.Database.Models
 {
     public enum OrderStatus
     {
@@ -8,15 +10,6 @@
         Ordered,
         Delivered,
         Error
-    }
-
-    public enum Languages
-    {
-        EN,
-        FR,
-        ES,
-        IT,
-        DE
     }
 
     /// <summary>
@@ -29,13 +22,13 @@
     /// <param name="language"></param>
     /// <param name="price"></param>
     /// <param name="name"></param>
-    public class DbOrder(DateTime createdAt, DateTime updatedAt, string ownerId, OrderStatus status, Languages language, int price, string name)
+    public class DbOrder(DateTime createdAt, DateTime updatedAt, string ownerId, OrderStatus status, StickerLanguage language, int price, string name)
     {
         public DateTime CreatedAt { get; set; } = createdAt;
         public DateTime UpdatedAt { get; set; } = updatedAt;
         public string OwnerId { get; set; } = ownerId;
         public OrderStatus Status { get; set; } = status;
-        public Languages Language { get; set; } = language;
+        public StickerLanguage Language { get; set; } = language;
         public int Price { get; set; } = price;
         public string Name { get; set; } = name;
     }

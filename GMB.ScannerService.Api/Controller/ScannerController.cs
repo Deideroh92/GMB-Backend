@@ -12,6 +12,7 @@ using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Models;
 using Sdk.Core.Types.Api;
 using System.Drawing;
+using GMB.Sdk.Core.StickerImageGenerator;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -159,7 +160,7 @@ namespace GMB.ScannerService.Api.Controller
         /// </summary>
         [HttpPost("scanner/sticker")]
         [Authorize(Policy = "DevelopmentPolicy")]
-        public void StartStickerScanner([FromBody] StickerScannerRequest request)
+        public async void StartStickerScanner([FromBody] StickerScannerRequest request)
         {
             try
             {
@@ -196,15 +197,22 @@ namespace GMB.ScannerService.Api.Controller
                         int numberOfReviews = reviews.Count;
 
                         // Avoid division by zero in case there are no reviews
-                        decimal averageScore = numberOfReviews > 0 ? (decimal)Math.Round((double)(totalScore / numberOfReviews), 1) : 0;
+                        double averageScore = numberOfReviews > 0 ? (double)Math.Round((double)(totalScore / numberOfReviews), 1) : 0;
 
                         string name = record.Name;
 
-                        Bitmap drawnCertificate = ToolBox.CreateCertificate(nbRating1, nbRating2, nbRating3, nbRating4, nbRating5, averageScore, name, request.OrderDate);
-                        Bitmap drawnSticker = ToolBox.CreateSticker(averageScore.ToString(), "test", request.OrderDate);
+                        DbSticker sticker = new(record.Id, averageScore, request.OrderDate, null, null, request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
+                        int stickerId = dbLib.CreateSticker(sticker);
 
-                        DbSticker sticker = new(record.Id, averageScore, request.OrderDate, ToolBox.BitmapToByteArray(drawnSticker), ToolBox.BitmapToByteArray(drawnSticker), request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
-                        dbLib.CreateSticker(sticker);
+                        Bitmap drawnCertificate = ToolBox.CreateCertificate(nbRating1, nbRating2, nbRating3, nbRating4, nbRating5, averageScore, name, request.OrderDate);
+
+                        StickerImageGenerator stickerGenerator = new();
+                        byte[] stickerImage = await stickerGenerator.Generate(request.Lang, averageScore, $"vasano.io/certificate/{stickerId}", request.OrderDate);
+
+                        sticker.Id = stickerId;
+                        sticker.Certificate = ToolBox.BitmapToByteArray(drawnCertificate);
+                        sticker.Image = stickerImage;
+                        dbLib.UpdateSticker(sticker);
                     } catch (Exception e)
                     {
                         Log.Error(e, $"An exception occurred while getting sticker for place id =[{record.Id}].");

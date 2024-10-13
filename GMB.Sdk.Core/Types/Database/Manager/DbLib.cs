@@ -1,4 +1,5 @@
-﻿using GMB.Sdk.Core.Types.BusinessService;
+﻿using GMB.Sdk.Core.StickerImageGenerator;
+using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.PlaceService;
@@ -1732,7 +1733,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         DateTime.Parse(reader["updatedAt"].ToString()!),
                         reader["ownerId"].ToString()!,
                         (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
-                        (Languages)Enum.Parse(typeof(Languages), reader["language"].ToString()!),
+                        (StickerLanguage)Enum.Parse(typeof(StickerLanguage), reader["language"].ToString()!),
                         (int)decimal.Parse(reader["price"].ToString()!),
                         reader["name"].ToString()!
                         );
@@ -1770,7 +1771,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         DateTime.Parse(reader["updatedAt"].ToString()!),
                         reader["ownerId"].ToString()!,
                         (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
-                        (Languages)Enum.Parse(typeof(Languages), reader["language"].ToString()!),
+                        (StickerLanguage)Enum.Parse(typeof(StickerLanguage), reader["language"].ToString()!),
                         (int)decimal.Parse(reader["price"].ToString()!),
                         reader["name"].ToString()!
                         );
@@ -1915,7 +1916,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// Create Sticker.
         /// </summary>
         /// <param name="sticker"></param>
-        public void CreateSticker(DbSticker sticker)
+        public int CreateSticker(DbSticker sticker)
         {
             try
             {
@@ -1939,38 +1940,33 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.Add("@Certificate", SqlDbType.VarBinary).Value = (object?)sticker.Certificate ?? DBNull.Value;
 
                 cmd.ExecuteNonQuery();
+
+                return Convert.ToInt32(cmd.ExecuteScalar());
             } catch (Exception e)
             {
                 throw new Exception($"Error creating sticker with id = [{sticker.PlaceId}]", e);
             }
         }
-        public void selectsticker()
+
+        /// <summary>
+        /// Create Sticker.
+        /// </summary>
+        /// <param name="sticker"></param>
+        public void UpdateSticker(DbSticker sticker)
         {
             try
             {
-                string selectCommand = "SELECT * FROM Stickers";
+                string insertCommand = "UPDATE Stickers SET IMAGE = @Image, CERTIFICATE = @Certificate WHERE ID = @Id";
 
-                using SqlCommand cmd = new(selectCommand, Connection);
-                using SqlDataReader reader = cmd.ExecuteReader();
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@Id", GetValueOrDefault(sticker.Id));
+                cmd.Parameters.Add("@Image", SqlDbType.VarBinary).Value = (object?)sticker.Image ?? DBNull.Value;
+                cmd.Parameters.Add("@Certificate", SqlDbType.VarBinary).Value = (object?)sticker.Certificate ?? DBNull.Value;
 
-                if (reader.Read())
-                {
-                    DbOrder order = new
-                        (DateTime.Parse(reader["createdAt"].ToString()!),
-                        DateTime.Parse(reader["updatedAt"].ToString()!),
-                        reader["ownerId"].ToString()!,
-                        (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
-                        (Languages)Enum.Parse(typeof(Languages), reader["language"].ToString()!),
-                        (int)decimal.Parse(reader["price"].ToString()!),
-                        reader["name"].ToString()!
-                        );
-                    return;
-                }
-
-                return;
+                cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
-                throw new Exception($"Error getting order for", e);
+                throw new Exception($"Error creating sticker with id = [{sticker.PlaceId}]", e);
             }
         }
 

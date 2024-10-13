@@ -1,4 +1,5 @@
-﻿using GMB.Sdk.Core.Types.BusinessService;
+﻿using GMB.Sdk.Core.StickerImageGenerator;
+using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Database.Models;
 
 namespace GMB.Sdk.Core.Types.ScannerService
@@ -109,10 +110,10 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="places"></param>
     /// <param name="orderDate"></param>
     /// <param name="lang"></param>
-    public class StickerScannerRequest(int orderId, List<DbPlace> places, DateTime orderDate, Languages lang)
+    public class StickerScannerRequest(int orderId, List<DbPlace> places, DateTime orderDate, StickerLanguage lang)
     {
         public int OrderId { get; set; } = orderId;
-        public Languages Lang { get; set; } = lang;
+        public StickerLanguage Lang { get; set; } = lang;
         public DateTime OrderDate { get; set; } = orderDate;
         public List<DbPlace> Places { get; set; } = places;
     }
