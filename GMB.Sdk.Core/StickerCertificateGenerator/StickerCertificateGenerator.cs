@@ -54,6 +54,7 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
         #endregion Consts
 
         static readonly CultureInfo frenchCulture = new ("fr-FR");
+        // TODO: add lazy on images and fonts => first check if there is need to do it when running generator in RabbitMQ Queue
         static readonly byte[] placePdfTemplateBytes;
         static readonly byte[] networkPdfTemplateBytes;
         static readonly PdfFont montserratBoldFont;
@@ -61,7 +62,6 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
         static readonly PdfFont montserratMediumFont;
         static readonly PdfFont montserratRegularFont;
         static readonly PdfFont montserratSemiBoldFont;
-        static readonly Color textColor;
 
         static StickerCertificateGenerator()
         {
@@ -132,7 +132,7 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 PdfAcroForm form = PdfAcroForm.GetAcroForm(networkCertificateDoc, true);
 
                 // Network name
-                form.GetField(networkNameFieldId).SetValue(networkName).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale(); // 18
+                form.GetField(networkNameFieldId).SetValue(networkName).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale(); // 18 in pdf
 
                 // Number of etabs
                 form.GetField(nbEtabsFieldId).SetValue(nbEtabs.ToString()).SetFontAndSize(montserratSemiBoldFont, 16);
