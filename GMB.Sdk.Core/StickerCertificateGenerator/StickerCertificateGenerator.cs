@@ -87,8 +87,7 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 double mean = Math.Round(GetMean(nbRating1, nbRating2, nbRating3, nbRating4, nbRating5), 3);
                 double score = Math.Round(mean, 1);
 
-                // place name
-                // TODO: Check if .SetFontSizeAutoScale() is not breaking things for little text. If yes, maybe measure if too wide, then apply .SetFontSizeAutoScale(). If no, set size to 44
+                // place name (Font Size = 44 in pdf)
                 form.GetField(placeNameFieldId).SetValue(placeName).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale();
 
                 // Place score
@@ -133,16 +132,16 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 PdfAcroForm form = PdfAcroForm.GetAcroForm(networkCertificateDoc, true);
 
                 // Network name
-                form.GetField(networkNameFieldId).SetValue(networkName).SetFont(montserratRegularFont).SetFontSizeAutoScale(); // 18
+                form.GetField(networkNameFieldId).SetValue(networkName).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale(); // 18
 
                 // Number of etabs
-                form.GetField(nbEtabsFieldId).SetValue(nbEtabs.ToString()).SetFontAndSize(montserratMediumFont, 12);
+                form.GetField(nbEtabsFieldId).SetValue(nbEtabs.ToString()).SetFontAndSize(montserratSemiBoldFont, 16);
 
                 // Number of reviews
-                form.GetField(nbReviewsFieldId).SetValue(nbReviews.ToString()).SetFontAndSize(montserratMediumFont, 18);
+                form.GetField(nbReviewsFieldId).SetValue(nbReviews.ToString()).SetFontAndSize(montserratSemiBoldFont, 16);
 
                 // Geographic zone
-                form.GetField(geoZoneFieldId).SetValue(geoZone).SetFont(montserratMediumFont).SetFontSizeAutoScale();//.SetFontAndSize(montserratMediumFont, 18);
+                form.GetField(geoZoneFieldId).SetValue(geoZone).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale();//.SetFontAndSize(montserratMediumFont, 18);
 
                 // Score
                 form.GetField(scoreFieldId).SetValue(Math.Round(score, 1).ToString("0.0", frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 55);
@@ -152,7 +151,7 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 form.GetField(scoreYearFieldId).SetValue(scoreYear.ToString()).SetFontAndSize(montserratBoldFont, 13);
 
                 // Actual date
-                form.GetField(certificateDateFieldId).SetValue(DateOnly.FromDateTime(DateTime.Now).ToString(frenchCulture)).SetFontAndSize(montserratMediumFont, 12);
+                form.GetField(certificateDateFieldId).SetValue(DateOnly.FromDateTime(DateTime.Now).ToString(frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 16);
 
                 // Actual year
                 string actualYear = DateTime.Now.Year.ToString();
@@ -170,6 +169,9 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 PdfPage page = widget.GetPage();
                 PdfCanvas pdfCanvas = new (page);
                 pdfCanvas.AddImageFittedIntoRectangle(imageData, fieldRectangle, false);
+                // Remove field as it's over the image (only when border color set to transparent, dunno why)
+                form.RemoveField(networkImageFieldId);
+
 
                 // Flatten the form to burn fields in doc
                 form.FlattenFields();
