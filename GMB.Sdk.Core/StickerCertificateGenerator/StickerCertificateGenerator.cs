@@ -172,7 +172,6 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 // Remove field as it's over the image (only when border color set to transparent, dunno why)
                 form.RemoveField(networkImageFieldId);
 
-
                 // Flatten the form to burn fields in doc
                 form.FlattenFields();
 
