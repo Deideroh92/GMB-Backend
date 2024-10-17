@@ -32,7 +32,7 @@ namespace GMB.Sdk.Core.StickerImageGenerator
 
     public class StickerImageGenerator
     {
-        const string baseImageFilePath = "StickerImageGenerator/logo.jpg";
+        const string baseImageFilePath = "StickerImageGenerator/baseImage.jpg";
         const string poppinsBoldFontFilePath = "StickerImageGenerator/Poppins-Bold.ttf";
         const string poppinsMediumFontFilePath = "StickerImageGenerator/Poppins-Medium.ttf";
         const int mainTextMaxWidth = 196;
@@ -45,7 +45,7 @@ namespace GMB.Sdk.Core.StickerImageGenerator
         static readonly PointF footerCertifiedTextCenterPosition = new(246, 465);
         static readonly Point qrCodePosition = new(55, 232);
 
-        // TODO: add lazy on images and fonts
+        // TODO: add lazy on images and fonts => first check if there is need to do it when running generator in RabbitMQ Queue
 
         static readonly Image<Rgba32> _image;
 

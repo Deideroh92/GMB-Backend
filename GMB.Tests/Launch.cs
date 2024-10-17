@@ -2,6 +2,7 @@ using GMB.BusinessService.Api.Controller;
 using GMB.ScannerService.Api.Controller;
 using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core;
+using GMB.Sdk.Core.StickerCertificateGenerator;
 using GMB.Sdk.Core.StickerImageGenerator;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
@@ -237,7 +238,7 @@ namespace GMB.Tests
             
             DbLib db = new(true);
 
-            db.selectsticker();
+            // db.selectsticker();
 
             DbOrder? order = db.GetOrderByID(id);
 
@@ -308,6 +309,24 @@ namespace GMB.Tests
 
                 File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Stickers\\sticker_{language}.png", stickerBytes);
             }
+        }
+
+        [TestMethod]
+        public void GeneratePlaceCertificate()
+        {
+            StickerCertificateGenerator generator = new();
+            byte[] pdfBytes = generator.GeneratePlaceCertificatePdf("McDonald's boulogne", DateTime.Now, 35, 72, 45, 158, 24);
+            File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Certificates\\placeCertificate.pdf", pdfBytes);
+        }
+
+        [TestMethod]
+        public void GenerateNetworkCertificate()
+        {
+            byte[] networkImageData = File.ReadAllBytes("Logo_France_Mcdo.png");
+
+            StickerCertificateGenerator generator = new();
+            byte[] pdfBytes = generator.GenerateNetworkCertificatePdf("McDonald's", 1200, 15487, "Paris - Île de France - France", 4.7, 2023, networkImageData);
+            File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Certificates\\networkCertificate.pdf", pdfBytes);
         }
         #endregion
     }
