@@ -13,6 +13,7 @@ using GMB.Sdk.Core.Types.Models;
 using Sdk.Core.Types.Api;
 using System.Drawing;
 using GMB.Sdk.Core.StickerImageGenerator;
+using GMB.Sdk.Core.StickerCertificateGenerator;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -204,13 +205,14 @@ namespace GMB.ScannerService.Api.Controller
                         DbSticker sticker = new(record.Id, averageScore, request.OrderDate, null, null, request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
                         int stickerId = dbLib.CreateSticker(sticker);
 
-                        Bitmap drawnCertificate = ToolBox.CreateCertificate(nbRating1, nbRating2, nbRating3, nbRating4, nbRating5, averageScore, name, request.OrderDate);
+                        StickerCertificateGenerator generator = new();
+                        byte[] drawnCertificate = generator.GeneratePlaceCertificatePdf(record.Name, DateTime.Now, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
 
                         StickerImageGenerator stickerGenerator = new();
                         byte[] stickerImage = await stickerGenerator.Generate(request.Lang, averageScore, $"vasano.io/certificate/{stickerId}", request.OrderDate);
 
                         sticker.Id = stickerId;
-                        sticker.Certificate = ToolBox.BitmapToByteArray(drawnCertificate);
+                        sticker.Certificate = drawnCertificate;
                         sticker.Image = stickerImage;
                         dbLib.UpdateSticker(sticker);
                     } catch (Exception e)
