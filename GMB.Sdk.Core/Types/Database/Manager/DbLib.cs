@@ -1455,7 +1455,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE, REVIEW_DATE, REVIEW_GOOGLE_DATE, ID_ETAB FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE, REVIEW_DATE, REVIEW_GOOGLE_DATE, ID_ETAB, DELETED FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdReview", idReview);
                 using SqlDataReader reader = cmd.ExecuteReader();
@@ -1477,7 +1477,10 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         null,
                         reader.IsDBNull(8) ? null : reader.GetDateTime(8),
                         reader.IsDBNull(7) ? null : reader.GetString(7),
-                        reader.IsDBNull(9) ? null : reader.GetString(9));
+                        reader.IsDBNull(9) ? null : reader.GetString(9),
+                        null,
+                        null,
+                        !reader.IsDBNull(13) && reader.GetBoolean(13));  
 
                 } else
                     return null;
@@ -1496,7 +1499,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.CommandTimeout = 10000;
@@ -1522,7 +1525,54 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.IsDBNull(7) ? null : reader.GetString(7),
                         reader.IsDBNull(10) ? null : reader.GetString(10),
                         null,
-                        reader.IsDBNull(14) ? null : reader.GetDateTime(14)
+                        reader.IsDBNull(14) ? null : reader.GetDateTime(14),
+                        !reader.IsDBNull(15) && reader.GetBoolean(15)
+                        ));
+                }
+                return brList;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting BR list with id etab = [{idEtab}]", e);
+            }
+        }
+        /// <summary>
+        /// Get list of Business Reviews.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        /// <returns>Business Reviews list or Null (doesn't exist)</returns>
+        public List<DbBusinessReview> GetBusinessReviewsListWithDate(string idEtab, DateTime? dateLimit)
+        {
+            try
+            {
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_DATE >= @DateLimit";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", idEtab);
+                cmd.Parameters.AddWithValue("@DateLimit", dateLimit);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<DbBusinessReview> brList = [];
+
+                while (reader.Read())
+                {
+                    brList.Add(new DbBusinessReview(idEtab,
+                        reader.GetString(9),
+                        reader.GetString(6),
+                        new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0),
+                            reader.IsDBNull(3) ? null : reader.GetInt32(3),
+                            !reader.IsDBNull(1) && reader.GetBoolean(1)),
+                        reader.GetInt32(2),
+                        reader.IsDBNull(4) ? null : reader.GetString(4),
+                        reader.IsDBNull(11) ? null : reader.GetString(11),
+                        reader.IsDBNull(12) ? null : reader.GetDateTime(12),
+                        reader.GetBoolean(5),
+                        reader.IsDBNull(13) ? null : reader.GetDateTime(13),
+                        reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                        reader.IsDBNull(7) ? null : reader.GetString(7),
+                        reader.IsDBNull(10) ? null : reader.GetString(10),
+                        null,
+                        reader.IsDBNull(14) ? null : reader.GetDateTime(14),
+                        !reader.IsDBNull(15) && reader.GetBoolean(15)
                         ));
                 }
                 return brList;
@@ -1605,6 +1655,25 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             } catch (Exception e)
             {
                 throw new Exception($"Error updating BR with id etab = [{review.IdEtab}] and id review = [{review.Id}]", e);
+            }
+        }        
+        /// <summary>       
+        /// Update Business Review.     
+        /// </summary>     
+        /// <param name="reviewId"></param>      
+        /// <param name="deleted"></param>
+        public void UpdateBusinessReviewDeleted(string reviewId, bool deleted = false)
+        {
+            try
+            {
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET DELETED = @Deleted WHERE REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Deleted", GetValueOrDefault(deleted));
+                cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(reviewId));
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error updating BR with id review = [{reviewId}]", e);
             }
         }
         /// <summary>
@@ -1952,6 +2021,84 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         /// Create Sticker.
         /// </summary>
         /// <param name="sticker"></param>
+        public int CreateStickerNetwork(DbStickerNetwork sticker)
+        {
+            try
+            {
+                string insertCommand = @"
+                INSERT INTO StickersNetwork (score, createdDate, brandName, nbEtab, nbReview, geoZone, year, image, certificate) 
+                VALUES (@Score, @CreatedDate, @BrandName, @NbEtab, @NbReview, @GeoZone, @Year, @Image, @Certificate);
+                SELECT SCOPE_IDENTITY();";
+
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@Score", GetValueOrDefault(sticker.Score));
+                cmd.Parameters.AddWithValue("@CreatedDate", GetValueOrDefault(sticker.CreatedDate));
+                cmd.Parameters.AddWithValue("@BrandName", GetValueOrDefault(sticker.BrandName));
+                cmd.Parameters.AddWithValue("@NbEtab", GetValueOrDefault(sticker.NbEtab));
+                cmd.Parameters.AddWithValue("@NbReview", GetValueOrDefault(sticker.NbReview));
+                cmd.Parameters.AddWithValue("@GeoZone", GetValueOrDefault(sticker.GeoZone));
+                cmd.Parameters.AddWithValue("@Year", GetValueOrDefault(sticker.Year));
+
+                cmd.Parameters.Add("@Image", SqlDbType.VarBinary).Value = (object?)sticker.Image ?? DBNull.Value;
+                cmd.Parameters.Add("@Certificate", SqlDbType.VarBinary).Value = (object?)sticker.Certificate ?? DBNull.Value;
+
+                cmd.ExecuteNonQuery();
+
+                return Convert.ToInt32(cmd.ExecuteScalar());
+            } catch (Exception e)
+            {
+                throw new Exception($"Error creating sticker with brand name = [{sticker.BrandName}]", e);
+            }
+        }
+
+        /// <summary>
+        /// Get Sticker network by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns>Place</returns>
+        public DbStickerNetwork? GetStickerNetworkById(string id)
+        {
+            try
+            {
+                string selectCommand = "SELECT * FROM StickersNetwork WHERE Id = @Id";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<DbPlace> placeList = new([]);
+
+                if (reader.Read())
+                {
+                    DbStickerNetwork sticker = new(
+                        Convert.ToDouble(reader["score"]),
+                        DateTime.Parse(reader["createdDate"].ToString()!),
+                        (reader["image"] != DBNull.Value) ? (byte[])reader["image"] : null,
+                        (reader["certificate"] != DBNull.Value) ? (byte[])reader["certificate"] : null,
+                        int.Parse(reader["nbEtab"].ToString()!),
+                        int.Parse(reader["nbReview"].ToString()!),
+                        int.Parse(reader["year"].ToString()!),
+                        reader["brandName"].ToString()!,
+                        reader["geoZone"].ToString()!,
+                        int.Parse(reader["id"].ToString()!)
+                        );
+
+                    return sticker;
+                }
+
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting sticker for id = [{id}]", e);
+            }
+
+        }
+
+        /// <summary>
+        /// Create Sticker.
+        /// </summary>
+        /// <param name="sticker"></param>
         public void UpdateSticker(DbSticker sticker)
         {
             try
@@ -1967,6 +2114,28 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             } catch (Exception e)
             {
                 throw new Exception($"Error creating sticker with id = [{sticker.PlaceId}]", e);
+            }
+        }
+
+        /// <summary>
+        /// Create Sticker.
+        /// </summary>
+        /// <param name="sticker"></param>
+        public void UpdateStickerNetwork(DbStickerNetwork sticker)
+        {
+            try
+            {
+                string insertCommand = "UPDATE StickersNetwork SET IMAGE = @Image, CERTIFICATE = @Certificate WHERE ID = @Id";
+
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@Id", GetValueOrDefault(sticker.Id));
+                cmd.Parameters.Add("@Image", SqlDbType.VarBinary).Value = (object?)sticker.Image ?? DBNull.Value;
+                cmd.Parameters.Add("@Certificate", SqlDbType.VarBinary).Value = (object?)sticker.Certificate ?? DBNull.Value;
+
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error creating sticker with brand name = [{sticker.BrandName}]", e);
             }
         }
 

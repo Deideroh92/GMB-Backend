@@ -73,6 +73,8 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
             montserratMediumFont = PdfFontFactory.CreateFont(montserratMediumFontFilePath);
             montserratRegularFont = PdfFontFactory.CreateFont(montserratRegularFontFilePath);
             montserratSemiBoldFont = PdfFontFactory.CreateFont(montserratSemiBoldFontFilePath);
+
+            frenchCulture.NumberFormat.NumberGroupSeparator = " ";
         }
 
         public byte[] GeneratePlaceCertificatePdf(string placeName, DateTime stickerDate, int nbRating1, int nbRating2, int nbRating3, int nbRating4, int nbRating5) {
@@ -122,7 +124,7 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
             return memoryStream.ToArray();
         }
 
-        public byte[] GenerateNetworkCertificatePdf(string networkName, int nbEtabs, int nbReviews, string geoZone, double score, int scoreYear, byte[] networkImageData)
+        public byte[] GenerateNetworkCertificatePdf(string networkName, int nbEtabs, int nbReviews, string geoZone, double score, int scoreYear)
         {
             using MemoryStream memoryStream = new();
             using (PdfReader pdfReader = new(new MemoryStream(networkPdfTemplateBytes)))
@@ -135,10 +137,10 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 form.GetField(networkNameFieldId).SetValue(networkName).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale(); // 18 in pdf
 
                 // Number of etabs
-                form.GetField(nbEtabsFieldId).SetValue(nbEtabs.ToString()).SetFontAndSize(montserratSemiBoldFont, 16);
+                form.GetField(nbEtabsFieldId).SetValue(nbEtabs.ToString("N0", frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 16);
 
                 // Number of reviews
-                form.GetField(nbReviewsFieldId).SetValue(nbReviews.ToString()).SetFontAndSize(montserratSemiBoldFont, 16);
+                form.GetField(nbReviewsFieldId).SetValue(nbReviews.ToString("N0", frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 16);
 
                 // Geographic zone
                 form.GetField(geoZoneFieldId).SetValue(geoZone).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale();//.SetFontAndSize(montserratMediumFont, 18);
@@ -159,16 +161,12 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 form.GetField(descriptionYear2FieldId).SetValue(actualYear).SetFontAndSize(montserratLightFont, 9);
                 form.GetField(footerYearFieldId).SetValue(actualYear).SetFontAndSize(montserratMediumFont, 8);
 
-                // Network image
-                ImageData imageData = ImageDataFactory.Create(networkImageData);
                 // Get field rectangle
                 PdfFormField networkImageField = form.GetField(networkImageFieldId);
                 PdfWidgetAnnotation widget = networkImageField.GetWidgets()[0];
                 Rectangle fieldRectangle = widget.GetRectangle().ToRectangle();
                 // Print image in page
                 PdfPage page = widget.GetPage();
-                PdfCanvas pdfCanvas = new (page);
-                pdfCanvas.AddImageFittedIntoRectangle(imageData, fieldRectangle, false);
                 // Remove field as it's over the image (only when border color set to transparent, dunno why)
                 form.RemoveField(networkImageFieldId);
 

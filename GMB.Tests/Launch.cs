@@ -14,6 +14,7 @@ using Sdk.Core.Types.Api;
 using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Drawing.Imaging;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace GMB.Tests
 {
@@ -95,7 +96,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 9);
+                db.UpdateBusinessProfileProcessingState(idEtab, 8);
             }
         }
         /// <summary>
@@ -266,7 +267,7 @@ namespace GMB.Tests
                 {
                     ScannerController scannerController = new();
 
-                    StickerScannerRequest request = new(id, places, order.CreatedAt, order.Language);
+                    StickerScannerRequest request = new(id, places, order.CreatedAt, order.Language, order.OwnerId == "cm1nx5an60000tem7v4rf3dkr");
 
                     scannerController.StartStickerScanner(request);
                 });
@@ -278,22 +279,73 @@ namespace GMB.Tests
 
             return;
         }
+        /// <summary>
+        ///  Generating Stickers Network
+        /// </summary>
+        [TestMethod]
+        public async Task GenerateStickersNetwork()
+        {
 
+            DbLib db = new(true);
+            // Example usage of the sticker generation function
+            double score = 4.7;
+            string zoneGeo = "France";
+            DateTime date = DateTime.Now;
+            int nbReviews = 11272;
+            int nbEtab = 346;
+            string brand = "ERA IMMOBILIER";
+            int year = 2023;
+
+            StickerCertificateGenerator certificateGenerator = new();
+            byte[] certificate = certificateGenerator.GenerateNetworkCertificatePdf(brand, nbEtab, nbReviews, zoneGeo, score, year);
+
+            DbStickerNetwork sticker = new(score, date, null, certificate, nbEtab, nbReviews, year, brand, zoneGeo);
+
+            int id = db.CreateStickerNetwork(sticker);
+
+            string qrUrl = $"https://vasano.io/sticker/{id}/network/certificate";
+            Bitmap stickerImage = ToolBox.CreateQrCode(qrUrl);
+            stickerImage.Save($"C:\\Users\\maxim\\Desktop\\qrCode_{id}.Png", ImageFormat.Png);
+
+            File.WriteAllBytes($"C:\\Users\\maxim\\Desktop\\certificat.pdf", certificate);
+            //db.UpdateStickerNetwork(sticker);
+        }
+        /// <summary>
+        ///  Generating Stickers Network
+        /// </summary>
+        [TestMethod]
+        public void UpdateStickerNetworkImage()
+        {
+
+            DbLib db = new(true);
+            byte[] image = File.ReadAllBytes("C:\\Users\\maxim\\Desktop\\STICKER Network - ERA.png");
+            byte[] certificate = File.ReadAllBytes("C:\\Users\\maxim\\Desktop\\Certificat Network - ERA.pdf");
+            string id = "4";
+            DbStickerNetwork? sticker = db.GetStickerNetworkById(id);
+
+
+            if (sticker == null)
+                return;
+
+            sticker.Certificate = certificate;
+            sticker.Image = image;
+
+            db.UpdateStickerNetwork(sticker);
+        }
 
         /// <summary>
         ///  For testing the generation of a sticker
         /// </summary>
         [TestMethod]
-        public void GenerateStickers()
+        public void GenerateQrCode()
         {
             // Example usage of the sticker generation function
-            string score = "4,5";
-            string qrUrl = "https://vasano.io";
+            string qrUrl = $"https://vasano.io/certificate/{10}";
 
-            Bitmap stickerImage = ToolBox.CreateSticker(score, qrUrl, DateTime.UtcNow);
+            Bitmap stickerImage = ToolBox.CreateQrCode(qrUrl);
 
             // Save the final sticker image (for demonstration purposes)
-            stickerImage.Save("sticker_output.png", ImageFormat.Png);
+            stickerImage.Save("C:\\Users\\maxim\\Desktop\\qrCode.Png", ImageFormat.Png);
 
             Console.WriteLine("Sticker image generated and saved as sticker_output.png");
         }
@@ -307,7 +359,7 @@ namespace GMB.Tests
             {
                 byte[] stickerBytes = await generator.Generate(language, 4.5, "https://vasano.io/certificate/sticker_id", DateTime.Now);
 
-                File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Stickers\\sticker_{language}.png", stickerBytes);
+                File.WriteAllBytes($"C:\\Users\\maxim\\Desktop\\sticker_{language}.png", stickerBytes);
             }
         }
 
@@ -316,17 +368,15 @@ namespace GMB.Tests
         {
             StickerCertificateGenerator generator = new();
             byte[] pdfBytes = generator.GeneratePlaceCertificatePdf("McDonald's boulogne", DateTime.Now, 35, 72, 45, 158, 24);
-            File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Certificates\\placeCertificate.pdf", pdfBytes);
+            File.WriteAllBytes($"C:\\Users\\maxim\\Desktop\\placeCertificate.pdf", pdfBytes);
         }
 
         [TestMethod]
         public void GenerateNetworkCertificate()
         {
-            byte[] networkImageData = File.ReadAllBytes("Logo_France_Mcdo.png");
-
             StickerCertificateGenerator generator = new();
-            byte[] pdfBytes = generator.GenerateNetworkCertificatePdf("McDonald's", 1200, 15487, "Paris - Île de France - France", 4.7, 2023, networkImageData);
-            File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Certificates\\networkCertificate.pdf", pdfBytes);
+            byte[] pdfBytes = generator.GenerateNetworkCertificatePdf("McDonald's", 1200, 15487, "Paris - Île de France - France", 4.7, 2023);
+            File.WriteAllBytes($"C:\\Users\\maxim\\Desktop\\networkCertificate.pdf", pdfBytes);
         }
         #endregion
     }

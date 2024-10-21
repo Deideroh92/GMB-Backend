@@ -52,7 +52,7 @@
     <None Update="logo.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Logo_France_Mcdo.png">
+    <None Update="Logo_Network.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Poppins-Bold.ttf">

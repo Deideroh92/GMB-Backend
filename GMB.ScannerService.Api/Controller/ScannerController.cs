@@ -57,7 +57,6 @@ namespace GMB.ScannerService.Api.Controller
 
                 if (businessList.Count < 10)
                     nbThreads = 1;
-                
 
                 foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
                 {
@@ -202,17 +201,18 @@ namespace GMB.ScannerService.Api.Controller
 
                         string name = record.Name;
 
-                        DbSticker sticker = new(record.Id, averageScore, request.OrderDate, null, null, request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
-                        int stickerId = dbLib.CreateSticker(sticker);
-
                         StickerCertificateGenerator generator = new();
                         byte[] drawnCertificate = generator.GeneratePlaceCertificatePdf(record.Name, DateTime.Now, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
 
+                        DbSticker sticker = new(record.Id, averageScore, request.OrderDate, null, drawnCertificate, request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
+                        int stickerId = dbLib.CreateSticker(sticker);
+
+
+
                         StickerImageGenerator stickerGenerator = new();
-                        byte[] stickerImage = await stickerGenerator.Generate(request.Lang, averageScore, $"vasano.io/certificate/{stickerId}", request.OrderDate);
+                        byte[] stickerImage = await stickerGenerator.Generate(request.Lang, averageScore, $"vasano.io/sticker/{stickerId}/certificate", request.OrderDate);
 
                         sticker.Id = stickerId;
-                        sticker.Certificate = drawnCertificate;
                         sticker.Image = stickerImage;
                         dbLib.UpdateSticker(sticker);
                     } catch (Exception e)
@@ -226,7 +226,13 @@ namespace GMB.ScannerService.Api.Controller
                     }
                 }
                 if (!isError)
-                    dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Analyzed);
+                {
+                    if (request.IsAdmin)
+                        dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Delivered);
+                    else
+                        dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Analyzed);
+                }
+                    
             } catch (Exception e)
             {
                 Log.Error(e, $"An exception occurred while starting scanner sticker : {e.Message}");

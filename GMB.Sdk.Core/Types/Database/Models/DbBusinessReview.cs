@@ -17,7 +17,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
     /// <param name="dateUpdate"></param>
     /// <param name="reviewReply"></param>
     /// <param name="visitDate"></param>
-    public class DbBusinessReview(string idEtab, string idReview, string googleReviewId, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DateTime? reviewReplyDate, string? reviewReplyGoogleDate, string? visitDate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null)
+    public class DbBusinessReview(string idEtab, string idReview, string googleReviewId, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DateTime? reviewReplyDate, string? reviewReplyGoogleDate, string? visitDate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null, bool deleted = false)
     {
         public long Id { get; set; }
         public string IdEtab { get; set; } = idEtab;
@@ -35,12 +35,17 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public DateTime? DateUpdate { get; set; } = dateUpdate;
         public DbBusinessReviewReply? ReviewReply { get; set; } = reviewReply;
         public string? VisitDate { get; set; } = visitDate;
+        public bool? Deleted { get; set; } = deleted;
 
         #region Local
 
         public bool Equals(DbBusinessReview other)
         {
             return other.ReviewText == ReviewText && other.Score == Score && other.User.Name == User.Name && other.User.NbReviews == User.NbReviews && other.User.LocalGuide == User.LocalGuide && other.ReviewReplied == ReviewReplied;
+        }
+        public bool EqualsWithStatus(DbBusinessReview other)
+        {
+            return other.ReviewText == ReviewText && other.Score == Score && other.User.Name == User.Name && other.User.NbReviews == User.NbReviews && other.User.LocalGuide == User.LocalGuide && other.ReviewReplied == ReviewReplied & other.Deleted == Deleted;
         }
         #endregion
     }

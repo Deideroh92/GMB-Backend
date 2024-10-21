@@ -39,6 +39,8 @@ namespace GMB.Scanner.Agent
                     GetBusinessProfileRequest BPRequest = new(businessAgent.Url, businessAgent.Guid, businessAgent.IdEtab);
                     DbBusinessProfile? business = null;
 
+                    List<DbBusinessReview> reviewList = new([]);
+
                     if (businessAgent.IdEtab != null)
                         business = db.GetBusinessByIdEtab(businessAgent.IdEtab);
 
@@ -142,13 +144,24 @@ namespace GMB.Scanner.Agent
                                     count = 1;
                                 }
                             }
+
+                            if (request.CheckReviewStatus)
+                            {
+                                reviewList = db.GetBusinessReviewsListWithDate(profile.IdEtab, request.DateLimit);
+
+                                foreach (DbBusinessReview review in reviewList)
+                                {
+                                    if (reviewList.Find((x) => x.IdReview == review.IdReview) == null)
+                                        db.UpdateBusinessReviewDeleted(review.IdReview, true);
+                                }
+                            } 
+
                         } catch (Exception e)
                         {
                             Log.Error(e, $"An exception occurred when getting reviews from id etab = [{businessAgent.IdEtab}], guid = [{businessAgent.Guid}], url = [{businessAgent.Url}] : {e.Message}");
                             driver.Dispose();
                             driver = new();
                         }
-
                     }
 
                     // Update Url state when finished.

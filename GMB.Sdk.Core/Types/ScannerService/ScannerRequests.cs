@@ -54,13 +54,14 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="businessList"></param>
     /// <param name="dateLimit"></param>
     /// <param name="updateProcessingState"></param>
-    public class ScannerBusinessParameters(Operation operation, bool getReviews, List<BusinessAgent>? businessList, DateTime? dateLimit = null, bool updateProcessingState = true)
+    public class ScannerBusinessParameters(Operation operation, bool getReviews, List<BusinessAgent>? businessList, DateTime? dateLimit = null, bool updateProcessingState = true, bool checkReviewStatus = false)
     {
         public List<BusinessAgent>? BusinessList { get; set; } = businessList;
         public bool GetReviews { get; set; } = getReviews;
         public bool UpdateProcessingState { get; set; } = updateProcessingState;
         public DateTime? DateLimit { get; set; } = dateLimit;
         public Operation Operation { get; set; } = operation;
+        public bool CheckReviewStatus { get; set; } = checkReviewStatus;
     }
     /// <summary>
     /// Constructor.
@@ -77,6 +78,7 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="category"></param>
     /// <param name="urlState"></param>
     /// <param name="updateProcessingState"></param>
+    /// <param name="checkDeletedStatus"></param>
     public class BusinessScannerRequest(int? entries,
                                         int processing,
                                         Operation operationType,
@@ -88,7 +90,8 @@ namespace GMB.Sdk.Core.Types.ScannerService
                                         string? brand = null,
                                         string? category = null,
                                         UrlState urlState = UrlState.NEW,
-                                        bool updateProcessingState = true)
+                                        bool updateProcessingState = true,
+                                        bool checkDeletedStatus = false)
     {
         public int? Entries { get; set; } = entries;
         public int Processing { get; set; } = processing;
@@ -102,6 +105,7 @@ namespace GMB.Sdk.Core.Types.ScannerService
         public string? Category { get; set; } = category;
         public UrlState UrlState { get; set; } = urlState;
         public bool UpdateProcessingState { get; set; } = updateProcessingState;
+        public bool CheckDeletedStatus { get; set; } = checkDeletedStatus;
     }
     /// <summary>
     /// Constructor.
@@ -110,12 +114,13 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="places"></param>
     /// <param name="orderDate"></param>
     /// <param name="lang"></param>
-    public class StickerScannerRequest(int orderId, List<DbPlace> places, DateTime orderDate, StickerLanguage lang)
+    public class StickerScannerRequest(int orderId, List<DbPlace> places, DateTime orderDate, StickerLanguage lang, bool isAdmin = false)
     {
         public int OrderId { get; set; } = orderId;
         public StickerLanguage Lang { get; set; } = lang;
         public DateTime OrderDate { get; set; } = orderDate;
         public List<DbPlace> Places { get; set; } = places;
+        public bool IsAdmin { get; set; } = isAdmin;
     }
     #endregion
 }

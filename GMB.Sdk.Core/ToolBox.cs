@@ -370,28 +370,6 @@ namespace GMB.Sdk.Core
         }
 
         /// <summary>
-        /// Insert Api adress inside Business profile.
-        /// </summary>
-        /// <param name="business"></param>
-        /// <param name="address"></param>
-        /// <returns>Business with address updated</returns>
-        public static DbBusinessProfile InsertApiAddressInBusiness(DbBusinessProfile business, AddressApiResponse address)
-        {
-            business.Lon = (address.Features[0]?.Geometry?.Coordinates[0]);
-            business.Lat = (address.Features[0]?.Geometry?.Coordinates[1]);
-            business.City = address.Features[0]?.Properties?.City;
-            business.PostCode = address.Features[0]?.Properties?.Postcode;
-            business.CityCode = address.Features[0]?.Properties?.CityCode;
-            business.Address = address.Features[0]?.Properties?.Street;
-            business.AddressType = address.Features[0]?.Properties?.PropertyType;
-            business.IdBan = address.Features[0]?.Properties?.Id;
-            business.StreetNumber = address.Features[0]?.Properties?.HouseNumber;
-
-            return business;
-        }
-
-
-        /// <summary>
         /// Breaking hours, when the program needs to pause.
         /// </summary>
         public static void BreakingHours()
@@ -411,128 +389,40 @@ namespace GMB.Sdk.Core
         }
 
         // Function to generate the QR code
-        private static Bitmap GenerateQrCode(string url)
+        private static Bitmap GenerateQrCode(string url, int pixelsPerModule, int width, int height)
         {
+            // Initialize the QR code generator
             QRCodeGenerator qrGenerator = new();
             QRCodeData qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.L);
-            PngByteQRCode qrCode = new(qrCodeData);
 
-            byte[] qrCodeBytes = qrCode.GetGraphic(5, [66, 134, 245], [0, 0, 0], true);
+            // Create the QR code with specified pixels per module and colors
+            PngByteQRCode qrCode = new(qrCodeData);
+            byte[] qrCodeBytes = qrCode.GetGraphic(pixelsPerModule, Color.White, Color.FromArgb(15, 157, 87), false);
 
             // Convert byte array to Bitmap
             using MemoryStream ms = new(qrCodeBytes);
-            return new Bitmap(ms);
-        }
+            Bitmap qrBitmap = new Bitmap(ms);
 
-        public static Font LoadCustomFont(string fontPath, float fontSize)
-        {
-            PrivateFontCollection privateFontCollection = new();
+            // Set the desired resolution (e.g., 300 DPI for print quality)
+            qrBitmap.SetResolution(300, 300);  // You can adjust the DPI here if needed
 
-            // Load the custom font
-            privateFontCollection.AddFontFile(fontPath);
+            // Resize to 4K resolution (3840 x 2160)
+            Bitmap highResQrBitmap = new Bitmap(qrBitmap, new Size(width, height));
 
-            // Return the custom font, make sure it's a valid font family
-            return new Font(privateFontCollection.Families[0], fontSize);
+            return highResQrBitmap;
         }
 
         // Function to create the final sticker image
-        public static Bitmap CreateSticker(string score, string qrUrl, DateTime orderDate)
+        public static Bitmap CreateQrCode(string qrUrl)
         {
-
-            DateTime startingDate = orderDate.AddMonths(-12);
-
-            // Load the sticker template (logo.jpg in your case)
-            string stickerPath = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "logo.jpg");
-            using Bitmap stickerImg = new(stickerPath);
-            int stickerWidth = stickerImg.Width;
-            int stickerHeight = stickerImg.Height;
+            int pixelsPerModule = 20; // Adjust this for a finer or coarser grid
+            int width = 5167; // 4K width
+            int height = 5167;
 
             // Generate QR code
-            Bitmap qrCodeImg = GenerateQrCode(qrUrl);
+            Bitmap qrCodeImg = GenerateQrCode(qrUrl, pixelsPerModule, width, height);
 
-            // Setup fonts
-            string fontPathBold = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Poppins-Bold.ttf");
-            string fontPathMedium = Path.Combine(Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName, "Poppins-Medium.ttf");
-            Font font = LoadCustomFont(fontPathBold, 36f);
-            Font font2 = LoadCustomFont(fontPathBold, 72f);
-            Font font3 = LoadCustomFont(fontPathMedium, 10f);
-
-            // Draw the text and QR code on the sticker image
-            using (Graphics g = Graphics.FromImage(stickerImg))
-            {
-                g.DrawString($"Notre note\nGoogle", font, Brushes.White, new PointF(30, 30));
-                g.DrawString(score, font2, Brushes.White, new PointF(285, 195));
-                g.DrawString("Moyenne des notes relevées entre le 1er janvier 2023 et le 31 décembre 2023", font3, Brushes.Black, new PointF(40, 445));
-                g.DrawString("Certifiée par Vasano | © Tous droits réservés", font3, Brushes.Black, new PointF(132, 458));
-
-                // Paste QR code onto sticker
-                g.DrawImage(qrCodeImg, new Point(55, 210));
-            }
-
-            // Resize the sticker image if needed
-            Bitmap resizedStickerImg = new(stickerImg, stickerWidth, stickerHeight);
-
-            return resizedStickerImg;
-        }
-
-        /// <summary>
-        /// Craete Certificate
-        /// </summary>
-        /// <param name="score1"></param>
-        /// <param name="score2"></param>
-        /// <param name="score3"></param>
-        /// <param name="score4"></param>
-        /// <param name="score5"></param>
-        /// <param name="averageScore"></param>
-        /// <param name="name"></param>
-        /// <returns>certificate</returns>
-        public static Bitmap CreateCertificate(int score1, int score2, int score3, int score4, int score5, double averageScore, string name, DateTime orderDate)
-        {
-
-            // Define image size
-            int width = 400;
-            int height = 200;
-
-            // Create a new Bitmap
-            Bitmap bitmap = new(width, height);
-
-            // Create a Graphics object to draw on the bitmap
-            using (Graphics g = Graphics.FromImage(bitmap))
-            {
-                // Set the background color to white
-                g.Clear(Color.White);
-
-                // Set the font and brush for drawing text
-                Font font = new Font("Arial", 24, FontStyle.Bold);
-                Brush brush = new SolidBrush(Color.Black);
-
-                // Draw the average score in the middle of the image
-                string text = $"Average Score: {averageScore.ToString()}";
-                SizeF textSize = g.MeasureString(text, font);
-
-                // Center the text
-                float textX = (width - textSize.Width) / 2;
-                float textY = (height - textSize.Height) / 2;
-
-                g.DrawString(text, font, brush, new PointF(textX, textY));
-            }
-
-            return bitmap;
-        }
-
-        /// <summary>
-        /// Convert bitmap to byte array
-        /// </summary>
-        /// <param name="bitmap"></param>
-        /// <returns>byte array</returns>
-        public static byte[] BitmapToByteArray(Bitmap bitmap)
-        {
-            using MemoryStream memoryStream = new();
-            // Save the bitmap to the memory stream in a specific format (e.g., PNG)
-            bitmap.Save(memoryStream, System.Drawing.Imaging.ImageFormat.Png);
-
-            // Return the byte array from the memory stream
-            return memoryStream.ToArray();
+            return qrCodeImg;
         }
         #endregion
     }

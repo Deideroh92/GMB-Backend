@@ -32,7 +32,8 @@ namespace GMB.Sdk.Core.StickerImageGenerator
 
     public class StickerImageGenerator
     {
-        const string baseImageFilePath = "StickerImageGenerator/baseImage.jpg";
+        const string baseImageFilePath = "StickerImageGenerator/baseImageBusiness.png";
+        const string baseImageNetworkFilePath = "StickerImageGenerator/baseImageNetwork.png";
         const string poppinsBoldFontFilePath = "StickerImageGenerator/Poppins-Bold.ttf";
         const string poppinsMediumFontFilePath = "StickerImageGenerator/Poppins-Medium.ttf";
         const int mainTextMaxWidth = 196;
@@ -55,7 +56,13 @@ namespace GMB.Sdk.Core.StickerImageGenerator
 
         static StickerImageGenerator()
         {
-            _image = Image.Load<Rgba32>(baseImageFilePath);
+            try
+            {
+                _image = Image.Load<Rgba32>(baseImageNetworkFilePath);
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
 
             FontCollection fontCollection = new();
             FontFamily boldFontFamily = fontCollection.Add(poppinsBoldFontFilePath);
