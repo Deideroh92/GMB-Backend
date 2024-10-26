@@ -367,8 +367,8 @@ namespace GMB.Tests
         public void GeneratePlaceCertificate()
         {
             StickerCertificateGenerator generator = new();
-            byte[] pdfBytes = generator.GeneratePlaceCertificatePdf("McDonald's boulogne", DateTime.Now, 35, 72, 45, 158, 24);
-            File.WriteAllBytes($"C:\\Users\\maxim\\Desktop\\placeCertificate.pdf", pdfBytes);
+            byte[] pdfBytes = generator.GeneratePlaceCertificatePdf(StickerLanguage.FR, "McDonald's boulogne", DateTime.Now, 35, 72, 45, 158, 24); 
+            File.WriteAllBytes(@"C:\Users\Lucas\Documents\Code\Vasano\Tests Certificates\placeCertificate.pdf", pdfBytes);
         }
 
         [TestMethod]
@@ -376,7 +376,7 @@ namespace GMB.Tests
         {
             StickerCertificateGenerator generator = new();
             byte[] pdfBytes = generator.GenerateNetworkCertificatePdf("McDonald's", 1200, 15487, "Paris - Île de France - France", 4.7, 2023);
-            File.WriteAllBytes($"C:\\Users\\maxim\\Desktop\\networkCertificate.pdf", pdfBytes);
+            File.WriteAllBytes(@"C:\Users\Lucas\Documents\Code\Vasano\Tests Certificates\networkCertificate.pdf", pdfBytes);
         }
         #endregion
     }

@@ -1,12 +1,7 @@
-﻿using iText.Forms;
-using iText.Forms.Fields;
-using iText.IO.Image;
-using iText.Kernel.Colors;
+﻿using GMB.Sdk.Core.StickerImageGenerator;
+using iText.Forms;
 using iText.Kernel.Font;
-using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Annot;
-using iText.Kernel.Pdf.Canvas;
 using System.Globalization;
 
 namespace GMB.Sdk.Core.StickerCertificateGenerator
@@ -15,7 +10,12 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
     {
         #region Consts
         // Resources files
-        const string placeCertificateTemplateFilePath = "StickerCertificateGenerator/placeCertificateTemplate.pdf";
+        const string frPlaceCertificateTemplateFilePath = "StickerCertificateGenerator/placeCertificateTemplate_fr.pdf";
+        const string enPlaceCertificateTemplateFilePath = "StickerCertificateGenerator/placeCertificateTemplate_en.pdf";
+        const string itPlaceCertificateTemplateFilePath = "StickerCertificateGenerator/placeCertificateTemplate_it.pdf";
+        const string esPlaceCertificateTemplateFilePath = "StickerCertificateGenerator/placeCertificateTemplate_es.pdf";
+        const string dePlaceCertificateTemplateFilePath = "StickerCertificateGenerator/placeCertificateTemplate_de.pdf";
+        const string ptPlaceCertificateTemplateFilePath = "StickerCertificateGenerator/placeCertificateTemplate_pt.pdf";
         const string networkCertificateTemplateFilePath = "StickerCertificateGenerator/networkCertificateTemplate.pdf";
         const string montserratBoldFontFilePath = "StickerCertificateGenerator/Montserrat-Bold.ttf";
         const string montserratLightFontFilePath = "StickerCertificateGenerator/Montserrat-Light.ttf";
@@ -53,9 +53,14 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
         const string networkImageFieldId = "networkImage_af_image";
         #endregion Consts
 
-        static readonly CultureInfo frenchCulture = new ("fr-FR");
+        static readonly CultureInfo frenchCulture = new("fr-FR");
         // TODO: add lazy on images and fonts => first check if there is need to do it when running generator in RabbitMQ Queue
-        static readonly byte[] placePdfTemplateBytes;
+        static readonly byte[] frPlacePdfTemplateBytes;
+        static readonly byte[] enPlacePdfTemplateBytes;
+        static readonly byte[] itPlacePdfTemplateBytes;
+        static readonly byte[] esPlacePdfTemplateBytes;
+        static readonly byte[] dePlacePdfTemplateBytes;
+        static readonly byte[] ptPlacePdfTemplateBytes;
         static readonly byte[] networkPdfTemplateBytes;
         static readonly PdfFont montserratBoldFont;
         static readonly PdfFont montserratLightFont;
@@ -65,7 +70,12 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
 
         static StickerCertificateGenerator()
         {
-            placePdfTemplateBytes = File.ReadAllBytes(placeCertificateTemplateFilePath);
+            frPlacePdfTemplateBytes = File.ReadAllBytes(frPlaceCertificateTemplateFilePath);
+            enPlacePdfTemplateBytes = File.ReadAllBytes(enPlaceCertificateTemplateFilePath);
+            itPlacePdfTemplateBytes = []; // File.ReadAllBytes(itPlaceCertificateTemplateFilePath);
+            esPlacePdfTemplateBytes = []; // File.ReadAllBytes(esPlaceCertificateTemplateFilePath);
+            dePlacePdfTemplateBytes = []; // File.ReadAllBytes(dePlaceCertificateTemplateFilePath);
+            ptPlacePdfTemplateBytes = []; // File.ReadAllBytes(ptPlaceCertificateTemplateFilePath);
             networkPdfTemplateBytes = File.ReadAllBytes(networkCertificateTemplateFilePath);
 
             montserratBoldFont = PdfFontFactory.CreateFont(montserratBoldFontFilePath);
@@ -77,9 +87,9 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
             frenchCulture.NumberFormat.NumberGroupSeparator = " ";
         }
 
-        public byte[] GeneratePlaceCertificatePdf(string placeName, DateTime stickerDate, int nbRating1, int nbRating2, int nbRating3, int nbRating4, int nbRating5) {
+        public byte[] GeneratePlaceCertificatePdf(StickerLanguage language, string placeName, DateTime stickerDate, int nbRating1, int nbRating2, int nbRating3, int nbRating4, int nbRating5) {
             using MemoryStream memoryStream = new();
-            using (PdfReader pdfReader = new(new MemoryStream(placePdfTemplateBytes)))
+            using (PdfReader pdfReader = new(new MemoryStream(GetCertificateTemplateByLanguage(language))))
             {
                 PdfDocument placeCertificateDoc = new(pdfReader, new PdfWriter(memoryStream));
 
@@ -161,15 +171,6 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
                 form.GetField(descriptionYear2FieldId).SetValue(actualYear).SetFontAndSize(montserratLightFont, 9);
                 form.GetField(footerYearFieldId).SetValue(actualYear).SetFontAndSize(montserratMediumFont, 8);
 
-                // Get field rectangle
-                PdfFormField networkImageField = form.GetField(networkImageFieldId);
-                PdfWidgetAnnotation widget = networkImageField.GetWidgets()[0];
-                Rectangle fieldRectangle = widget.GetRectangle().ToRectangle();
-                // Print image in page
-                PdfPage page = widget.GetPage();
-                // Remove field as it's over the image (only when border color set to transparent, dunno why)
-                form.RemoveField(networkImageFieldId);
-
                 // Flatten the form to burn fields in doc
                 form.FlattenFields();
 
@@ -179,6 +180,19 @@ namespace GMB.Sdk.Core.StickerCertificateGenerator
 
             // Return the generated PDF as a byte array
             return memoryStream.ToArray();
+        }
+
+        static byte[] GetCertificateTemplateByLanguage(StickerLanguage language)
+        {
+            return language switch {
+                StickerLanguage.FR => frPlacePdfTemplateBytes,
+                StickerLanguage.EN => enPlacePdfTemplateBytes,
+                StickerLanguage.IT => itPlacePdfTemplateBytes,
+                StickerLanguage.ES => esPlacePdfTemplateBytes,
+                StickerLanguage.DE => dePlacePdfTemplateBytes,
+                //StickerLanguage.PT => ptPlacePdfTemplateBytes,
+                _ => throw new NotImplementedException()
+            };
         }
 
         static double GetMean(int nbRating1, int nbRating2, int nbRating3, int nbRating4, int nbRating5) =>

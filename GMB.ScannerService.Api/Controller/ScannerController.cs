@@ -202,7 +202,7 @@ namespace GMB.ScannerService.Api.Controller
                         string name = record.Name;
 
                         StickerCertificateGenerator generator = new();
-                        byte[] drawnCertificate = generator.GeneratePlaceCertificatePdf(record.Name, DateTime.Now, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
+                        byte[] drawnCertificate = generator.GeneratePlaceCertificatePdf(StickerLanguage.FR, record.Name, DateTime.Now, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
 
                         DbSticker sticker = new(record.Id, averageScore, request.OrderDate, null, drawnCertificate, request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
                         int stickerId = dbLib.CreateSticker(sticker);

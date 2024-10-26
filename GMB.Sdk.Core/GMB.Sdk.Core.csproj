@@ -56,6 +56,12 @@
     <None Update="StickerCertificateGenerator\placeCertificateTemplate.pdf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="StickerCertificateGenerator\placeCertificateTemplate_en.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="StickerCertificateGenerator\placeCertificateTemplate_fr.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="StickerImageGenerator\baseImage.jpg">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
