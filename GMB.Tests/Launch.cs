@@ -2,19 +2,16 @@ using GMB.BusinessService.Api.Controller;
 using GMB.ScannerService.Api.Controller;
 using GMB.ScannerService.Api.Services;
 using GMB.Sdk.Core;
-using GMB.Sdk.Core.StickerCertificateGenerator;
-using GMB.Sdk.Core.StickerImageGenerator;
+using GMB.Sdk.Core.FileGenerators.Certificate;
+using GMB.Sdk.Core.FileGenerators.Sticker;
 using GMB.Sdk.Core.Types.Api;
 using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Sdk.Core.Types.Api;
-using System.Diagnostics.Contracts;
 using System.Drawing;
 using System.Drawing.Imaging;
-using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace GMB.Tests
 {
@@ -296,7 +293,7 @@ namespace GMB.Tests
             string brand = "ERA IMMOBILIER";
             int year = 2023;
 
-            StickerCertificateGenerator certificateGenerator = new();
+            CertificateGenerator certificateGenerator = new();
             byte[] certificate = certificateGenerator.GenerateNetworkCertificatePdf(brand, nbEtab, nbReviews, zoneGeo, score, year);
 
             DbStickerNetwork sticker = new(score, date, null, certificate, nbEtab, nbReviews, year, brand, zoneGeo);
@@ -351,22 +348,30 @@ namespace GMB.Tests
         }
 
         [TestMethod]
+        public async Task GenerateStickerTest()
+        {
+            StickerGenerator generator = new();
+            byte[] stickerBytes = await generator.Generate(StickerLanguage.FR, 4.5, "https://vasano.io/certificate/sticker_id", DateTime.Now);
+
+            File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Stickers\\sticker_test.pdf", stickerBytes);
+        }
+
+        [TestMethod]
         public async Task GenerateStickersTest()
         {
-            StickerImageGenerator generator = new();
-            List<long> elapsedTimes = [];
+            StickerGenerator generator = new();
             foreach (StickerLanguage language in Enum.GetValues(typeof(StickerLanguage)))
             {
                 byte[] stickerBytes = await generator.Generate(language, 4.5, "https://vasano.io/certificate/sticker_id", DateTime.Now);
 
-                File.WriteAllBytes($"C:\\Users\\maxim\\Desktop\\sticker_{language}.png", stickerBytes);
+                File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Stickers\\sticker_{language}.pdf", stickerBytes);
             }
         }
 
         [TestMethod]
         public void GeneratePlaceCertificate()
         {
-            StickerCertificateGenerator generator = new();
+            CertificateGenerator generator = new();
             byte[] pdfBytes = generator.GeneratePlaceCertificatePdf(StickerLanguage.FR, "McDonald's boulogne", DateTime.Now, 35, 72, 45, 158, 24); 
             File.WriteAllBytes(@"C:\Users\Lucas\Documents\Code\Vasano\Tests Certificates\placeCertificate.pdf", pdfBytes);
         }
@@ -374,7 +379,7 @@ namespace GMB.Tests
         [TestMethod]
         public void GenerateNetworkCertificate()
         {
-            StickerCertificateGenerator generator = new();
+            CertificateGenerator generator = new();
             byte[] pdfBytes = generator.GenerateNetworkCertificatePdf("McDonald's", 1200, 15487, "Paris - Île de France - France", 4.7, 2023);
             File.WriteAllBytes(@"C:\Users\Lucas\Documents\Code\Vasano\Tests Certificates\networkCertificate.pdf", pdfBytes);
         }

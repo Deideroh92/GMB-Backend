@@ -1,4 +1,4 @@
-﻿using GMB.Sdk.Core.StickerImageGenerator;
+﻿using GMB.Sdk.Core.FileGenerators.Sticker;
 
 namespace GMB.Sdk.Core.Types.Database.Models
 {

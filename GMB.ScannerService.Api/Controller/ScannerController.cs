@@ -10,10 +10,8 @@ using GMB.Sdk.Core;
 using System.Diagnostics;
 using GMB.Sdk.Core.Types.BusinessService;
 using GMB.Sdk.Core.Types.Models;
-using Sdk.Core.Types.Api;
-using System.Drawing;
-using GMB.Sdk.Core.StickerImageGenerator;
-using GMB.Sdk.Core.StickerCertificateGenerator;
+using GMB.Sdk.Core.FileGenerators.Certificate;
+using GMB.Sdk.Core.FileGenerators.Sticker;
 
 namespace GMB.ScannerService.Api.Controller
 {
@@ -201,7 +199,7 @@ namespace GMB.ScannerService.Api.Controller
 
                         string name = record.Name;
 
-                        StickerCertificateGenerator generator = new();
+                        CertificateGenerator generator = new();
                         byte[] drawnCertificate = generator.GeneratePlaceCertificatePdf(StickerLanguage.FR, record.Name, DateTime.Now, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
 
                         DbSticker sticker = new(record.Id, averageScore, request.OrderDate, null, drawnCertificate, request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
@@ -209,7 +207,7 @@ namespace GMB.ScannerService.Api.Controller
 
 
 
-                        StickerImageGenerator stickerGenerator = new();
+                        StickerGenerator stickerGenerator = new();
                         byte[] stickerImage = await stickerGenerator.Generate(request.Lang, averageScore, $"vasano.io/sticker/{stickerId}/certificate", request.OrderDate);
 
                         sticker.Id = stickerId;
