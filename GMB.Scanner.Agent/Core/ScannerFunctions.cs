@@ -648,7 +648,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.CityCode != "75108" ||
                 profile.Country != "France" ||
                 profile.StreetNumber != "3" ||
-                profile.Category != "Restaurant" ||
+                profile.Category != "Restaurant français" ||
                 profile.Website != "https://restaurant-maxims.com/" ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
                 profile.PictureUrl == null ||
