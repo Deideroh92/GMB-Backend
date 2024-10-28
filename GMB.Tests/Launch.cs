@@ -348,21 +348,26 @@ namespace GMB.Tests
         }
 
         [TestMethod]
-        public async Task GenerateStickerTest()
+        public void GenerateStickerTest()
         {
             StickerGenerator generator = new();
-            byte[] stickerBytes = await generator.Generate(StickerLanguage.FR, 4.5, "https://vasano.io/certificate/sticker_id", DateTime.Now);
+            byte[] stickerBytes = generator.Generate(StickerLanguage.FR, 4.5, "https://vasano.io/certificate/sticker_id", DateTime.Now);
 
             File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Stickers\\sticker_test.pdf", stickerBytes);
         }
 
         [TestMethod]
-        public async Task GenerateStickersTest()
+        public void GenerateStickersTest()
         {
             StickerGenerator generator = new();
+            List<long> elapsedTimes = [];
             foreach (StickerLanguage language in Enum.GetValues(typeof(StickerLanguage)))
             {
-                byte[] stickerBytes = await generator.Generate(language, 4.5, "https://vasano.io/certificate/sticker_id", DateTime.Now);
+                System.Diagnostics.Stopwatch sw = new();
+                sw.Start();
+                byte[] stickerBytes = generator.Generate(language, 4.5, "https://vasano.io/certificate/sticker_id", DateTime.Now);
+                sw.Stop();
+                elapsedTimes.Add(sw.ElapsedMilliseconds);
 
                 File.WriteAllBytes($"C:\\Users\\Lucas\\Documents\\Code\\Vasano\\Tests Stickers\\sticker_{language}.pdf", stickerBytes);
             }

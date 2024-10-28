@@ -208,7 +208,7 @@ namespace GMB.ScannerService.Api.Controller
 
 
                         StickerGenerator stickerGenerator = new();
-                        byte[] stickerImage = await stickerGenerator.Generate(request.Lang, averageScore, $"vasano.io/sticker/{stickerId}/certificate", request.OrderDate);
+                        byte[] stickerImage = stickerGenerator.Generate(request.Lang, averageScore, $"vasano.io/sticker/{stickerId}/certificate", request.OrderDate);
 
                         sticker.Id = stickerId;
                         sticker.Image = stickerImage;
