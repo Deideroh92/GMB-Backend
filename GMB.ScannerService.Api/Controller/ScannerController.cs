@@ -195,7 +195,7 @@ namespace GMB.ScannerService.Api.Controller
                         int numberOfReviews = reviews.Count;
 
                         // Avoid division by zero in case there are no reviews
-                        double averageScore = numberOfReviews > 0 ? (double)Math.Round((double)(totalScore / numberOfReviews), 1) : 0;
+                        double averageScore = numberOfReviews > 0 ? Math.Round((double)totalScore / numberOfReviews, 1) : 0;
 
                         string name = record.Name;
 
@@ -204,8 +204,6 @@ namespace GMB.ScannerService.Api.Controller
 
                         DbSticker sticker = new(record.Id, averageScore, request.OrderDate, null, drawnCertificate, request.OrderId, nbRating1, nbRating2, nbRating3, nbRating4, nbRating5);
                         int stickerId = dbLib.CreateSticker(sticker);
-
-
 
                         StickerGenerator stickerGenerator = new();
                         byte[] stickerImage = stickerGenerator.Generate(request.Lang, averageScore, $"vasano.io/sticker/{stickerId}/certificate", request.OrderDate);

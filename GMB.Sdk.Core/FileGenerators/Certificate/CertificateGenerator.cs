@@ -10,18 +10,18 @@ namespace GMB.Sdk.Core.FileGenerators.Certificate
     {
         #region Consts
         // Resources files
-        const string frPlaceCertificateTemplateFilePath = "FileGenerators/Sticker/Resources/placeCertificateTemplate_fr.pdf";
-        const string enPlaceCertificateTemplateFilePath = "FileGenerators/Sticker/Resources/placeCertificateTemplate_en.pdf";
-        const string itPlaceCertificateTemplateFilePath = "FileGenerators/Sticker/Resources/placeCertificateTemplate_it.pdf";
-        const string esPlaceCertificateTemplateFilePath = "FileGenerators/Sticker/Resources/placeCertificateTemplate_es.pdf";
-        const string dePlaceCertificateTemplateFilePath = "FileGenerators/Sticker/Resources/placeCertificateTemplate_de.pdf";
-        const string ptPlaceCertificateTemplateFilePath = "FileGenerators/Sticker/Resources/placeCertificateTemplate_pt.pdf";
-        const string networkCertificateTemplateFilePath = "FileGenerators/Sticker/Resources/networkCertificateTemplate.pdf";
-        const string montserratBoldFontFilePath = "FileGenerators/Sticker/Resources/Montserrat-Bold.ttf";
-        const string montserratLightFontFilePath = "FileGenerators/Sticker/Resources/Montserrat-Light.ttf";
-        const string montserratMediumFontFilePath = "FileGenerators/Sticker/Resources/Montserrat-Medium.ttf";
-        const string montserratRegularFontFilePath = "FileGenerators/Sticker/Resources/Montserrat-Regular.ttf";
-        const string montserratSemiBoldFontFilePath = "FileGenerators/Sticker/Resources/Montserrat-SemiBold.ttf";
+        const string frPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_fr.pdf";
+        const string enPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_en.pdf";
+        const string itPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_it.pdf";
+        const string esPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_es.pdf";
+        const string dePlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_de.pdf";
+        const string ptPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_pt.pdf";
+        const string networkCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/networkCertificateTemplate.pdf";
+        const string montserratBoldFontFilePath = "FileGenerators/Certificate/Resources/Montserrat-Bold.ttf";
+        const string montserratLightFontFilePath = "FileGenerators/Certificate/Resources/Montserrat-Light.ttf";
+        const string montserratMediumFontFilePath = "FileGenerators/Certificate/Resources/Montserrat-Medium.ttf";
+        const string montserratRegularFontFilePath = "FileGenerators/Certificate/Resources/Montserrat-Regular.ttf";
+        const string montserratSemiBoldFontFilePath = "FileGenerators/Certificate/Resources/Montserrat-SemiBold.ttf";
 
         // Shared Field ids
         const string scoreFieldId = "score";
