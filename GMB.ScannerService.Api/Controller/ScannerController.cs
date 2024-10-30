@@ -158,7 +158,7 @@ namespace GMB.ScannerService.Api.Controller
         /// </summary>
         [HttpPost("scanner/sticker")]
         [Authorize(Policy = "DevelopmentPolicy")]
-        public async void StartStickerScanner([FromBody] StickerScannerRequest request)
+        public void StartStickerScanner([FromBody] StickerScannerRequest request)
         {
             try
             {
@@ -228,7 +228,7 @@ namespace GMB.ScannerService.Api.Controller
                     else
                         dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Analyzed);
                 }
-                    
+
             } catch (Exception e)
             {
                 Log.Error(e, $"An exception occurred while starting scanner sticker : {e.Message}");

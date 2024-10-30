@@ -2008,8 +2008,6 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.Add("@Image", SqlDbType.VarBinary).Value = (object?)sticker.Image ?? DBNull.Value;
                 cmd.Parameters.Add("@Certificate", SqlDbType.VarBinary).Value = (object?)sticker.Certificate ?? DBNull.Value;
 
-                cmd.ExecuteNonQuery();
-
                 return Convert.ToInt32(cmd.ExecuteScalar());
             } catch (Exception e)
             {
