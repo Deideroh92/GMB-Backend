@@ -1,5 +1,6 @@
 ﻿using GMB.Sdk.Core.FileGenerators.Sticker;
 using iText.Forms;
+using iText.IO.Font;
 using iText.Kernel.Font;
 using iText.Kernel.Pdf;
 using System.Globalization;
@@ -10,13 +11,8 @@ namespace GMB.Sdk.Core.FileGenerators.Certificate
     {
         #region Consts
         // Resources files
-        const string frPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_fr.pdf";
-        const string enPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_en.pdf";
-        const string itPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_it.pdf";
-        const string esPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_es.pdf";
-        const string dePlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_de.pdf";
-        const string ptPlaceCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/placeCertificateTemplate_pt.pdf";
         const string networkCertificateTemplateFilePath = "FileGenerators/Certificate/Resources/networkCertificateTemplate.pdf";
+
         const string montserratBoldFontFilePath = "FileGenerators/Certificate/Resources/Montserrat-Bold.ttf";
         const string montserratLightFontFilePath = "FileGenerators/Certificate/Resources/Montserrat-Light.ttf";
         const string montserratMediumFontFilePath = "FileGenerators/Certificate/Resources/Montserrat-Medium.ttf";
@@ -27,7 +23,7 @@ namespace GMB.Sdk.Core.FileGenerators.Certificate
         const string scoreFieldId = "score";
         const string footerYearFieldId = "footerYear";
 
-        // Place Field ids
+        // Place Certificate Field ids
         const string placeNameFieldId = "placeName";
         const string startDateFieldId = "startDate";
         const string endDateFieldId = "endDate";
@@ -38,7 +34,7 @@ namespace GMB.Sdk.Core.FileGenerators.Certificate
         const string rating5FieldId = "nbRating5";
         const string ratingMeanFieldId = "meanRating";
 
-        // Network Field ids
+        // Network Certificate Field ids
         const string titleYearFieldId = "titleYear";
         const string networkNameFieldId = "networkName";
         const string nbEtabsFieldId = "nbEtabs";
@@ -48,156 +44,312 @@ namespace GMB.Sdk.Core.FileGenerators.Certificate
         const string certificateDateFieldId = "certificateDate";
         const string descriptionYear1FieldId = "descriptionYear1";
         const string descriptionYear2FieldId = "descriptionYear2";
-        // Strangely, Adobe Acrobat adds "_af_image" to field's name.
-        // Note that this field is of type image, not text like others
-        const string networkImageFieldId = "networkImage_af_image";
         #endregion Consts
 
-        static readonly CultureInfo frenchCulture = new("fr-FR");
-        // TODO: add lazy on images and fonts => first check if there is need to do it when running generator in RabbitMQ Queue
-        static readonly byte[] frPlacePdfTemplateBytes;
-        static readonly byte[] enPlacePdfTemplateBytes;
-        static readonly byte[] itPlacePdfTemplateBytes;
-        static readonly byte[] esPlacePdfTemplateBytes;
-        static readonly byte[] dePlacePdfTemplateBytes;
-        static readonly byte[] ptPlacePdfTemplateBytes;
-        static readonly byte[] networkPdfTemplateBytes;
-        static readonly PdfFont montserratBoldFont;
-        static readonly PdfFont montserratLightFont;
-        static readonly PdfFont montserratMediumFont;
-        static readonly PdfFont montserratRegularFont;
-        static readonly PdfFont montserratSemiBoldFont;
+        #region Static Fields
+        // Cultures Info
+        static readonly Dictionary<StickerLanguage, CultureInfo> cultures = new()
+        {
+            { StickerLanguage.FR, new CultureInfo("fr-FR") },
+            { StickerLanguage.EN, new CultureInfo("en-GB") },
+            { StickerLanguage.IT, new CultureInfo("it-IT") },
+            { StickerLanguage.DE, new CultureInfo("de-DE") },
+            { StickerLanguage.ES, new CultureInfo("es-ES") },
+            { StickerLanguage.PT, new CultureInfo("pt-PT") },
+        };
+
+        // Template File Paths
+        static readonly Dictionary<StickerLanguage, string> placeCertificateTemplatePaths = new()
+        {
+            { StickerLanguage.FR, "FileGenerators/Certificate/Resources/placeCertificateTemplate_fr.pdf" },
+            { StickerLanguage.EN, "FileGenerators/Certificate/Resources/placeCertificateTemplate_en.pdf" },
+            { StickerLanguage.IT, "FileGenerators/Certificate/Resources/placeCertificateTemplate_it.pdf" },
+            { StickerLanguage.DE, "FileGenerators/Certificate/Resources/placeCertificateTemplate_es.pdf" },
+            { StickerLanguage.ES, "FileGenerators/Certificate/Resources/placeCertificateTemplate_de.pdf" },
+            { StickerLanguage.PT, "FileGenerators/Certificate/Resources/placeCertificateTemplate_pt.pdf" },
+        };
+
+        // Cached Resources
+        static readonly Dictionary<StickerLanguage, Lazy<byte[]>> placeTemplateBytes = [];
+        static readonly Lazy<byte[]> networkTemplateBytes = new(() => File.ReadAllBytes(networkCertificateTemplateFilePath));
+
+        // Cached Font Programs
+        static readonly Lazy<FontProgram> montserratBoldFontProgram = new(() => FontProgramFactory.CreateFont(montserratBoldFontFilePath));
+        static readonly Lazy<FontProgram> montserratLightFontProgram = new(() => FontProgramFactory.CreateFont(montserratLightFontFilePath));
+        static readonly Lazy<FontProgram> montserratMediumFontProgram = new(() => FontProgramFactory.CreateFont(montserratMediumFontFilePath));
+        static readonly Lazy<FontProgram> montserratRegularFontProgram = new(() => FontProgramFactory.CreateFont(montserratRegularFontFilePath));
+        static readonly Lazy<FontProgram> montserratSemiBoldFontProgram = new(() => FontProgramFactory.CreateFont(montserratSemiBoldFontFilePath));
+        #endregion Static Fields
 
         static CertificateGenerator()
         {
-            frPlacePdfTemplateBytes = File.ReadAllBytes(frPlaceCertificateTemplateFilePath);
-            enPlacePdfTemplateBytes = File.ReadAllBytes(enPlaceCertificateTemplateFilePath);
-            itPlacePdfTemplateBytes = []; // File.ReadAllBytes(itPlaceCertificateTemplateFilePath);
-            esPlacePdfTemplateBytes = []; // File.ReadAllBytes(esPlaceCertificateTemplateFilePath);
-            dePlacePdfTemplateBytes = []; // File.ReadAllBytes(dePlaceCertificateTemplateFilePath);
-            ptPlacePdfTemplateBytes = []; // File.ReadAllBytes(ptPlaceCertificateTemplateFilePath);
-            networkPdfTemplateBytes = File.ReadAllBytes(networkCertificateTemplateFilePath);
-
-            montserratBoldFont = PdfFontFactory.CreateFont(montserratBoldFontFilePath);
-            montserratLightFont = PdfFontFactory.CreateFont(montserratLightFontFilePath);
-            montserratMediumFont = PdfFontFactory.CreateFont(montserratMediumFontFilePath);
-            montserratRegularFont = PdfFontFactory.CreateFont(montserratRegularFontFilePath);
-            montserratSemiBoldFont = PdfFontFactory.CreateFont(montserratSemiBoldFontFilePath);
-
-            frenchCulture.NumberFormat.NumberGroupSeparator = " ";
+            // Initialize Place Certificate Templates
+            //foreach (StickerLanguage language in placeCertificateTemplatePaths.Keys)
+            //    placeTemplateBytes[language] = new Lazy<byte[]>(() => File.ReadAllBytes(placeCertificateTemplatePaths[language]));
+            placeTemplateBytes[StickerLanguage.FR] = new Lazy<byte[]>(() => File.ReadAllBytes(placeCertificateTemplatePaths[StickerLanguage.FR]));
         }
 
-        public byte[] GeneratePlaceCertificatePdf(StickerLanguage language, string placeName, DateTime stickerDate, int nbRating1, int nbRating2, int nbRating3, int nbRating4, int nbRating5) {
-            using MemoryStream memoryStream = new();
-            using PdfReader pdfReader = new(new MemoryStream(GetCertificateTemplateByLanguage(language)));
+        public byte[] GeneratePlaceCertificatePdf(
+            StickerLanguage language,
+            string placeName,
+            DateTime stickerDate,
+            int nbRating1,
+            int nbRating2,
+            int nbRating3,
+            int nbRating4,
+            int nbRating5)
+        {
+            if (language != StickerLanguage.FR)
+                throw new NotSupportedException();
 
-            PdfDocument placeCertificateDoc = new(pdfReader, new PdfWriter(memoryStream));
+            using MemoryStream memoryStream = new();
+            using PdfReader pdfReader = new(new MemoryStream(GetPlaceTemplateByLanguage(language)));
+            using PdfDocument placeCertificateDoc = new(pdfReader, new PdfWriter(memoryStream));
+
+            // Create PdfFont instance for the document
+            PdfFont montserratSemiBoldFont = PdfFontFactory.CreateFont(montserratSemiBoldFontFilePath);
 
             PdfAcroForm form = PdfAcroForm.GetAcroForm(placeCertificateDoc, true);
 
-            string actualYear = DateTime.Now.Year.ToString();
+            FillPlaceCertificateForm(
+                form,
+                language,
+                placeName,
+                stickerDate,
+                nbRating1,
+                nbRating2,
+                nbRating3,
+                nbRating4,
+                nbRating5,
+                montserratSemiBoldFont);
+
+            form.FlattenFields(); // Flatten the form to burn fields in doc
+            placeCertificateDoc.Close(); // Close the PDF (this will write the content to the MemoryStream)
+
+            // Return the generated PDF as a byte array
+            return memoryStream.ToArray();
+        }
+
+        public byte[] GenerateNetworkCertificatePdf(
+            string networkName,
+            int nbEtabs,
+            int nbReviews,
+            string geoZone,
+            double score,
+            int scoreYear)
+        {
+            using MemoryStream memoryStream = new();
+            using PdfReader pdfReader = new(new MemoryStream(networkTemplateBytes.Value));
+            using PdfDocument networkCertificateDoc = new(pdfReader, new PdfWriter(memoryStream));
+
+            // Create PdfFont instances for the document
+            PdfFont montserratBoldFont = PdfFontFactory.CreateFont(montserratBoldFontFilePath);
+            PdfFont montserratLightFont = PdfFontFactory.CreateFont(montserratLightFontFilePath);
+            PdfFont montserratMediumFont = PdfFontFactory.CreateFont(montserratMediumFontFilePath);
+            PdfFont montserratRegularFont = PdfFontFactory.CreateFont(montserratRegularFontFilePath);
+            PdfFont montserratSemiBoldFont = PdfFontFactory.CreateFont(montserratSemiBoldFontFilePath);
+            
+            PdfAcroForm form = PdfAcroForm.GetAcroForm(networkCertificateDoc, true);
+
+            FillNetworkCertificateForm(
+                form,
+                networkName,
+                nbEtabs,
+                nbReviews,
+                geoZone,
+                score,
+                scoreYear,
+                montserratSemiBoldFont,
+                montserratRegularFont,
+                montserratBoldFont,
+                montserratLightFont,
+                montserratMediumFont
+                );
+            
+            form.FlattenFields(); // Flatten the form to burn fields in doc
+            networkCertificateDoc.Close(); // Close the PDF (this will write the content to the MemoryStream)
+
+            // Return the generated PDF as a byte array
+            return memoryStream.ToArray();
+        }
+
+        #region Static methods
+        static void FillPlaceCertificateForm(
+            PdfAcroForm form,
+            StickerLanguage language,
+            string placeName,
+            DateTime stickerDate,
+            int nbRating1,
+            int nbRating2,
+            int nbRating3,
+            int nbRating4,
+            int nbRating5,
+            PdfFont montserratSemiBoldFont)
+        {
+            CultureInfo culture = GetCultureByLanguage(language);
+
             double mean = Math.Round(GetMean(nbRating1, nbRating2, nbRating3, nbRating4, nbRating5), 3);
             double score = Math.Round(mean, 1);
 
-            // place name (Font Size = 44 in pdf)
-            form.GetField(placeNameFieldId).SetValue(placeName).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale();
+            // Place Name
+            form.GetField(placeNameFieldId)
+                .SetValue(placeName)
+                .SetFont(montserratSemiBoldFont)
+                .SetFontSizeAutoScale();
 
-            // Place score
-            form.GetField(scoreFieldId).SetValue(score.ToString("0.0", frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 55);
+            // Score
+            form.GetField(scoreFieldId)
+                .SetValue(score.ToString("0.0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 55);
 
-            // Certificate dates
+            // Dates
             DateTime startStickerDate = stickerDate.AddMonths(-12);
-            string startDateString = DateOnly.FromDateTime(startStickerDate).ToString(frenchCulture);
-            string endDateString = DateOnly.FromDateTime(stickerDate).ToString(frenchCulture);
-            form.GetField(startDateFieldId).SetValue(startDateString).SetFontAndSize(montserratSemiBoldFont, 12);
-            form.GetField(endDateFieldId).SetValue(endDateString).SetFontAndSize(montserratSemiBoldFont, 12);
+            string startDateString = startStickerDate.ToString("d", culture);
+            string endDateString = stickerDate.ToString("d", culture);
 
-            // Place ratings
-            form.GetField(rating1FieldId).SetValue(nbRating1.ToString()).SetFontAndSize(montserratSemiBoldFont, 12);
-            form.GetField(rating2FieldId).SetValue(nbRating2.ToString()).SetFontAndSize(montserratSemiBoldFont, 12);
-            form.GetField(rating3FieldId).SetValue(nbRating3.ToString()).SetFontAndSize(montserratSemiBoldFont, 12);
-            form.GetField(rating4FieldId).SetValue(nbRating4.ToString()).SetFontAndSize(montserratSemiBoldFont, 12);
-            form.GetField(rating5FieldId).SetValue(nbRating5.ToString()).SetFontAndSize(montserratSemiBoldFont, 12);
-            form.GetField(ratingMeanFieldId).SetValue(mean.ToString("0.000", frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 12);
+            form.GetField(startDateFieldId)
+                .SetValue(startDateString)
+                .SetFontAndSize(montserratSemiBoldFont, 12);
 
-            // Actual year
-            form.GetField(footerYearFieldId).SetValue(DateTime.Now.Year.ToString()).SetFontAndSize(montserratMediumFont, 8);
+            form.GetField(endDateFieldId)
+                .SetValue(endDateString)
+                .SetFontAndSize(montserratSemiBoldFont, 12);
 
-            // Flatten the form to burn fields in doc
-            form.FlattenFields();
+            // Ratings
+            form.GetField(rating1FieldId)
+                .SetValue(nbRating1.ToString("N0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 12);
 
-            // Close the PDF (this will write the content to the MemoryStream)
-            placeCertificateDoc.Close();
+            form.GetField(rating2FieldId)
+                .SetValue(nbRating2.ToString("N0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 12);
 
-            // Return the generated PDF as a byte array
-            return memoryStream.ToArray();
+            form.GetField(rating3FieldId)
+                .SetValue(nbRating3.ToString("N0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 12);
+
+            form.GetField(rating4FieldId)
+                .SetValue(nbRating4.ToString("N0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 12);
+
+            form.GetField(rating5FieldId)
+                .SetValue(nbRating5.ToString("N0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 12);
+
+            form.GetField(ratingMeanFieldId)
+                .SetValue(mean.ToString("0.000", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 12);
+
+            // Footer Year
+            string currentYear = DateTime.Now.Year.ToString();
+            form.GetField(footerYearFieldId)
+                .SetValue(currentYear)
+                .SetFontAndSize(montserratSemiBoldFont, 8);
         }
 
-        public byte[] GenerateNetworkCertificatePdf(string networkName, int nbEtabs, int nbReviews, string geoZone, double score, int scoreYear)
+        static void FillNetworkCertificateForm(
+            PdfAcroForm form,
+            string networkName,
+            int nbEtabs,
+            int nbReviews,
+            string geoZone,
+            double score,
+            int scoreYear,
+            PdfFont montserratSemiBoldFont,
+            PdfFont montserratRegularFont,
+            PdfFont montserratBoldFont,
+            PdfFont montserratLightFont,
+            PdfFont montserratMediumFont)
         {
-            using MemoryStream memoryStream = new();
-            using (PdfReader pdfReader = new(new MemoryStream(networkPdfTemplateBytes)))
+            CultureInfo culture = GetCultureByLanguage(StickerLanguage.FR); // Network certificates are French only
+
+            // Network Name
+            form.GetField(networkNameFieldId)
+                .SetValue(networkName)
+                .SetFont(montserratSemiBoldFont)
+                .SetFontSizeAutoScale();
+
+            // Number of Establishments
+            form.GetField(nbEtabsFieldId)
+                .SetValue(nbEtabs.ToString("N0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 16);
+
+            // Number of Reviews
+            form.GetField(nbReviewsFieldId)
+                .SetValue(nbReviews.ToString("N0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 16);
+
+            // Geographic Zone
+            form.GetField(geoZoneFieldId)
+                .SetValue(geoZone)
+                .SetFont(montserratSemiBoldFont)
+                .SetFontSizeAutoScale();
+
+            // Score
+            form.GetField(scoreFieldId)
+                .SetValue(Math.Round(score, 1).ToString("0.0", culture))
+                .SetFontAndSize(montserratSemiBoldFont, 55);
+
+            // Title Year and Score Year
+            form.GetField(titleYearFieldId)
+                .SetValue(scoreYear.ToString())
+                .SetFontAndSize(montserratRegularFont, 15);
+
+            form.GetField(scoreYearFieldId)
+                .SetValue(scoreYear.ToString())
+                .SetFontAndSize(montserratBoldFont, 13);
+
+            // Certificate Date
+            string certificateDate = DateTime.Now.ToString("d", culture);
+            form.GetField(certificateDateFieldId)
+                .SetValue(certificateDate)
+                .SetFontAndSize(montserratSemiBoldFont, 16);
+
+            // Description Year and Footer Year
+            string currentYear = DateTime.Now.Year.ToString();
+
+            form.GetField(descriptionYear1FieldId)
+                .SetValue(currentYear)
+                .SetFontAndSize(montserratLightFont, 9);
+
+            form.GetField(descriptionYear2FieldId)
+                .SetValue(currentYear)
+                .SetFontAndSize(montserratLightFont, 9);
+
+            form.GetField(footerYearFieldId)
+                .SetValue(currentYear)
+                .SetFontAndSize(montserratMediumFont, 8);
+        }
+
+        static byte[] GetPlaceTemplateByLanguage(StickerLanguage language)
+        {
+            if (placeTemplateBytes.TryGetValue(language, out Lazy<byte[]>? lazyBytes))
             {
-                PdfDocument networkCertificateDoc = new(pdfReader, new PdfWriter(memoryStream));
+                return lazyBytes.Value;
+            }
+            throw new NotSupportedException($"Template for language '{language}' is not supported.");
+        }
 
-                PdfAcroForm form = PdfAcroForm.GetAcroForm(networkCertificateDoc, true);
+        static CultureInfo GetCultureByLanguage(StickerLanguage language)
+        {
+            if (cultures.TryGetValue(language, out CultureInfo? culture))
+            {
+                return culture;
+            }
+            return CultureInfo.InvariantCulture;
+        }
 
-                // Network name
-                form.GetField(networkNameFieldId).SetValue(networkName).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale(); // 18 in pdf
-
-                // Number of etabs
-                form.GetField(nbEtabsFieldId).SetValue(nbEtabs.ToString("N0", frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 16);
-
-                // Number of reviews
-                form.GetField(nbReviewsFieldId).SetValue(nbReviews.ToString("N0", frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 16);
-
-                // Geographic zone
-                form.GetField(geoZoneFieldId).SetValue(geoZone).SetFont(montserratSemiBoldFont).SetFontSizeAutoScale();//.SetFontAndSize(montserratMediumFont, 18);
-
-                // Score
-                form.GetField(scoreFieldId).SetValue(Math.Round(score, 1).ToString("0.0", frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 55);
-
-                // Title year and Score year
-                form.GetField(titleYearFieldId).SetValue(scoreYear.ToString()).SetFontAndSize(montserratRegularFont, 15);
-                form.GetField(scoreYearFieldId).SetValue(scoreYear.ToString()).SetFontAndSize(montserratBoldFont, 13);
-
-                // Actual date
-                form.GetField(certificateDateFieldId).SetValue(DateOnly.FromDateTime(DateTime.Now).ToString(frenchCulture)).SetFontAndSize(montserratSemiBoldFont, 16);
-
-                // Actual year
-                string actualYear = DateTime.Now.Year.ToString();
-                form.GetField(descriptionYear1FieldId).SetValue(actualYear).SetFontAndSize(montserratLightFont, 9);
-                form.GetField(descriptionYear2FieldId).SetValue(actualYear).SetFontAndSize(montserratLightFont, 9);
-                form.GetField(footerYearFieldId).SetValue(actualYear).SetFontAndSize(montserratMediumFont, 8);
-
-                // Flatten the form to burn fields in doc
-                form.FlattenFields();
-
-                // Close the PDF (this will write the content to the MemoryStream)
-                networkCertificateDoc.Close();
+        static double GetMean(int nbRating1, int nbRating2, int nbRating3, int nbRating4, int nbRating5)
+        {
+            int totalRatings = nbRating1 + nbRating2 + nbRating3 + nbRating4 + nbRating5;
+            if (totalRatings == 0)
+            {
+                return 0;
             }
 
-            // Return the generated PDF as a byte array
-            return memoryStream.ToArray();
+            double weightedSum = nbRating1 * 1 + nbRating2 * 2 + nbRating3 * 3 + nbRating4 * 4 + nbRating5 * 5;
+            return weightedSum / totalRatings;
         }
-
-        static byte[] GetCertificateTemplateByLanguage(StickerLanguage language)
-        {
-            return language switch {
-                StickerLanguage.FR => frPlacePdfTemplateBytes,
-                StickerLanguage.EN => enPlacePdfTemplateBytes,
-                StickerLanguage.IT => itPlacePdfTemplateBytes,
-                StickerLanguage.ES => esPlacePdfTemplateBytes,
-                StickerLanguage.DE => dePlacePdfTemplateBytes,
-                //StickerLanguage.PT => ptPlacePdfTemplateBytes,
-                _ => throw new NotImplementedException()
-            };
-        }
-
-        static double GetMean(int nbRating1, int nbRating2, int nbRating3, int nbRating4, int nbRating5) =>
-            (nbRating1 + nbRating2 * 2 + nbRating3 * 3 + nbRating4 * 4 + nbRating5 * 5)
-            /
-            (double)(nbRating1 + nbRating2 + nbRating3 + nbRating4 + nbRating5);
-
+        #endregion Static methods
     }
 }
