@@ -114,13 +114,12 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="places"></param>
     /// <param name="orderDate"></param>
     /// <param name="lang"></param>
-    public class StickerScannerRequest(int orderId, List<DbPlace> places, DateTime orderDate, StickerLanguage lang, bool isAdmin = false)
+    public class StickerScannerRequest(int orderId, List<DbPlace> places, DateTime orderDate, StickerLanguage lang)
     {
         public int OrderId { get; set; } = orderId;
         public StickerLanguage Lang { get; set; } = lang;
         public DateTime OrderDate { get; set; } = orderDate;
         public List<DbPlace> Places { get; set; } = places;
-        public bool IsAdmin { get; set; } = isAdmin;
     }
     #endregion
 }

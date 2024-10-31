@@ -158,7 +158,7 @@ namespace GMB.ScannerService.Api.Controller
         /// </summary>
         [HttpPost("scanner/sticker")]
         [Authorize(Policy = "DevelopmentPolicy")]
-        public void StartStickerScanner([FromBody] StickerScannerRequest request)
+        public bool StartStickerScanner([FromBody] StickerScannerRequest request)
         {
             try
             {
@@ -221,13 +221,7 @@ namespace GMB.ScannerService.Api.Controller
                         continue;
                     }
                 }
-                if (!isError)
-                {
-                    if (request.IsAdmin)
-                        dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Delivered);
-                    else
-                        dbLib.UpdateOrderStatus(request.OrderId, OrderStatus.Analyzed);
-                }
+                return isError;
 
             } catch (Exception e)
             {

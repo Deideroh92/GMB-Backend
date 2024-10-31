@@ -9,6 +9,7 @@ using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
 using System.Drawing.Imaging;
@@ -232,7 +233,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task LaunchOrder()
         {
-            int id = 5;
+            int id = 6;
             
             DbLib db = new(true);
 
@@ -258,21 +259,30 @@ namespace GMB.Tests
 
             List<Task> tasks = [];
 
+            bool isError = false;
+
             foreach (var chunk in places.Chunk(places.Count / nbThreads))
             {
                 Task newThread = Task.Run(() =>
                 {
                     ScannerController scannerController = new();
 
-                    StickerScannerRequest request = new(id, places, order.CreatedAt, order.Language, order.OwnerId == "cm1nx5an60000tem7v4rf3dkr");
+                    StickerScannerRequest request = new(id, new List<DbPlace>(chunk), order.CreatedAt, order.Language);
 
-                    scannerController.StartStickerScanner(request);
+                    isError = scannerController.StartStickerScanner(request);
                 });
                 tasks.Add(newThread);
                 Thread.Sleep(15000);
             }
             await Task.WhenAll(tasks);
 
+            if (!isError)
+            {
+                if (order.OwnerId == "cm1nx5an60000tem7v4rf3dkr")
+                    db.UpdateOrderStatus(id, OrderStatus.Delivered);
+                else
+                    db.UpdateOrderStatus(id, OrderStatus.Analyzed);
+            }
 
             return;
         }
