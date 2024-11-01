@@ -226,6 +226,7 @@ namespace GMB.ScannerService.Api.Controller
             } catch (Exception e)
             {
                 Log.Error(e, $"An exception occurred while starting scanner sticker : {e.Message}");
+                return true;
             }
         }
     }

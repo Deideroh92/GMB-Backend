@@ -151,7 +151,7 @@ namespace GMB.Scanner.Agent
 
                                 foreach (DbBusinessReview review in reviewList)
                                 {
-                                    if (reviewList.Find((x) => x.IdReview == review.IdReview) == null)
+                                    if (reviews.Find((x) => x.IdReview == review.IdReview) == null)
                                         db.UpdateBusinessReviewDeleted(review.IdReview, true);
                                 }
                             } 
