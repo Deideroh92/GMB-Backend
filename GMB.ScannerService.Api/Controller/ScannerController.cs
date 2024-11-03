@@ -60,7 +60,7 @@ namespace GMB.ScannerService.Api.Controller
                 {
                     Task newThread = Task.Run(async () =>
                     {
-                        ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState);
+                        ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState, request.CheckDeletedStatus);
                         await Scanner.Agent.Scanner.BusinessScanner(scannerRequest).ConfigureAwait(false);
                     });
                     tasks.Add(newThread);
