@@ -1633,8 +1633,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string changeDateCommand = changeDate ? ", REVIEW_DATE_UPDATE = @ReviewDate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate" : "";
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, VISIT_DATE = @VisitDate";
+                string changeDateCommand = changeDate ? ", REVIEW_DATE_UPDATE = @ReviewDateUpdate, REVIEW_GOOGLE_DATE = @ReviewGoogleDate" : "";
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET USER_NAME = @UserName, USER_STATUS = @UserStatus, SCORE = @Score, USER_NB_REVIEWS = @UserNbReviews, REVIEW = @Review, REVIEW_ANSWERED = @ReviewAnswered, DATE_UPDATE = @DateUpdate, DELETED = @Deleted, VISIT_DATE = @VisitDate";
                 string whereCommand = " WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand + changeDateCommand + whereCommand, Connection);
                 cmd.Parameters.AddWithValue("@UserName", GetValueOrDefault(review.User.Name));
@@ -1646,10 +1646,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@DateUpdate", GetValueOrDefault(review.DateUpdate));
                 cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(review.IdReview));
                 cmd.Parameters.AddWithValue("@VisitDate", GetValueOrDefault(review.VisitDate));
+                cmd.Parameters.AddWithValue("@Deleted", GetValueOrDefault(review.Deleted));
                 if (changeDate)
                 {
                     cmd.Parameters.AddWithValue("@ReviewDateUpdate", GetValueOrDefault(review.ReviewDate));
-                    cmd.Parameters.AddWithValue("@ReviewGoogleDateUpdate", GetValueOrDefault(review.ReviewGoogleDate));
+                    cmd.Parameters.AddWithValue("@ReviewGoogleDate", GetValueOrDefault(review.ReviewGoogleDate));
                 }
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
