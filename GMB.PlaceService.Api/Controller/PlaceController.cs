@@ -20,7 +20,7 @@ namespace GMB.PlaceService.Api.Controller
         /// </summary>
         /// <param name="query"></param>
         /// <returns>GMB</returns>
-        [HttpGet("place/find-by-query/{query}")]
+        [HttpPost("place/find-by-query")]
         [Authorize]
         public async Task<ActionResult<GetBusinessListFromGoogleResponse>> GetPlaceByQuery(GetPlaceRequest query)
         {
@@ -45,7 +45,7 @@ namespace GMB.PlaceService.Api.Controller
         /// </summary>
         /// <param name="query"></param>
         /// <returns>GMB list or null if nothing found</returns>
-        [HttpPost("place/find-by-query")]
+        [HttpPost("place/find-by-query-list")]
         [Authorize]
         public async Task<ActionResult<GetBusinessListFromGoogleResponse>> GetPlacesByQueryList(GetPlacesRequest query)
         {
@@ -79,15 +79,13 @@ namespace GMB.PlaceService.Api.Controller
         /// </summary>
         /// <param name="query"></param>
         /// <returns>GMB or null if not found</returns>
-        [HttpGet("place/find-by-place-id/{query}")]
+        [HttpPost("place/find-by-place-id")]
         [Authorize]
         public async Task<ActionResult<GetBusinessFromGoogleResponse>> GetPlaceByPlaceId(GetPlaceRequest query)
         {
             try
             {
                 Place? place = await Service.PlaceService.GetPlaceByPlaceId(query.Query, query.Lang);
-
-                byte[]? test = await Service.PlaceService.GetPhotoById("AXCi2Q6N3kOdfqi9GaQOq0-4NOaBPCxwjI39VcHvitvNFD4XMuI_8ONn9Tooudy1uCnO3BUgLU9dJaeMpYV1dc11Nfkodaq2JyRO84-9TuNmnLHtatfgeCRgBdFBfmaW4pVpUCgH0-_MAy5wjBujf0PV76PD7TnKUBsgcJij");
                 
                 if (place == null)
                 {
@@ -111,7 +109,7 @@ namespace GMB.PlaceService.Api.Controller
         /// </summary>
         /// <param name="query"></param>
         /// <returns>GMB list or null if nothing found</returns>
-        [HttpPost("place/find-by-place-id")]
+        [HttpPost("place/find-by-place-id-list")]
         [Authorize]
         public async Task<ActionResult<GetBusinessListFromGoogleResponse>> GetPlacesByPlaceIdList(GetPlacesRequest query)
         {

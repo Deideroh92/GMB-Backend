@@ -24,7 +24,7 @@ namespace GMB.PlaceService.Api.Service
             try
             {
                 using HttpClient client = new();
-                string apiUrl = "https://places.googleapis.com/v1/places/" + placeId + "?language=" + lang;
+                string apiUrl = "https://places.googleapis.com/v1/places/" + placeId + "?languageCode=" + lang;
 
                 HttpRequestMessage request = new(HttpMethod.Get, apiUrl);
 
@@ -102,14 +102,13 @@ namespace GMB.PlaceService.Api.Service
                 using HttpClient client = new();
                 Root? placeResponse = new();
 
-                string apiUrl = "https://places.googleapis.com/v1/places:searchText?language=" + lang;
+                string apiUrl = $"https://places.googleapis.com/v1/places:searchText?languageCode={lang}";
                 client.DefaultRequestHeaders.Add("X-Goog-Api-Key", API_KEY);
-                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.internationalPhoneNumber," +
-                    "places.nationalPhoneNumber,places.websiteUri,places.userRatingCount,places.googleMapsUri,places.addressComponents,places.plusCode,places.shortFormattedAddress," +
-                    "places.location,places.rating,places.businessStatus, places.photos");
-                string requestBody = $"{{\"textQuery\": \"{query}\"}}";
+                client.DefaultRequestHeaders.Add("X-Goog-FieldMask", "places.id,places.displayName,places.formattedAddress,places.internationalPhoneNumber,places.nationalPhoneNumber,places.websiteUri,places.userRatingCount,places.googleMapsUri,places.addressComponents,places.plusCode,places.shortFormattedAddress,places.location,places.rating,places.businessStatus,places.photos");
 
+                string requestBody = $"{{\"textQuery\": \"{query}\"}}";
                 HttpResponseMessage response = await client.PostAsync(apiUrl, new StringContent(requestBody, Encoding.UTF8, "application/json"));
+
 
                 if (response.IsSuccessStatusCode)
                 {
