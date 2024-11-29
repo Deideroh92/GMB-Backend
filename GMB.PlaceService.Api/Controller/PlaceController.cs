@@ -28,6 +28,10 @@ namespace GMB.PlaceService.Api.Controller
             List<GoogleResponse> businessList = [];
             Place[]? places = await Service.PlaceService.GetPlacesByQuery(query.Query, query.Lang);
 
+            if (places == null || places.Length == 0) {
+                return new GetBusinessListFromGoogleResponse(null);
+            }
+
             foreach (Place place in places)
             {
                 Business? bp = ToolBox.PlaceToB(place);

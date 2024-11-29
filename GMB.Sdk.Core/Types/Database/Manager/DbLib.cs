@@ -2157,6 +2157,37 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error deleting sticker for place id = [{placeId}] and year = [{year}]", e);
             }
         }
+
+        public DbUserVasanoIO? GetVasanoIOUser(string id)
+        {
+            try
+            {
+                string selectCommand = "SELECT * FROM Users WHERE Id = @Id";
+
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Id", id);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<DbPlace> placeList = new([]);
+
+                if (reader.Read())
+                {
+                    DbUserVasanoIO user = new(
+                        reader["name"].ToString()!,
+                        reader["email"].ToString()!,
+                        id
+                        );
+
+                    return user;
+                }
+
+                return null;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting user with id = [{id}]", e);
+            }
+        }
         #endregion
 
         #region Error Table

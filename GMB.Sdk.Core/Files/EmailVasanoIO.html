@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        .container {
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            margin: 40px auto;
+            padding: 20px;
+            max-width: 465px;
+        }
+
+        .section {
+            margin-top: 32px;
+        }
+
+        .img-center {
+            display: block;
+            margin: 0 auto;
+            width: 50%;
+            height: 50%;
+        }
+
+        .hr {
+            border: 1px solid #eaeaea;
+            margin: 26px 0;
+            width: 100%;
+        }
+
+        .text {
+            color: black;
+            font-size: 14px;
+            line-height: 24px;
+        }
+
+        .button {
+            background-color: #007ee6;
+            color: white;
+            font-size: 12px;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            padding: 10px 20px;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .link {
+            color: #007ee6;
+            text-decoration: none;
+        }
+
+        .footer-text {
+            color: #666666;
+            font-size: 12px;
+            line-height: 24px;
+        }
+
+        .footer {
+            max-width: 580px;
+            margin: 0 auto;
+            text-align: center;
+            color: #706a7b;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body style="background-color: white; font-family: Arial, sans-serif;">
+    <div class="container">
+        <div class="section">
+            <a href="https://vasano.io">
+                <img src="https://vasano.io/images/logo/logo_Vasano.webp"
+                     alt="Vasano Solutions"
+                     class="img-center" />
+            </a>
+        </div>
+        <hr class="hr" />
+        <p class="text">Hello {{username}},</p>
+        <p class="text">
+            Your STICKERS are ready for selection for the order #
+            <strong>{{orderId}}</strong>.
+        </p>
+        <p class="text">
+            The next step for you is to select which STICKERS you are interested
+            in, and continue your order!
+        </p>
+        <div class="section" style="text-align: center; margin: 32px 0;">
+            <a href="https://vasano.io/orders/{{orderId}}" class="button">
+                Select your STICKERS
+            </a>
+        </div>
+        <p class="text">
+            or copy and paste this URL into your browser:
+            <a href="https://vasano.io/orders/{{orderId}}" class="link">
+                https://vasano.io/orders/{{orderId}}
+            </a>
+        </p>
+        <hr class="hr" />
+        <p class="footer-text">
+            This email was sent because you successfully purchased our STICKERS on
+            Vasano.io. If you were not expecting this invitation, contact
+            immediately
+            <a href="mailto:contact@vasano.io" class="link">contact@vasano.io</a>.
+        </p>
+    </div>
+
+    <div class="footer">
+        <a href="https://www.linkedin.com/company/vasano-solutions/"
+           target="_blank"
+           style="color: #007ee6; text-decoration: none;">
+            LinkedIn
+        </a>
+        <p>© 2024 Vasano Solutions, All Rights Reserved</p>
+        <p>10 Rue de la Paix, 75002 Paris - FRANCE</p>
+    </div>
+</body>
+</html>

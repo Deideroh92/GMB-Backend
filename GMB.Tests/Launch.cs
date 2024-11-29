@@ -94,7 +94,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 8);
+                db.UpdateBusinessProfileProcessingState(idEtab, 1);
             }
         }
         /// <summary>
@@ -233,7 +233,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task LaunchOrder()
         {
-            int id = 6;
+            int id = 10;
             
             DbLib db = new(true);
 
@@ -281,7 +281,15 @@ namespace GMB.Tests
                 if (order.OwnerId == "cm1nx5an60000tem7v4rf3dkr")
                     db.UpdateOrderStatus(id, OrderStatus.Delivered);
                 else
+                {
                     db.UpdateOrderStatus(id, OrderStatus.Analyzed);
+                    DbUserVasanoIO? user = db.GetVasanoIOUser(order.OwnerId);
+                    if (user != null)
+                    {
+                        ToolBox.SendEmailVasanoIO(user.Name, id, "Your STICKERS are ready!", user.Email);
+                    }
+                }
+                    
             }
 
             return;

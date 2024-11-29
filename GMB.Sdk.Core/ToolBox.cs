@@ -78,11 +78,94 @@ namespace GMB.Sdk.Core
             smtpClient.Send(mailMessage4);
         }
 
-        /// <summary>
-        /// Return the current exact executable root path (folder where is located exe)
-        /// </summary>
-        /// <returns></returns>
-        public static string GetExecutableRootPath()
+    public static void SendEmailVasanoIO(string username, int orderId, string subject, string email)
+    {
+        string smtpServer = "smtp.gmail.com";
+        int smtpPort = 587;
+        string fromEmail = "maximiliend1998@gmail.com";
+        string password = "iigz pyyn ngsp wjqq"; // Use your app-specific password
+        string[] toEmails = { email, "admin@vasano.io" };
+
+        string body = $@"
+        <!DOCTYPE html>
+        <html>
+            <head>
+            <style>
+                /* Define styles here */
+            </style>
+            </head>
+            <body style='background-color: white; font-family: Arial, sans-serif;'>
+            <div style='border: 1px solid #eaeaea; border-radius: 8px; margin: 40px auto; padding: 20px; max-width: 465px;'>
+                <div style='margin-top: 32px; text-align: center;'>
+                <a href='https://vasano.io'>
+                    <img
+                    src='https://vasano.io/images/logo/logo_Vasano.webp'
+                    alt='Vasano Solutions'
+                    style='display: block; margin: 0 auto; width: 50%; height: 50%;'
+                    />
+                </a>
+                </div>
+                <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+                <p style='color: black; font-size: 14px; line-height: 24px;'>Hello {username},</p>
+                <p style='color: black; font-size: 14px; line-height: 24px;'>
+                Your STICKERS are ready for selection for the order #
+                <strong>{orderId}</strong>.
+                </p>
+                <p style='color: black; font-size: 14px; line-height: 24px;'>
+                The next step for you is to select which STICKERS you are interested
+                in, and continue your order!
+                </p>
+                <div style='text-align: center; margin: 32px 0;'>
+                <a href='https://vasano.io/orders/{orderId}' style='background-color: #007ee6; color: white; font-size: 12px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; display: inline-block;'>
+                    Select your STICKERS
+                </a>
+                </div>
+                <p style='color: black; font-size: 14px; line-height: 24px;'>
+                or copy and paste this URL into your browser:
+                <a href='https://vasano.io/orders/{orderId}' style='color: #007ee6; text-decoration: none;'>https://vasano.io/orders/{orderId}</a>
+                </p>
+                <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+                <p style='color: #666666; font-size: 12px; line-height: 24px;'>
+                This email was sent because you successfully purchased our STICKERS
+                on Vasano.io. If you were not expecting this invitation, contact
+                immediately <a href='mailto:contact@vasano.io' style='color: #007ee6;'>contact@vasano.io</a>.
+                </p>
+            </div>
+            <div style='max-width: 580px; margin: 0 auto; text-align: center; color: #706a7b; font-size: 12px;'>
+                <a href='https://www.linkedin.com/company/vasano-solutions/' target='_blank' style='color: #007ee6; text-decoration: none;'>LinkedIn</a>
+                <p>© 2024 Vasano Solutions, All Rights Reserved</p>
+                <p>10 Rue de la Paix, 75002 Paris - FRANCE</p>
+            </div>
+            </body>
+        </html>";
+
+        // Configure SMTP client
+        SmtpClient smtpClient = new(smtpServer)
+        {
+            Port = smtpPort,
+            UseDefaultCredentials = false,
+            Credentials = new NetworkCredential(fromEmail, password),
+            EnableSsl = true
+        };
+
+        // Create and send the email to each recipient
+        foreach (string toEmail in toEmails)
+        {
+            MailMessage mailMessage = new(fromEmail, toEmail, subject, body)
+            {
+                IsBodyHtml = true
+            };
+
+            smtpClient.Send(mailMessage);
+        }
+    }
+
+
+    /// <summary>
+    /// Return the current exact executable root path (folder where is located exe)
+    /// </summary>
+    /// <returns></returns>
+    public static string GetExecutableRootPath()
         {
             return $"{(RuntimeInformation.IsOSPlatform(OSPlatform.Linux) ? "/" : "")}{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}";
         }
