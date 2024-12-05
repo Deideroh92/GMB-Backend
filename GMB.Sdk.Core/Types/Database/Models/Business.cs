@@ -31,6 +31,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public DateTime? DateUpdate { get; set; }
         public string? PictureUrl { get; set; }
         public string? PlaceUrl { get; set; }
+        [JsonConverter(typeof(JsonStringEnumConverter))]
         public BusinessStatus Status { get; set; }
         public int Processing { get; set; }
         public double? Score { get; set; }
