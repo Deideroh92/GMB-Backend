@@ -8,6 +8,7 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using Serilog;
 using System.Collections.ObjectModel;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace GMB.Scanner.Agent.Core
@@ -33,7 +34,7 @@ namespace GMB.Scanner.Agent.Core
         /// <param name="business"></param>
         /// <param name="getPlusCode"></param>
         /// <returns>Business Profile and a Business Score if any</returns>
-        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, GetBusinessProfileRequest request, DbBusinessProfile? business, bool getPlusCode = true)
+        public static async Task<(DbBusinessProfile?, DbBusinessScore?)> GetBusinessProfileAndScoreFromGooglePageAsync(SeleniumDriver driver, GetBusinessProfileRequest request, DbBusinessProfile? business, bool getPlusCode = true, bool getPhotos = false)
         {
             // Initialization of all variables
             int? reviews = null;

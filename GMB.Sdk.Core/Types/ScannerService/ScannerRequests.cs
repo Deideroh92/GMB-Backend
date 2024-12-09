@@ -54,7 +54,8 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="businessList"></param>
     /// <param name="dateLimit"></param>
     /// <param name="updateProcessingState"></param>
-    public class ScannerBusinessParameters(Operation operation, bool getReviews, List<BusinessAgent>? businessList, DateTime? dateLimit = null, bool updateProcessingState = true, bool checkReviewStatus = false)
+    /// <param name="getPhotos"></param>
+    public class ScannerBusinessParameters(Operation operation, bool getReviews, List<BusinessAgent>? businessList, DateTime? dateLimit = null, bool updateProcessingState = true, bool checkReviewStatus = false, bool getPhotos = false)
     {
         public List<BusinessAgent>? BusinessList { get; set; } = businessList;
         public bool GetReviews { get; set; } = getReviews;
@@ -62,6 +63,7 @@ namespace GMB.Sdk.Core.Types.ScannerService
         public DateTime? DateLimit { get; set; } = dateLimit;
         public Operation Operation { get; set; } = operation;
         public bool CheckReviewStatus { get; set; } = checkReviewStatus;
+        public bool GetPhotos { get; set; } = getPhotos;
     }
     /// <summary>
     /// Constructor.
@@ -79,6 +81,7 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="urlState"></param>
     /// <param name="updateProcessingState"></param>
     /// <param name="checkDeletedStatus"></param>
+    /// <param name="checkPhotos"></param>
     public class BusinessScannerRequest(int? entries,
                                         int processing,
                                         Operation operationType,
@@ -91,7 +94,8 @@ namespace GMB.Sdk.Core.Types.ScannerService
                                         string? category = null,
                                         UrlState urlState = UrlState.NEW,
                                         bool updateProcessingState = true,
-                                        bool checkDeletedStatus = false)
+                                        bool checkDeletedStatus = false,
+                                        bool checkPhotos = false)
     {
         public int? Entries { get; set; } = entries;
         public int Processing { get; set; } = processing;
@@ -106,6 +110,7 @@ namespace GMB.Sdk.Core.Types.ScannerService
         public UrlState UrlState { get; set; } = urlState;
         public bool UpdateProcessingState { get; set; } = updateProcessingState;
         public bool CheckDeletedStatus { get; set; } = checkDeletedStatus;
+        public bool CheckPhotos { get; set; } = checkPhotos;
     }
     /// <summary>
     /// Constructor.

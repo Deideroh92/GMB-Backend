@@ -22,9 +22,9 @@ namespace GMB.Tests
         public async Task CheckXPath()
         {
             SeleniumDriver driver = new();
-            string url = "https://www.google.com/maps/place/Starbucks/@48.8370969,2.2386167,18.97z/data=!3m1!5s0x47e67ae79f1bc11b:0x7edf0a3a4d967b6c!4m14!1m7!3m6!1s0x47e67ae7a1990ecb:0x4b52704d99f5fa86!2sLes+Passages+Shopping+Center!8m2!3d48.8372222!4d2.2397222!16s%2Fg%2F1tph11dz!3m5!1s0x47e67ae79ff165e9:0x327bbed739092bc4!8m2!3d48.8367!4d2.23933!16s%2Fg%2F1tcvhdfk?entry=ttu&g_ep=EgoyMDI0MDgyMS4wIKXMDSoASAFQAw%3D%3D";
+            string url = "https://www.google.com/maps/place/Allianz+Assurance+PARIS+ETOILE+-+SENECHAL+%26+CAILLARD/@48.8743443,2.2503592,13z/data=!4m10!1m2!2m1!1sallianz!3m6!1s0x47e66f7d3df59105:0x2fdab494f64176c8!8m2!3d48.8743443!4d2.2915579!15sCgdhbGxpYW56IgOIAQFaCSIHYWxsaWFuepIBEGluc3VyYW5jZV9hZ2VuY3ngAQA!16s%2Fg%2F11h7tdybz2?entry=ttu&g_ep=EgoyMDI0MTIwNC4wIKXMDSoASAFQAw%3D%3D";
             (DbBusinessProfile? profile, DbBusinessScore? score) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url), null);
-
+            driver.Dispose();
             return;
         }
 

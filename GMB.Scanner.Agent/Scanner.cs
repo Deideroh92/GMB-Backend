@@ -5,8 +5,13 @@ using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using GMB.Sdk.Core.Types.ScannerService;
+using OpenQA.Selenium.Support.UI;
+using OpenQA.Selenium;
+using SeleniumExtras.WaitHelpers;
 using Serilog;
 using System.Globalization;
+using System.Net;
+using System.Linq;
 
 namespace GMB.Scanner.Agent
 {
@@ -99,6 +104,55 @@ namespace GMB.Scanner.Agent
                     // Insert Business Score if have one.
                     if (score?.Score != null)
                         db.CreateBusinessScore(score);
+
+                    if (request.GetPhotos)
+                    {
+                        WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
+
+                        IWebElement toImagePage = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@jsaction, 'heroHeaderImage')]")));
+                        toImagePage.Click();
+
+                        Thread.Sleep(1000);
+
+                        IReadOnlyCollection<IWebElement> links = driver.WebDriver.FindElements(By.XPath("//a[@href and @data-photo-index and contains(@jsaction, 'pane.gallery.main')]"));
+
+                        // Count the matching elements
+                        bool isOwner = false;
+
+                        DateTime dateInsert = DateTime.UtcNow;
+
+                        foreach (IWebElement link in links)
+                        {
+                            try
+                            {
+                                // Click the <a> element
+                                link.Click();
+
+                                // Wait for the new content to load (adjust the condition as needed for your application)
+                                wait.Until(ExpectedConditions.ElementExists(By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]")));
+
+                                // Find the <a> elements with the specific condition
+                                var matchingElement = driver.WebDriver.FindElement(By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]"));
+
+                                // Retrieve the aria-label attribute
+                                string OwnerName = WebUtility.HtmlDecode(matchingElement.GetAttribute("aria-label"));
+                                string photoUrl = WebUtility.HtmlDecode(matchingElement.GetAttribute("href"));
+
+                                if (OwnerName.Contains(profile.Name))
+                                    isOwner = true;
+                                else
+                                    isOwner = false;
+
+                                db.CreateBusinessPhoto(new(business.IdEtab, photoUrl, isOwner, dateInsert));
+
+                                // Re-locate the links to avoid StaleElementReferenceException
+                                //links = driver.FindElements(By.XPath(xpath));
+                            } catch (Exception ex)
+                            {
+                                Console.WriteLine($"An error occurred: {ex.Message}");
+                            }
+                        }
+                    }
 
                     // Getting reviews
                     if (request.GetReviews && request.DateLimit != null && score?.Score != null)

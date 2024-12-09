@@ -60,7 +60,7 @@ namespace GMB.ScannerService.Api.Controller
                 {
                     Task newThread = Task.Run(async () =>
                     {
-                        ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState, request.CheckDeletedStatus);
+                        ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState, request.CheckDeletedStatus, request.CheckPhotos);
                         await Scanner.Agent.Scanner.BusinessScanner(scannerRequest).ConfigureAwait(false);
                     });
                     tasks.Add(newThread);
@@ -178,7 +178,7 @@ namespace GMB.ScannerService.Api.Controller
 
                         driver.GetToPage(record.Url);
 
-                        List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews("none", DateTime.UtcNow.AddMonths(-12), driver);
+                        List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews("none", DateTime.UtcNow.AddMonths(-11), driver);
 
                         if (reviews == null)
                             continue;

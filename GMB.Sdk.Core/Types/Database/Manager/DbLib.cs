@@ -1406,6 +1406,29 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 
         #endregion
 
+        #region Business Photos
+        /// <summary>
+        /// Create Business Photo.
+        /// </summary>
+        /// <param name="businessPhoto"></param>
+        public void CreateBusinessPhoto(DbBusinessPhoto businessPhoto)
+        {
+            try
+            {
+                string insertCommand = "INSERT INTO BUSINESS_PHOTO (ID_ETAB, IS_OWNER, PHOTO_URL, DATE_INSERT) VALUES (@IdEtab, @IsOwner, @PhotoUrl, @DateInsert)";
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", GetValueOrDefault(businessPhoto.IdEtab));
+                cmd.Parameters.AddWithValue("@IsOwner", GetValueOrDefault(businessPhoto.IsOwner));
+                cmd.Parameters.AddWithValue("@PhotoUrl", GetValueOrDefault(businessPhoto.PhotoUrl));
+                cmd.Parameters.AddWithValue("@DateInsert", GetValueOrDefault(businessPhoto.DateInsert));
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception("Error while creating Business Photo", e);
+            }
+        }
+        #endregion
+
         #region Business Review
 
         #region Creation
