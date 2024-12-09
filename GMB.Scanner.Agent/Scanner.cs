@@ -109,6 +109,8 @@ namespace GMB.Scanner.Agent
                     {
                         WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
 
+                        driver.GetToPage(businessAgent.Url);
+
                         IWebElement toImagePage = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@jsaction, 'heroHeaderImage')]")));
                         toImagePage.Click();
 
@@ -134,9 +136,22 @@ namespace GMB.Scanner.Agent
                                 // Find the <a> elements with the specific condition
                                 var matchingElement = driver.WebDriver.FindElement(By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]"));
 
+                                // Retrieve the <div> inside the matching <a> element
+                                var divElement = matchingElement.FindElement(By.XPath(".//div"));
+
+                                // Get the style attribute of the <div>
+                                string styleAttribute = divElement.GetAttribute("style");
+
+                                // Extract the URL from the background-image property
+                                var regex = new System.Text.RegularExpressions.Regex(@"background-image:\s*url\(\""(.*?)\""\)");
+                                var match = regex.Match(styleAttribute);
+
+                                string? photoUrl = match.Success
+                                    ? WebUtility.HtmlDecode(match.Groups[1].Value)
+                                    : null;
+
                                 // Retrieve the aria-label attribute
                                 string OwnerName = WebUtility.HtmlDecode(matchingElement.GetAttribute("aria-label"));
-                                string photoUrl = WebUtility.HtmlDecode(matchingElement.GetAttribute("href"));
 
                                 if (OwnerName.Contains(profile.Name))
                                     isOwner = true;
@@ -146,8 +161,9 @@ namespace GMB.Scanner.Agent
                                 db.CreateBusinessPhoto(new(business.IdEtab, photoUrl, isOwner, dateInsert));
 
                                 // Re-locate the links to avoid StaleElementReferenceException
-                                //links = driver.FindElements(By.XPath(xpath));
-                            } catch (Exception ex)
+                                links = driver.WebDriver.FindElements(By.XPath("//a[@href and @data-photo-index and contains(@jsaction, 'pane.gallery.main')]"));
+                            }
+                            catch (Exception ex)
                             {
                                 Console.WriteLine($"An error occurred: {ex.Message}");
                             }

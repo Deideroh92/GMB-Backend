@@ -154,7 +154,7 @@ namespace GMB.Tests
         {
             AuthorizationPolicyService policy = new();
             ScannerController scannerController = new();
-            BusinessScannerRequest request = new(1000, 11, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddMonths(-12), false, false, null, null, null, UrlState.NEW, true);
+            BusinessScannerRequest request = new(1000, 11, Operation.PROCESSING_STATE, false, DateTime.UtcNow.AddMonths(-12), false, false, null, null, null, UrlState.NEW, true, false, true);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;
@@ -286,7 +286,7 @@ namespace GMB.Tests
                     DbUserVasanoIO? user = db.GetVasanoIOUser(order.OwnerId);
                     if (user != null)
                     {
-                        ToolBox.SendEmailVasanoIO(user.Name, id, "Your STICKERS are ready!", user.Email);
+                        //ToolBox.SendEmailVasanoIO(user.Name, id, "Your STICKERS are ready!", user.Email);
                     }
                 }
                     
