@@ -80,10 +80,10 @@ namespace GMB.Sdk.Core
 
     public static void SendEmailVasanoIO(string username, int orderId, string subject, string email)
     {
-        string smtpServer = "smtp.gmail.com";
+        string smtpServer = "ssl0.ovh.net";
         int smtpPort = 587;
-        string fromEmail = "maximiliend1998@gmail.com";
-        string password = "iigz pyyn ngsp wjqq"; // Use your app-specific password
+        string fromEmail = "no-reply@vasano.io";
+        string password = "SthKHRdbyQ0c9nH";
         string[] toEmails = { email, "admin@vasano.io" };
 
         string body = $@"

@@ -12,6 +12,9 @@ using Serilog;
 using System.Globalization;
 using System.Net;
 using System.Linq;
+using iText.Layout.Element;
+using System.Collections.ObjectModel;
+using System.Linq.Expressions;
 
 namespace GMB.Scanner.Agent
 {
@@ -107,66 +110,113 @@ namespace GMB.Scanner.Agent
 
                     if (request.GetPhotos)
                     {
-                        WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
-
-                        driver.GetToPage(businessAgent.Url);
-
-                        IWebElement toImagePage = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@jsaction, 'heroHeaderImage')]")));
-                        toImagePage.Click();
-
-                        Thread.Sleep(1000);
-
-                        IReadOnlyCollection<IWebElement> links = driver.WebDriver.FindElements(By.XPath("//a[@href and @data-photo-index and contains(@jsaction, 'pane.gallery.main')]"));
-
-                        // Count the matching elements
-                        bool isOwner = false;
-
-                        DateTime dateInsert = DateTime.UtcNow;
-
-                        foreach (IWebElement link in links)
+                        try
                         {
-                            try
+                            WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
+
+                            driver.GetToPage(businessAgent.Url);
+
+                            IWebElement toImagePage = wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//button[contains(@jsaction, 'heroHeaderImage')]")));
+                            toImagePage.Click();
+
+                            Thread.Sleep(1000);
+
+                            IReadOnlyCollection<IWebElement> links = driver.WebDriver.FindElements(By.XPath("//a[@href and @data-photo-index and contains(@jsaction, 'pane.gallery.main')]"));
+
+                            bool isOwner = false;
+
+                            if (links.Count == 0)
                             {
-                                // Click the <a> element
-                                link.Click();
+                                IWebElement card = driver.WebDriver.FindElement(By.XPath("//div[@role='navigation' and @tabindex='-1' and @jsaction='focus:titlecard.main']"));
 
-                                // Wait for the new content to load (adjust the condition as needed for your application)
-                                wait.Until(ExpectedConditions.ElementExists(By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]")));
+                                try
+                                {
+                                    // Wait for the new content to load (adjust the condition as needed for your application)
+                                    wait.Until(ExpectedConditions.ElementExists(By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]")));
+                                    var cardName = ToolBox.FindElementSafe(card, [By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]")]);
 
-                                // Find the <a> elements with the specific condition
-                                var matchingElement = driver.WebDriver.FindElement(By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]"));
+                                    // Retrieve the aria-label attribute
+                                    string OwnerName = WebUtility.HtmlDecode(cardName.GetAttribute("aria-label"));
 
-                                // Retrieve the <div> inside the matching <a> element
-                                var divElement = matchingElement.FindElement(By.XPath(".//div"));
-
-                                // Get the style attribute of the <div>
-                                string styleAttribute = divElement.GetAttribute("style");
-
-                                // Extract the URL from the background-image property
-                                var regex = new System.Text.RegularExpressions.Regex(@"background-image:\s*url\(\""(.*?)\""\)");
-                                var match = regex.Match(styleAttribute);
-
-                                string? photoUrl = match.Success
-                                    ? WebUtility.HtmlDecode(match.Groups[1].Value)
-                                    : null;
-
-                                // Retrieve the aria-label attribute
-                                string OwnerName = WebUtility.HtmlDecode(matchingElement.GetAttribute("aria-label"));
-
-                                if (OwnerName.Contains(profile.Name))
-                                    isOwner = true;
-                                else
+                                    if (OwnerName.Contains(profile.Name))
+                                        isOwner = true;
+                                    else
+                                        isOwner = false;
+                                } catch (Exception)
+                                {
                                     isOwner = false;
-
-                                db.CreateBusinessPhoto(new(business.IdEtab, photoUrl, isOwner, dateInsert));
-
-                                // Re-locate the links to avoid StaleElementReferenceException
-                                links = driver.WebDriver.FindElements(By.XPath("//a[@href and @data-photo-index and contains(@jsaction, 'pane.gallery.main')]"));
-                            }
-                            catch (Exception ex)
+                                }
+                                db.CreateBusinessPhoto(new(business.IdEtab, "Only one photo", isOwner, DateTime.UtcNow));
+                            } else
                             {
-                                Console.WriteLine($"An error occurred: {ex.Message}");
+
+                                DateTime dateInsert = DateTime.UtcNow;
+
+                                IWebElement parent = (IWebElement)((IJavaScriptExecutor)driver.WebDriver).ExecuteScript("return arguments[0].parentNode.parentNode.parentNode.parentNode;", links.First());
+
+                                foreach (IWebElement link in links)
+                                {
+                                    try
+                                    {
+                                        try
+                                        {
+                                            link.Click();
+                                        } catch (Exception)
+                                        {
+                                            ((IJavaScriptExecutor)driver.WebDriver).ExecuteScript("arguments[0].scrollTop = arguments[0].scrollHeight", parent);
+                                            Thread.Sleep(1000);
+                                            link.Click();
+                                        }
+
+                                        Thread.Sleep(1000);
+
+                                        IWebElement card = driver.WebDriver.FindElement(By.XPath("//div[@role='navigation' and @tabindex='-1' and @jsaction='focus:titlecard.main']"));
+
+                                        try
+                                        {
+                                            // Wait for the new content to load (adjust the condition as needed for your application)
+                                            wait.Until(ExpectedConditions.ElementExists(By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]")));
+                                            var cardName = ToolBox.FindElementSafe(card, [By.XPath("//a[contains(@data-attribution-url, '//maps.google.com/maps/contrib/')]")]);
+
+                                            // Retrieve the aria-label attribute
+                                            string OwnerName = WebUtility.HtmlDecode(cardName.GetAttribute("aria-label"));
+
+                                            if (OwnerName.Contains(profile.Name))
+                                                isOwner = true;
+                                            else
+                                                isOwner = false;
+                                        } catch (Exception)
+                                        {
+                                            isOwner = false;
+                                        }
+
+                                        var divElement = link.FindElement(By.XPath(".//div[@role='img']"));
+
+                                        string styleAttribute = divElement.GetAttribute("style");
+
+                                        // Extract the URL from the background-image property
+                                        var regex = new System.Text.RegularExpressions.Regex(@"background-image:\s*url\(\""(.*?)\""\)");
+                                        var match = regex.Match(styleAttribute);
+
+                                        string? photoUrl = match.Success
+                                            ? WebUtility.HtmlDecode(match.Groups[1].Value)
+                                            : null;
+
+                                        if (photoUrl == null)
+                                            continue;
+                                        db.CreateBusinessPhoto(new(business.IdEtab, photoUrl, isOwner, dateInsert));
+
+                                        // Re-locate the links to avoid StaleElementReferenceException
+                                        links = driver.WebDriver.FindElements(By.XPath("//a[@href and @data-photo-index and contains(@jsaction, 'pane.gallery.main')]"));
+                                    } catch (Exception ex)
+                                    {
+                                        Console.WriteLine($"An error occurred: {ex.Message}");
+                                    }
+                                }
                             }
+                            } catch (Exception)
+                        {
+                            db.CreateBusinessPhoto(new(business.IdEtab, "Only one photo", false, DateTime.UtcNow));
                         }
                     }
 

@@ -206,7 +206,7 @@ namespace GMB.Sdk.Core.FileGenerators.Sticker
             return language switch
             {
                 StickerLanguage.EN => "Certified by Vasano | © All rights reserved",
-                StickerLanguage.FR => "Certifié par Vasano | © Tous droits réservés",
+                StickerLanguage.FR => "Certifiée par Vasano | © Tous droits réservés",
                 StickerLanguage.IT => "Certificato da Vasano | © Tutti i diritti riservati",
                 StickerLanguage.DE => "Zertifiziert von Vasano | © Alle Rechte vorbehalten",
                 StickerLanguage.ES => "Certificado por Vasano | © Todos los derechos reservados",

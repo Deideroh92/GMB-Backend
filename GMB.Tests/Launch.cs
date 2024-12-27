@@ -13,6 +13,7 @@ using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Drawing;
 using System.Drawing.Imaging;
+using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
 
 namespace GMB.Tests
 {
@@ -94,7 +95,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 10);
+                db.UpdateBusinessProfileProcessingState(idEtab, 8);
             }
         }
         /// <summary>
@@ -233,7 +234,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task LaunchOrder()
         {
-            int id = 26;
+            int id = 33;
             
             DbLib db = new(true);
 
@@ -286,7 +287,7 @@ namespace GMB.Tests
                     DbUserVasanoIO? user = db.GetVasanoIOUser(order.OwnerId);
                     if (user != null)
                     {
-                        //ToolBox.SendEmailVasanoIO(user.Name, id, "Your STICKERS are ready!", user.Email);
+                        ToolBox.SendEmailVasanoIO(user.Name, id, "Your STICKERS are ready!", user.Email);
                     }
                 }
                     
@@ -402,9 +403,7 @@ namespace GMB.Tests
         [TestMethod]
         public void GenerateNetworkCertificate()
         {
-            CertificateGenerator generator = new();
-            byte[] pdfBytes = generator.GenerateNetworkCertificatePdf("McDonald's", 1200, 15487, "Paris - Île de France - France", 4.7, 2023);
-            File.WriteAllBytes(@"C:\Users\Lucas\Documents\Code\Vasano\Tests Certificates\networkCertificate.pdf", pdfBytes);
+            ToolBox.SendEmailVasanoIO("Test", 12, "Your STICKERS are ready!", "maximiliend1998@hotmail.fr");
         }
         #endregion
     }
