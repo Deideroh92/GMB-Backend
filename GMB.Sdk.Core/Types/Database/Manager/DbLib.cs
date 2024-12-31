@@ -2197,9 +2197,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 if (reader.Read())
                 {
                     DbUserVasanoIO user = new(
-                        reader["name"].ToString()!,
+                        reader["firstName"].ToString()!,
+                        reader["lastName"].ToString()!,
                         reader["email"].ToString()!,
-                        id
+                        id,
+                        reader["companyCountry"].ToString()!
                         );
 
                     return user;

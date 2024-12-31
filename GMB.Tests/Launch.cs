@@ -11,6 +11,7 @@ using GMB.Sdk.Core.Types.ScannerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestPlatform.ObjectModel;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using static iText.StyledXmlParser.Jsoup.Select.Evaluator;
@@ -234,7 +235,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task LaunchOrder()
         {
-            int id = 33;
+            int id = 37;
             
             DbLib db = new(true);
 
@@ -287,7 +288,31 @@ namespace GMB.Tests
                     DbUserVasanoIO? user = db.GetVasanoIOUser(order.OwnerId);
                     if (user != null)
                     {
-                        ToolBox.SendEmailVasanoIO(user.Name, id, "Your STICKERS are ready!", user.Email);
+                        string translatedSubject;
+
+                        switch (user.Country.ToLower())
+                        {
+                            case "france":
+                                translatedSubject = "Vos STICKERS sont prêts !";
+                                break;
+
+                            case "spain":
+                                translatedSubject = "¡Sus STICKERS están listos!";
+                                break;
+
+                            case "germany":
+                                translatedSubject = "Ihre STICKER sind bereit!";
+                                break;
+
+                            // Add more cases as needed for other countries
+
+                            default:
+                                // Default to English if no country matches
+                                translatedSubject = "Your STICKERS are ready!";
+                                break;
+                        }
+
+                        ToolBox.SendEmailVasanoIO(user.FirstName + " " + user.LasttName, id, translatedSubject, user.Email, user.Country);
                     }
                 }
                     
@@ -403,7 +428,7 @@ namespace GMB.Tests
         [TestMethod]
         public void GenerateNetworkCertificate()
         {
-            ToolBox.SendEmailVasanoIO("Test", 12, "Your STICKERS are ready!", "maximiliend1998@hotmail.fr");
+            //oolBox.SendEmailVasanoIO("Test", 12, "Your STICKERS are ready!", "maximiliend1998@hotmail.fr");
         }
         #endregion
     }
