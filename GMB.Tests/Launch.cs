@@ -235,7 +235,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task LaunchOrder()
         {
-            int id = 37;
+            int id = 40;
             
             DbLib db = new(true);
 
@@ -304,13 +304,24 @@ namespace GMB.Tests
                                 translatedSubject = "Ihre STICKER sind bereit!";
                                 break;
 
-                            // Add more cases as needed for other countries
+                            case "italy":
+                                translatedSubject = "I tuoi STICKER sono pronti!";
+                                break;
+
+                            case "portugal":
+                                translatedSubject = "Os seus STICKERS estão prontos!";
+                                break;
+
+                            case "netherlands":
+                                translatedSubject = "Uw STICKERS zijn klaar!";
+                                break;
 
                             default:
                                 // Default to English if no country matches
                                 translatedSubject = "Your STICKERS are ready!";
                                 break;
                         }
+
 
                         ToolBox.SendEmailVasanoIO(user.FirstName + " " + user.LasttName, id, translatedSubject, user.Email, user.Country);
                     }
