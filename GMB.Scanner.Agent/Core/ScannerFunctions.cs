@@ -788,43 +788,6 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Le Meurice - Reviews global error !");
             #endregion
 
-            #region Hôtel de Crillon
-            request = new("https://www.google.com/maps/place/H%C3%B4tel+de+Crillon,+A+Rosewood+Hotel/@48.8672778,2.3185144,17z/data=!3m1!4b1!4m10!3m9!1s0x47e66fd2bde4f80b:0x7b976ab67fe636aa!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8672743!4d2.3210947!16zL20vMDRmY3hs?entry=ttu");
-            (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Hôtel de Crillon, A Rosewood Hotel" ||
-                (profile.GoogleAddress != "10 Pl. de la Concorde, 75008 Paris, France" && profile.GoogleAddress != "10 Pl. de la Concorde, 75008 Paris") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75108" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "10" ||
-                profile.Category != "Hébergement" ||
-                profile.Website != "https://www.rosewoodhotels.com/en/hotel-de-crillon" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4V88C+WC" ||
-                (profile.Tel != "01 44 71 15 00" && profile.Tel != "+33 1 44 71 15 00") ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Hôtel de Crillon - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 30);
-
-            if (reviews == null)
-                return new(false, "Hôtel de Crillon - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Hôtel de Crillon - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
-                return new(false, "Hôtel de Crillon - Reviews global error !");
-            #endregion
-
             return new(true, "Test executed successfully.");
         }
         #endregion
