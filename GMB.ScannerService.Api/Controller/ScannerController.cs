@@ -51,7 +51,7 @@ namespace GMB.ScannerService.Api.Controller
                         break;
                 }
 
-                int nbThreads = 1;
+                int nbThreads = 8;
 
                 if (businessList.Count < 10)
                     nbThreads = 1;
