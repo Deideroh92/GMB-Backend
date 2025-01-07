@@ -276,7 +276,7 @@ namespace GMB.Sdk.Core.FileGenerators.Certificate
 
             // Number of Reviews
             form.GetField(nbReviewsFieldId)
-                .SetValue(nbReviews.ToString("N0", culture))
+                .SetValue(nbReviews.ToString("N0", culture).Replace(culture.NumberFormat.NumberGroupSeparator, " "))
                 .SetFontAndSize(montserratSemiBoldFont, 16);
 
             // Geographic Zone
