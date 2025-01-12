@@ -675,24 +675,23 @@ namespace GMB.BusinessService.Api.Controller
         /// <param name="review"></param>
         [HttpPut("bp/br/update")]
         [Authorize]
-        public ActionResult<GenericResponse> UpdateBusinessReview([FromBody] DbBusinessReview review)
+        public ActionResult<GenericResponse> UpdateBusinessReviewReply([FromBody] UpdateBusinessReviewReplyRequest review)
         {
             try
             {
                 DbLib db = new();
 
-                DbBusinessReview? dbReview = db.GetBusinessReview(review.IdReview);
+                DbBusinessReview? dbReview = db.GetBusinessReview(review.Id);
                 if (review == null)
-                    return GenericResponse.Exception($"No review with id = [{review.IdReview}]");
-                review.DateUpdate = DateTime.UtcNow;
-                db.UpdateBusinessReview(review, false);
+                    return GenericResponse.Exception($"No review with id = [{review.Id}]");
+                db.UpdateBusinessReviewReply(review.Id, review.Replied);
 
-                return new GenericResponse(null, $"Update BR with id = [{review.IdReview}]");
+                return new GenericResponse(null, $"Updated BR with id = [{review.Id}]");
 
             } catch (Exception e)
             {
                 Log.Error(e, $"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GenericResponse.Exception($"An exception occurred while updating BR with id = [{review.IdReview}] : {e.Message}");
+                return GenericResponse.Exception($"An exception occurred while updating BR with id = [{review.Id}] : {e.Message}");
             }
         }
         #endregion

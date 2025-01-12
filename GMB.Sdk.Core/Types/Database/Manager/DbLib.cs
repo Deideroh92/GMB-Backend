@@ -1719,13 +1719,33 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error updating BR with id etab = [{review.IdEtab}] and id review = [{review.Id}]", e);
             }
         }
+        /// <summary>
+        /// Update Business Review.
+        /// </summary>
+        /// <param name="idReview"></param>
+        /// <param name="replied"></param>
+        public void UpdateBusinessReviewReply(string idReview, bool replied)
+        {
+            try
+            {
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET REVIEW_ANSWERED = @Replied, REVIEW_ANSWERED_DATE = @Today WHERE REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Replied", replied);
+                cmd.Parameters.AddWithValue("@Today", DateTime.UtcNow);
+                cmd.Parameters.AddWithValue("@IdReview", idReview);
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error updating BR with id review = [{idReview}]", e);
+            }
+        }
         #endregion
 
-        #region Delete
-        /// <summary>
-        /// Delete Business Reviews.
-        /// </summary>
-        /// <param name="idEtab"></param>
+                #region Delete
+                /// <summary>
+                /// Delete Business Reviews.
+                /// </summary>
+                /// <param name="idEtab"></param>
         public void DeleteBusinessReviews(string idEtab)
         {
             try
