@@ -544,7 +544,7 @@ namespace GMB.Scanner.Agent.Core
                 profile.Website != "https://www.paris.fr/" ||
                 profile.PictureUrl == null ||
                 profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PlusCode != "8FW4V943+R5" ||
+                profile.PlusCode != "8FW4V943+V6" ||
                 score.NbReviews == null ||
                 score.Score <= 1 ||
                 score.Score >= 5 ||
