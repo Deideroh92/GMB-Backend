@@ -96,7 +96,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 8);
+                db.UpdateBusinessProfileProcessingState(idEtab, 11);
             }
         }
         /// <summary>
@@ -156,7 +156,7 @@ namespace GMB.Tests
         {
             AuthorizationPolicyService policy = new();
             ScannerController scannerController = new();
-            BusinessScannerRequest request = new(1000, 11, Operation.PROCESSING_STATE, false, DateTime.UtcNow.AddMonths(-12), false, false, null, null, null, UrlState.NEW, true, false, true);
+            BusinessScannerRequest request = new(99999, 11, Operation.PROCESSING_STATE, false, DateTime.UtcNow.AddMonths(-12), false, false, null, null, null, UrlState.NEW, true, false, true);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;
@@ -235,7 +235,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task LaunchOrder()
         {
-            int id = 45;
+            int id = 58;
             
             DbLib db = new(true);
 
