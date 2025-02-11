@@ -247,7 +247,7 @@ namespace GMB.Scanner.Agent
 
                                         if (!review.Equals(dbBusinessReview))
                                         {
-                                            db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText);
+                                            db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || dbBusinessReview.ReviewText != review.ReviewText || dbBusinessReview.ReviewReplied != review.ReviewReplied);
                                             continue;
                                         }
                                     }
