@@ -153,7 +153,7 @@
                    PlaceId == other.PlaceId &&
                    Name == other.Name &&
                    Category == other.Category &&
-                   GoogleAddress == other.GoogleAddress &&
+                   (GoogleAddress == null || GoogleAddress == other.GoogleAddress) &&
                    Tel == other.Tel &&
                    Website == other.Website &&
                    Status == other.Status &&
