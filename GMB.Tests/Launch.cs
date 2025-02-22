@@ -235,7 +235,7 @@ namespace GMB.Tests
         [TestMethod]
         public async Task LaunchOrder()
         {
-            int id = 54;
+            int id = 7;
             
             DbLib db = new(true);
 
@@ -340,18 +340,18 @@ namespace GMB.Tests
 
             DbLib db = new(true);
             // Example usage of the sticker generation function
-            double score = 4.7;
+            double score = 4.9;
             string zoneGeo = "France";
             DateTime date = DateTime.Now;
-            int nbReviews = 11272;
-            int nbEtab = 346;
+            int nbReviews = 9507;
+            int nbEtab = 406;
             string brand = "ERA IMMOBILIER";
-            int year = 2023;
+            int year = 2024;
 
             CertificateGenerator certificateGenerator = new();
             byte[] certificate = certificateGenerator.GenerateNetworkCertificatePdf(brand, nbEtab, nbReviews, zoneGeo, score, year);
 
-            DbStickerNetwork sticker = new(score, date, null, certificate, nbEtab, nbReviews, year, brand, zoneGeo);
+            DbStickerNetwork sticker = new(score, date, null, certificate, nbEtab, nbReviews, year, brand, zoneGeo, 4);
 
             int id = db.CreateStickerNetwork(sticker);
 
@@ -370,9 +370,9 @@ namespace GMB.Tests
         {
 
             DbLib db = new(true);
-            byte[] image = File.ReadAllBytes("C:\\Users\\maxim\\Desktop\\STICKER Network - ERA.png");
+            byte[] image = File.ReadAllBytes("C:\\Users\\maxim\\Desktop\\STICKER Network - ERA.pdf");
             byte[] certificate = File.ReadAllBytes("C:\\Users\\maxim\\Desktop\\Certificat Network - ERA.pdf");
-            string id = "4";
+            string id = "18";
             DbStickerNetwork? sticker = db.GetStickerNetworkById(id);
 
 

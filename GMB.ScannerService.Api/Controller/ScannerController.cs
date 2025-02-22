@@ -67,12 +67,15 @@ namespace GMB.ScannerService.Api.Controller
                     Thread.Sleep(15000);
                 }
                 await Task.WhenAll(tasks);
+                ToolBox.KillAllChromeProcesses();
                 return new GenericResponse(1, "Scanner launched successfully.");
             } catch (Exception e)
             {
                 Log.Error(e, $"An exception occurred while launching scanner.");
                 return GenericResponse.Exception($"An exception occurred while launching scanner. : {e.Message}");
             }
+
+            
         }
 
         /// <summary>

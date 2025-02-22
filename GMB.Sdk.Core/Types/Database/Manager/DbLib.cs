@@ -1847,8 +1847,13 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader["ownerId"].ToString()!,
                         (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
                         (StickerLanguage)Enum.Parse(typeof(StickerLanguage), reader["language"].ToString()!),
-                        (int)decimal.Parse(reader["price"].ToString()!),
-                        reader["name"].ToString()!
+                        (int)decimal.Parse(reader["basePrice"].ToString()!),
+                        reader["name"].ToString()!,
+                        (int)decimal.Parse(reader["VATamount"].ToString()!),
+                        (int)decimal.Parse(reader["VATprice"].ToString()!),
+                        (int)decimal.Parse(reader["discount"].ToString()!),
+                        (int)decimal.Parse(reader["priceNoVAT"].ToString()!),
+                        (int)decimal.Parse(reader["priceWithVAT"].ToString()!)
                         );
                     return order;
                 }
@@ -1885,8 +1890,13 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader["ownerId"].ToString()!,
                         (OrderStatus)Enum.Parse(typeof(OrderStatus), reader["status"].ToString()!),
                         (StickerLanguage)Enum.Parse(typeof(StickerLanguage), reader["language"].ToString()!),
-                        (int)decimal.Parse(reader["price"].ToString()!),
-                        reader["name"].ToString()!
+                        (int)decimal.Parse(reader["basePrice"].ToString()!),
+                        reader["name"].ToString()!,
+                        (int)decimal.Parse(reader["VATamount"].ToString()!),
+                        (int)decimal.Parse(reader["VATprice"].ToString()!),
+                        (int)decimal.Parse(reader["discount"].ToString()!),
+                        (int)decimal.Parse(reader["priceNoVAT"].ToString()!),
+                        (int)decimal.Parse(reader["priceWithVAT"].ToString()!)
                         );
                     orders.Add(order);
                 }

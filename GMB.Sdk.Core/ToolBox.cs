@@ -16,6 +16,7 @@ using QRCoder;
 using Serilog;
 using System.Drawing.Text;
 using AngleSharp.Io;
+using System.Diagnostics;
 
 namespace GMB.Sdk.Core
 {
@@ -84,7 +85,7 @@ namespace GMB.Sdk.Core
             int smtpPort = 587;
             string fromEmail = "no-reply@vasano.io";
             string password = "SthKHRdbyQ0c9nH";
-            string[] toEmails = { email, "admin@vasano.io" };
+            string[] toEmails = { email, "no-reply@vasano.io" };
 
             // Dictionary to map countries to the translated email body
             var translations = new Dictionary<string, string>
@@ -101,7 +102,7 @@ namespace GMB.Sdk.Core
                 <div style='border: 1px solid #eaeaea; border-radius: 8px; margin: 40px auto; padding: 20px; max-width: 465px;'>
                     <div style='margin-top: 32px; text-align: center;'>
                     <a href='https://vasano.io'>
-                        <img src='https://vasano.io/images/logo/logo_Vasano.webp' alt='Vasano Solutions' style='display: block; margin: 0 auto; width: 50%; height: 50%;'/>
+                        <img src='https://vasano.io/images/logo/logo_Vasano.png' alt='Vasano Solutions' style='display: block; margin: 0 auto; width: 50%; height: 50%;'/>
                     </a>
                     </div>
                     <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
@@ -122,31 +123,239 @@ namespace GMB.Sdk.Core
                 </div>
                 </body>
             </html>"},
-
-        
+        { "spain", $@"
+        <!DOCTYPE html>
+        <html>
+            <head>
+            <style>
+                /* Define styles here */
+            </style>
+            </head>
+            <body style='background-color: white; font-family: Arial, sans-serif;'>
+            <div style='border: 1px solid #eaeaea; border-radius: 8px; margin: 40px auto; padding: 20px; max-width: 465px;'>
+                <div style='margin-top: 32px; text-align: center;'>
+                <a href='https://vasano.io'>
+                    <img src='https://vasano.io/images/logo/logo_Vasano.png' alt='Vasano Solutions' style='display: block; margin: 0 auto; width: 50%; height: 50%;'/>
+                </a>
+                </div>
+                <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+                <p style='color: black; font-size: 14px; line-height: 24px;'>Hola {username},</p>
+                <p style='color: black; font-size: 14px; line-height: 24px;'>El resultado de su solicitud <strong>#{orderId}</strong> está disponible.</p>
+                <p style='color: black; font-size: 14px; line-height: 24px;'>Siguiente paso: ¡selecciona los STICKERS que te interesan y continúa con tu pedido!</p>
+                <div style='text-align: center; margin: 32px 0;'>
+                <a href='https://vasano.io/orders/{orderId}' style='background-color: #007ee6; color: white; font-size: 12px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; display: inline-block;'>Selecciona tus STICKERS</a>
+                </div>
+                <p style='color: black; font-size: 14px; line-height: 24px;'>o copia y pega esta URL en tu navegador: <a href='https://vasano.io/orders/{orderId}' style='color: #007ee6; text-decoration: none;'>https://vasano.io/orders/{orderId}</a></p>
+                <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+                <p style='color: #666666; font-size: 12px; line-height: 24px;'>Este correo electrónico se envió porque realizó una solicitud de STICKERS en Vasano.io. Si no esperaba este correo, comuníquese de inmediato con <a href='mailto:contact@vasano.io' style='color: #007ee6;'>contact@vasano.io</a>.</p>
+            </div>
+            <div style='max-width: 580px; margin: 0 auto; text-align: center; color: #706a7b; font-size: 12px;'>
+                <a href='https://www.linkedin.com/company/vasano-solutions/' target='_blank' style='color: #007ee6; text-decoration: none;'>LinkedIn</a>
+                <p>© 2024 Vasano Solutions, Todos los derechos reservados</p>
+                <p>10 Rue de la Paix, 75002 Paris - FRANCIA</p>
+            </div>
+            </body>
+        </html>"},
+        { "germany", $@"
+    <!DOCTYPE html>
+    <html>
+        <head>
+        <style>
+            /* Define styles here */
+        </style>
+        </head>
+        <body style='background-color: white; font-family: Arial, sans-serif;'>
+        <div style='border: 1px solid #eaeaea; border-radius: 8px; margin: 40px auto; padding: 20px; max-width: 465px;'>
+            <div style='margin-top: 32px; text-align: center;'>
+            <a href='https://vasano.io'>
+                <img src='https://vasano.io/images/logo/logo_Vasano.png' alt='Vasano Solutions' style='display: block; margin: 0 auto; width: 50%; height: 50%;'/>
+            </a>
+            </div>
+            <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Hallo {username},</p>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Das Ergebnis Ihrer Anfrage <strong>#{orderId}</strong> ist verfügbar.</p>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Nächster Schritt: Wählen Sie die STICKER aus, die Sie interessieren, und setzen Sie Ihre Bestellung fort!</p>
+            <div style='text-align: center; margin: 32px 0;'>
+            <a href='https://vasano.io/orders/{orderId}' style='background-color: #007ee6; color: white; font-size: 12px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; display: inline-block;'>Wählen Sie Ihre STICKER</a>
+            </div>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Oder kopieren Sie diese URL und fügen Sie sie in Ihren Browser ein: <a href='https://vasano.io/orders/{orderId}' style='color: #007ee6; text-decoration: none;'>https://vasano.io/orders/{orderId}</a></p>
+            <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+            <p style='color: #666666; font-size: 12px; line-height: 24px;'>Diese E-Mail wurde gesendet, weil Sie eine STICKER-Anfrage auf Vasano.io gestellt haben. Wenn Sie diese E-Mail nicht erwartet haben, kontaktieren Sie bitte sofort <a href='mailto:contact@vasano.io' style='color: #007ee6;'>contact@vasano.io</a>.</p>
+        </div>
+        <div style='max-width: 580px; margin: 0 auto; text-align: center; color: #706a7b; font-size: 12px;'>
+            <a href='https://www.linkedin.com/company/vasano-solutions/' target='_blank' style='color: #007ee6; text-decoration: none;'>LinkedIn</a>
+            <p>© 2024 Vasano Solutions, Alle Rechte vorbehalten</p>
+            <p>10 Rue de la Paix, 75002 Paris - FRANKREICH</p>
+        </div>
+        </body>
+    </html>"},
+        { "portugal", $@"
+    <!DOCTYPE html>
+    <html>
+        <head>
+        <style>
+            /* Define styles here */
+        </style>
+        </head>
+        <body style='background-color: white; font-family: Arial, sans-serif;'>
+        <div style='border: 1px solid #eaeaea; border-radius: 8px; margin: 40px auto; padding: 20px; max-width: 465px;'>
+            <div style='margin-top: 32px; text-align: center;'>
+            <a href='https://vasano.io'>
+                <img src='https://vasano.io/images/logo/logo_Vasano.png' alt='Vasano Solutions' style='display: block; margin: 0 auto; width: 50%; height: 50%;'/>
+            </a>
+            </div>
+            <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Olá {username},</p>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>O resultado da sua solicitação <strong>#{orderId}</strong> está disponível.</p>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Próxima etapa: selecione os STICKERS que lhe interessam e continue seu pedido!</p>
+            <div style='text-align: center; margin: 32px 0;'>
+            <a href='https://vasano.io/orders/{orderId}' style='background-color: #007ee6; color: white; font-size: 12px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; display: inline-block;'>Selecione seus STICKERS</a>
+            </div>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Ou copie e cole este URL no seu navegador: <a href='https://vasano.io/orders/{orderId}' style='color: #007ee6; text-decoration: none;'>https://vasano.io/orders/{orderId}</a></p>
+            <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+            <p style='color: #666666; font-size: 12px; line-height: 24px;'>Este e-mail foi enviado porque você fez uma solicitação de STICKERS no Vasano.io. Se você não estava esperando este e-mail, entre em contato imediatamente com <a href='mailto:contact@vasano.io' style='color: #007ee6;'>contact@vasano.io</a>.</p>
+        </div>
+        <div style='max-width: 580px; margin: 0 auto; text-align: center; color: #706a7b; font-size: 12px;'>
+            <a href='https://www.linkedin.com/company/vasano-solutions/' target='_blank' style='color: #007ee6; text-decoration: none;'>LinkedIn</a>
+            <p>© 2024 Vasano Solutions, Todos os direitos reservados</p>
+            <p>10 Rue de la Paix, 75002 Paris - FRANÇA</p>
+        </div>
+        </body>
+    </html>"},
+        { "italy", $@"
+    <!DOCTYPE html>
+    <html>
+        <head>
+        <style>
+            /* Define styles here */
+        </style>
+        </head>
+        <body style='background-color: white; font-family: Arial, sans-serif;'>
+        <div style='border: 1px solid #eaeaea; border-radius: 8px; margin: 40px auto; padding: 20px; max-width: 465px;'>
+            <div style='margin-top: 32px; text-align: center;'>
+            <a href='https://vasano.io'>
+                <img src='https://vasano.io/images/logo/logo_Vasano.png' alt='Vasano Solutions' style='display: block; margin: 0 auto; width: 50%; height: 50%;'/>
+            </a>
+            </div>
+            <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Ciao {username},</p>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Il risultato della tua richiesta <strong>#{orderId}</strong> è disponibile.</p>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Prossimo passo: seleziona gli STICKERS che ti interessano e continua il tuo ordine!</p>
+            <div style='text-align: center; margin: 32px 0;'>
+            <a href='https://vasano.io/orders/{orderId}' style='background-color: #007ee6; color: white; font-size: 12px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; display: inline-block;'>Seleziona i tuoi STICKERS</a>
+            </div>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Oppure copia e incolla questo URL nel tuo browser: <a href='https://vasano.io/orders/{orderId}' style='color: #007ee6; text-decoration: none;'>https://vasano.io/orders/{orderId}</a></p>
+            <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+            <p style='color: #666666; font-size: 12px; line-height: 24px;'>Questa email è stata inviata perché hai effettuato una richiesta di STICKERS su Vasano.io. Se non aspettavi questa email, contatta immediatamente <a href='mailto:contact@vasano.io' style='color: #007ee6;'>contact@vasano.io</a>.</p>
+        </div>
+        <div style='max-width: 580px; margin: 0 auto; text-align: center; color: #706a7b; font-size: 12px;'>
+            <a href='https://www.linkedin.com/company/vasano-solutions/' target='_blank' style='color: #007ee6; text-decoration: none;'>LinkedIn</a>
+            <p>© 2024 Vasano Solutions, Tutti i diritti riservati</p>
+            <p>10 Rue de la Paix, 75002 Paris - FRANCIA</p>
+        </div>
+        </body>
+    </html>"},
+        { "netherlands", $@"
+    <!DOCTYPE html>
+    <html>
+        <head>
+        <style>
+            /* Define styles here */
+        </style>
+        </head>
+        <body style='background-color: white; font-family: Arial, sans-serif;'>
+        <div style='border: 1px solid #eaeaea; border-radius: 8px; margin: 40px auto; padding: 20px; max-width: 465px;'>
+            <div style='margin-top: 32px; text-align: center;'>
+            <a href='https://vasano.io'>
+                <img src='https://vasano.io/images/logo/logo_Vasano.png' alt='Vasano Solutions' style='display: block; margin: 0 auto; width: 50%; height: 50%;'/>
+            </a>
+            </div>
+            <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Hallo {username},</p>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>De resultaten van je aanvraag <strong>#{orderId}</strong> zijn beschikbaar.</p>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Volgende stap: selecteer de STICKERS die je interesseren en ga verder met je bestelling!</p>
+            <div style='text-align: center; margin: 32px 0;'>
+            <a href='https://vasano.io/orders/{orderId}' style='background-color: #007ee6; color: white; font-size: 12px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; display: inline-block;'>Selecteer je STICKERS</a>
+            </div>
+            <p style='color: black; font-size: 14px; line-height: 24px;'>Of kopieer en plak deze URL in je browser: <a href='https://vasano.io/orders/{orderId}' style='color: #007ee6; text-decoration: none;'>https://vasano.io/orders/{orderId}</a></p>
+            <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+            <p style='color: #666666; font-size: 12px; line-height: 24px;'>Deze e-mail is verzonden omdat je een aanvraag voor STICKERS hebt ingediend op Vasano.io. Als je deze e-mail niet verwachtte, neem dan onmiddellijk contact op met <a href='mailto:contact@vasano.io' style='color: #007ee6;'>contact@vasano.io</a>.</p>
+        </div>
+        <div style='max-width: 580px; margin: 0 auto; text-align: center; color: #706a7b; font-size: 12px;'>
+            <a href='https://www.linkedin.com/company/vasano-solutions/' target='_blank' style='color: #007ee6; text-decoration: none;'>LinkedIn</a>
+            <p>© 2024 Vasano Solutions, Alle rechten voorbehouden</p>
+            <p>10 Rue de la Paix, 75002 Parijs - NEDERLAND</p>
+        </div>
+        </body>
+    </html>"}
 
     };
 
-            // Set default translation (English)
-            string body = translations.GetValueOrDefault(country.ToLower(), translations["france"]);
+            // Default English email template
+            string englishEmailTemplate = $@"
+<!DOCTYPE html>
+<html>
+    <head>
+    <style>
+        /* Define styles here */
+    </style>
+    </head>
+    <body style='background-color: white; font-family: Arial, sans-serif;'>
+    <div style='border: 1px solid #eaeaea; border-radius: 8px; margin: 40px auto; padding: 20px; max-width: 465px;'>
+        <div style='margin-top: 32px; text-align: center;'>
+        <a href='https://vasano.io'>
+            <img src='https://vasano.io/images/logo/logo_Vasano.png' alt='Vasano Solutions' style='display: block; margin: 0 auto; width: 50%; height: 50%;'/>
+        </a>
+        </div>
+        <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+        <p style='color: black; font-size: 14px; line-height: 24px;'>Hello {username},</p>
+        <p style='color: black; font-size: 14px; line-height: 24px;'>The result of your request <strong>#{orderId}</strong> is available.</p>
+        <p style='color: black; font-size: 14px; line-height: 24px;'>Next step: select the STICKERS you're interested in and continue your order!</p>
+        <div style='text-align: center; margin: 32px 0;'>
+        <a href='https://vasano.io/orders/{orderId}' style='background-color: #007ee6; color: white; font-size: 12px; font-weight: 600; text-decoration: none; padding: 10px 20px; border-radius: 4px; display: inline-block;'>Select your STICKERS</a>
+        </div>
+        <p style='color: black; font-size: 14px; line-height: 24px;'>or copy and paste this URL in your browser: <a href='https://vasano.io/orders/{orderId}' style='color: #007ee6; text-decoration: none;'>https://vasano.io/orders/{orderId}</a></p>
+        <hr style='border: 1px solid #eaeaea; margin: 26px 0; width: 100%;' />
+        <p style='color: #666666; font-size: 12px; line-height: 24px;'>This email was sent because you made a STICKERS request on Vasano.io. If you didn't expect this email, please contact <a href='mailto:contact@vasano.io' style='color: #007ee6;'>contact@vasano.io</a> immediately.</p>
+    </div>
+    <div style='max-width: 580px; margin: 0 auto; text-align: center; color: #706a7b; font-size: 12px;'>
+        <a href='https://www.linkedin.com/company/vasano-solutions/' target='_blank' style='color: #007ee6; text-decoration: none;'>LinkedIn</a>
+        <p>© 2024 Vasano Solutions, All rights reserved</p>
+        <p>10 Rue de la Paix, 75002 Paris - FRANCE</p>
+    </div>
+    </body>
+</html>";
 
+            // Set default translation (English)
+            string body;
+            if (translations.TryGetValue(country, out string? value))
+                body = value;
+            else
+                body = englishEmailTemplate;
+
+            using var smtpClient = new SmtpClient(smtpServer)
+            {
+                Port = smtpPort,
+                Credentials = new NetworkCredential(fromEmail, password),
+                EnableSsl = true,
+            };
+            using var mail = new MailMessage
+            {
+                From = new MailAddress(fromEmail, "Vasano.io"),
+                Subject = subject,
+                IsBodyHtml = true,
+                Body = body,
+                BodyEncoding = Encoding.UTF8,
+                SubjectEncoding = Encoding.UTF8
+            };
+            // Add all recipients at once
             foreach (var toEmail in toEmails)
             {
-                var smtpClient = new SmtpClient(smtpServer)
-                {
-                    Port = smtpPort,
-                    Credentials = new NetworkCredential(fromEmail, password),
-                    EnableSsl = true,
-                };
-                MailMessage mail = new(fromEmail, toEmail, subject, "")
-                {
-                    IsBodyHtml = true,
-                    Body = body,
-                    BodyEncoding = System.Text.Encoding.UTF8,
-                    SubjectEncoding = System.Text.Encoding.UTF8
-                };
-                smtpClient.Send(mail);
+                mail.To.Add(toEmail);
             }
+
+            // Send email once
+            smtpClient.Send(mail);
         }
 
 
@@ -496,6 +705,24 @@ namespace GMB.Sdk.Core
             Bitmap qrCodeImg = GenerateQrCode(qrUrl, pixelsPerModule, width, height);
 
             return qrCodeImg;
+        }
+
+        // Kill all chrome processes.
+        public static void KillAllChromeProcesses()
+        {
+            try
+            {
+                Process[] chromeProcesses = Process.GetProcessesByName("chrome");
+                foreach (Process proc in chromeProcesses)
+                {
+                    proc.Kill();
+                    proc.WaitForExit(); // Ensures the process is fully terminated
+                    Console.WriteLine($"Killed process: {proc.Id}");
+                }
+            } catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+            }
         }
         #endregion
     }
