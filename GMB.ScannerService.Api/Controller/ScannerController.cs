@@ -28,18 +28,57 @@ namespace GMB.ScannerService.Api.Controller
         [Authorize(Policy = "DevelopmentPolicy")]
         public async Task<ActionResult<GenericResponse>> StartBusinessScannerAsync([FromBody] BusinessScannerRequest request)
         {
-            try
+            List<BusinessAgent> businessList = [];
+            List<Task> tasks = [];
+            using DbLib db = new();
+            SeleniumDriver driver = new();
+            var testResult = await ScannerFunctions.ScannerTest(driver);
+            driver.Dispose();
+
+            if (!testResult.Success)
+                return GenericResponse.Exception($"XPATH was modified, can't scan anything !");
+
+            switch (request.OperationType)
             {
-                List<BusinessAgent> businessList = [];
-                List<Task> tasks = [];
-                using DbLib db = new();
-                SeleniumDriver driver = new();
-                var testResult = await ScannerFunctions.ScannerTest(driver);
-                driver.Dispose();
+                case Operation.PROCESSING_STATE:
+                    GetBusinessListRequest businessListRequest = new(request.Entries, request.Processing, request.Brand, request.Category, request.CategoryFamily, request.IsNetwork, request.IsIndependant);
+                    businessList = db.GetBusinessAgentList(businessListRequest);
+                    break;
+                case Operation.URL_STATE:
+                    businessList = db.GetBusinessAgentListByUrlState(request.UrlState, request.Entries, request.Processing);
+                    break;
+            }
 
-                if (!testResult.Success)
-                    return GenericResponse.Exception($"XPATH was modified, can't scan anything !");
+            while (businessList.Count > 0)
+            {
+                try
+                {
+                    int nbThreads = 8;
 
+                    if (businessList.Count < 10)
+                        nbThreads = 1;
+
+                    foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
+                    {
+                        Task newThread = Task.Run(async () =>
+                        {
+                            ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState, request.CheckDeletedStatus, request.CheckPhotos);
+                            await Scanner.Agent.Scanner.BusinessScanner(scannerRequest).ConfigureAwait(false);
+                        });
+                        tasks.Add(newThread);
+                        Thread.Sleep(15000);
+                    }
+                    await Task.WhenAll(tasks);
+                    ToolBox.KillAllChromeProcesses();
+                
+                } catch (Exception e)
+                {
+                    Log.Error(e, $"An exception occurred while launching scanner.");
+                    return GenericResponse.Exception($"An exception occurred while launching scanner. : {e.Message}");
+                }
+
+                if (!request.UpdateProcessingState)
+                    break;
                 switch (request.OperationType)
                 {
                     case Operation.PROCESSING_STATE:
@@ -50,32 +89,8 @@ namespace GMB.ScannerService.Api.Controller
                         businessList = db.GetBusinessAgentListByUrlState(request.UrlState, request.Entries, request.Processing);
                         break;
                 }
-
-                int nbThreads = 8;
-
-                if (businessList.Count < 10)
-                    nbThreads = 1;
-
-                foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
-                {
-                    Task newThread = Task.Run(async () =>
-                    {
-                        ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState, request.CheckDeletedStatus, request.CheckPhotos);
-                        await Scanner.Agent.Scanner.BusinessScanner(scannerRequest).ConfigureAwait(false);
-                    });
-                    tasks.Add(newThread);
-                    Thread.Sleep(15000);
-                }
-                await Task.WhenAll(tasks);
-                ToolBox.KillAllChromeProcesses();
-                return new GenericResponse(1, "Scanner launched successfully.");
-            } catch (Exception e)
-            {
-                Log.Error(e, $"An exception occurred while launching scanner.");
-                return GenericResponse.Exception($"An exception occurred while launching scanner. : {e.Message}");
             }
-
-            
+            return new GenericResponse(1, "Finish");
         }
 
         /// <summary>

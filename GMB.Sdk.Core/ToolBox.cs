@@ -328,7 +328,7 @@ namespace GMB.Sdk.Core
 
             // Set default translation (English)
             string body;
-            if (translations.TryGetValue(country, out string? value))
+            if (translations.TryGetValue(country.ToLower(), out string? value))
                 body = value;
             else
                 body = englishEmailTemplate;
