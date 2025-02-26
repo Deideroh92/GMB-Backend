@@ -233,31 +233,40 @@ namespace GMB.BusinessService.Api.Controller
         /// <param name="request"></param>
         [HttpPost("bp/place-id")]
         [Authorize]
-        public ActionResult<GetBusinessResponse> GetBusinessByPlaceId([FromBody] GetBusinessRequest request)
+        public ActionResult<GetBusinessListResponse> GetBusinessListByPlaceId([FromBody] GetBusinessRequest request)
         {
             try
             {
                 using DbLib db = new();
                 List<DbBusinessReview>? reviewList = null;
+                List<Business?>? bpFinalList = [];
                 string id = request.Id.Trim();
 
-                DbBusinessProfile? bp = db.GetBusinessByPlaceId(id);
+                List<DbBusinessProfile>? bpList = db.GetBusinessListByPlaceId(id);
 
-                if (bp == null)
-                    return new GetBusinessResponse(null);
+                if (bpList == null || bpList.Count == 0)
+                    return new GetBusinessListResponse(null);
 
-                DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(bp.IdEtab);
 
-                Business? business = new(bp, bs);
 
-                if (request.GetReviews)
-                    reviewList = db.GetBusinessReviewsList(bp.IdEtab);
+                foreach(DbBusinessProfile bp in bpList)
+                {
+                    DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(bp.IdEtab);
 
-                return new GetBusinessResponse(business, false, reviewList);
+                    if (request.GetReviews)
+                        reviewList = db.GetBusinessReviewsList(bp.IdEtab);
+
+                    Business? business = new(bp, bs, reviewList);
+
+                    if (business != null)
+                        bpFinalList.Add(business);
+                }
+
+                return new GetBusinessListResponse(bpFinalList);
             } catch (Exception e)
             {
                 Log.Error($"Exception = [{e.Message}], Stack = [{e.StackTrace}]");
-                return GetBusinessRequest.Exception($"Error getting business by place id : [{e.Message}]");
+                return GetBusinessListResponse.Exception($"Error getting business by place id : [{e.Message}]");
             }
         }
         /// <summary>

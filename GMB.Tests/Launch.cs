@@ -98,6 +98,45 @@ namespace GMB.Tests
             {
                 db.UpdateBusinessProfileProcessingState(idEtab, 11);
             }
+        }        /// <summary>
+        /// Exporting Hotels info.
+        /// </summary>
+        [TestMethod]
+        public void DeleteFromIdEtabFile()
+        {
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Sdk.Core\Files\Custom.txt";
+            using DbLib db = new();
+
+            List<string> values = [];
+
+            using (StreamReader reader = new(filePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string? line = reader.ReadLine();
+                    if (line != null)
+                        values.Add(line);
+                }
+            }
+            try
+            {
+                foreach (string idEtab in values)
+                {
+                    DbBusinessProfile? bp = db.GetBusinessByIdEtab(idEtab);
+                    List<DbBusinessReview> businessReviews = db.GetBusinessReviewsList(idEtab);
+                    foreach (DbBusinessReview review in businessReviews)
+                    {
+                        db.DeleteBusinessReviewsFeeling(review.IdReview);
+                    }
+                    db.DeleteBusinessReviews(idEtab);
+                    db.DeleteBusinessScore(idEtab);
+                    db.DeleteBusinessProfile(idEtab);
+                    db.DeleteBusinessUrlByGuid(bp.FirstGuid);
+                }
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
         /// <summary>
         /// Getting ID etab and place ID from url list.
