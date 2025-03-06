@@ -247,8 +247,6 @@ namespace GMB.BusinessService.Api.Controller
                 if (bpList == null || bpList.Count == 0)
                     return new GetBusinessListResponse(null);
 
-
-
                 foreach(DbBusinessProfile bp in bpList)
                 {
                     DbBusinessScore? bs = db.GetBusinessScoreByIdEtab(bp.IdEtab);

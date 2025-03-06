@@ -59,17 +59,23 @@ namespace GMB.Sdk.Core.Types.Api
 
     public class Photo
     {
-        [JsonProperty("photoReference")]
-        public string? PhotoReference { get; set; }
+        [JsonProperty("name")]
+        public string? Name { get; set; }
 
-        [JsonProperty("height")]
-        public int? Height { get; set; }
-
-        [JsonProperty("width")]
+        [JsonProperty("widthPx")]
         public int? Width { get; set; }
 
-        [JsonProperty("htmlAttributions")]
-        public List<string>? HtmlAttributions { get; set; }
+        [JsonProperty("heightPx")]
+        public int? Height { get; set; }
+
+        [JsonProperty("authorAttributions")]
+        public List<AuthorAttribution>? AuthorAttributions { get; set; }
+
+        [JsonProperty("flagContentUri")]
+        public string? FlagContentUri { get; set; }
+
+        [JsonProperty("googleMapsUri")]
+        public string? GoogleMapsUri { get; set; }
     }
 
     public class Place
