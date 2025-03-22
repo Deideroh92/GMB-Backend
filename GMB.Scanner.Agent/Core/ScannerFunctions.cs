@@ -334,6 +334,8 @@ namespace GMB.Scanner.Agent.Core
         {
             try
             {
+                WebDriverWait wait = new(driver, TimeSpan.FromSeconds(5));
+                wait.Until(ExpectedConditions.ElementToBeClickable(By.XPath("//div[@data-review-id and @aria-label]")));
                 ReadOnlyCollection<IWebElement>? reviewList = ToolBox.FindElementsSafe(driver, XPathReview.reviewList);
 
                 if (reviewList == null || reviewList.Count == 0)
