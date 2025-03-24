@@ -485,7 +485,7 @@ namespace GMB.Scanner.Agent.Core
         {
             try
             {
-                WebDriverWait wait = new(driver, TimeSpan.FromSeconds(5));
+                WebDriverWait wait = new(driver, TimeSpan.FromSeconds(10));
 
                 IWebElement sortButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.sortReviews)));
                 sortButton.Click();
