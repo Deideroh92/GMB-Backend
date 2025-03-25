@@ -511,6 +511,8 @@ namespace GMB.Scanner.Agent.Core
                 IWebElement sortButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.hotelSortGoogleReviews)));
                 sortButton.Click();
 
+                Thread.Sleep(1000);
+
                 sortButton = wait.Until(ExpectedConditions.ElementToBeClickable(ToolBox.FindElementSafe(driver, XPathReview.hotelSortPress)));
                 sortButton.Click();
 
