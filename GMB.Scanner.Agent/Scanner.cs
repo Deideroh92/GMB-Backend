@@ -121,7 +121,7 @@ namespace GMB.Scanner.Agent
 
                             Thread.Sleep(1000);
 
-                            IReadOnlyCollection<IWebElement> links = driver.WebDriver.FindElements(By.XPath("//a[@href and @data-photo-index and contains(@jsaction, 'pane.gallery.main')]"));
+                            IReadOnlyCollection<IWebElement> links = driver.WebDriver.FindElements(By.XPath("//a[@href and @data-photo-index and contains(@jsaction, 'gallery.main') and contains(@aria-label, 'Photo')]"));
 
                             bool isOwner = false;
 
