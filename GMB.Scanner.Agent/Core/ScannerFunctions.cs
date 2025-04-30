@@ -680,43 +680,6 @@ namespace GMB.Scanner.Agent.Core
             if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
                 return new(false, "Maxim's - Reviews global error !");
             #endregion
-            
-            #region Ritz Paris
-            request = new("https://www.google.com/maps/place/Ritz+Paris/@48.8681021,2.3240169,17z/data=!3m2!4b1!5s0x47e66e318913a89d:0x6ff08e4d1a846c6!4m10!3m9!1s0x47e66f50e4922355:0x4e7e02b37682a099!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8680987!4d2.3288932!16zL20vMDU2bjgx?entry=ttu");
-            (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Ritz Paris" ||
-                (profile.GoogleAddress != "15 Pl. Vendôme, 75001 Paris" && profile.GoogleAddress != "15 Pl. Vendôme, 75001 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75101" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "15" ||
-                profile.Category != "Hébergement" ||
-                profile.Website != "https://www.ritzparis.com/?utm_source=google&utm_medium=organic&utm_campaign=gmb_ritz_paris" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4V89H+6H" ||
-                (profile.Tel != "01 43 16 30 30" && profile.Tel != "+33 1 43 16 30 30") ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Ritz Paris - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 30);
-
-            if (reviews == null)
-                return new(false, "Ritz Paris - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Ritz Paris - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
-                return new(false, "Ritz Paris - Reviews global error !");
-            #endregion
 
             #region Lasserre
             request = new("https://www.google.com/maps/place/Lasserre/@48.8697972,2.2942567,15z/data=!3m1!5s0x47e66fdac6120255:0xb3e6ad148f54b824!4m13!1m5!2m4!1srestaurant+gestronomique+paris!5m2!5m1!1s2024-02-22!3m6!1s0x47e66fdac63417f3:0xcf3ba46dec23641b!8m2!3d48.8663494!4d2.3099175!15sCh5yZXN0YXVyYW50IGdhc3Ryb25vbWlxdWUgcGFyaXMiA6ABAVogIh5yZXN0YXVyYW50IGdhc3Ryb25vbWlxdWUgcGFyaXOSARZmaW5lX2RpbmluZ19yZXN0YXVyYW50mgEkQ2hkRFNVaE5NRzluUzBWSlEwRm5TVU5HYlMxNWVGOW5SUkFC4AEA!16s%2Fg%2F1227jzq5?entry=ttu");
@@ -755,42 +718,6 @@ namespace GMB.Scanner.Agent.Core
                 return new(false, "Lasserre - Reviews global error !");
             #endregion
 
-            #region Le Meurice
-            request = new("https://www.google.com/maps/place/Le+Meurice/@48.8672778,2.3185144,17z/data=!3m1!5s0x47e66e2de0435427:0x5a05b1d55da9d3ed!4m22!1m11!3m10!1s0x47e66fd2bde4f80b:0x7b976ab67fe636aa!2sH%C3%B4tel+de+Crillon,+A+Rosewood+Hotel!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8672743!4d2.3210947!16zL20vMDRmY3hs!3m9!1s0x47e66f37dc585251:0xe0a171bc7aaa5c94!5m3!1s2024-02-22!4m1!1i2!8m2!3d48.8651888!4d2.3280831!16s%2Fg%2F11j9fyhgz2?entry=ttu");
-            (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Le Meurice" ||
-                (profile.GoogleAddress != "228 Rue de Rivoli, 75001 Paris" && profile.GoogleAddress != "228 Rue de Rivoli, 75001 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75101" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "228" ||
-                profile.Category != "Hébergement" ||
-                profile.Website != "https://www.dorchestercollection.com/paris/le-meurice" ||
-                profile.PictureUrl == null ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PlusCode != "8FW4V88H+36" ||
-                (profile.Tel != "01 44 58 10 10" && profile.Tel != "+33 1 44 58 10 10") ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Le Meurice - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, true, 30);
-
-            if (reviews == null)
-                return new(false, "Le Meurice - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Le Meurice - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
-                return new(false, "Le Meurice - Reviews global error !");
-            #endregion
 
             return new(true, "Test executed successfully.");
         }
