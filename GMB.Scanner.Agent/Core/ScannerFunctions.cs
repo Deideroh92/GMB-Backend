@@ -430,7 +430,10 @@ namespace GMB.Scanner.Agent.Core
                 if (visitDate != null && !visitDate.Contains("Visité en"))
                     visitDate = null;
 
-                DateTime reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
+                DateTime reviewDate;
+
+                if (reviewGoogleDate.Contains("an") && visitDate != null) reviewDate = ToolBox.ComputeDateFromVisitDate(visitDate);
+                else reviewDate = ToolBox.ComputeDateFromGoogleDate(reviewGoogleDate);
 
                 if ((reviewGoogleDate == null || dateLimit.HasValue && reviewDate < dateLimit.Value) && !hasNbLimit)
                     return null;
