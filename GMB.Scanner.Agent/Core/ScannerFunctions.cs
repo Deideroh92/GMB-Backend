@@ -77,7 +77,7 @@ namespace GMB.Scanner.Agent.Core
                 string? tel = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.tel)?.GetAttribute("aria-label")?.Replace("Numéro de téléphone:", "")?.Trim();
                 string? website = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.website)?.GetAttribute("href")?.Trim();
                 
-                bool hasOpeningHours = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hasOpeningHours)?.GetAttribute("href")?.Trim() == null;
+                bool hasOpeningHours = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.hasOpeningHours) != null;
 
                 // Business Status
                 string? status_tmp = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.status)?.Text.Trim();
