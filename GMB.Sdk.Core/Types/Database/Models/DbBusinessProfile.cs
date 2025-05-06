@@ -36,6 +36,7 @@
         public string? Website { get; set; }
         public string? PlusCode { get; set; }
         public string? LocatedIn { get; set; }
+        public bool? HasBusinessHours { get; set; }
         public DateTime? DateInsert { get; set; }
         public DateTime? DateUpdate { get; set; }
         public int Processing { get; set; }
@@ -70,7 +71,8 @@
         /// <param name="plusCode"></param>
         /// <param name="country"></param>
         /// <param name="locatedIn"></param>
-        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null, string? locatedIn = null)
+        /// <param name="hasBusinessHours"></param>
+        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null, string? locatedIn = null, bool? hasBusinessHours = null)
         {
             Id = -500;
             IdEtab = idEtab;
@@ -102,8 +104,8 @@
             PlaceUrl = placeUrl;
             TelInt = telInt;
             LocatedIn = locatedIn;
-
-            CheckValidity(); 
+            HasBusinessHours = hasBusinessHours;
+            CheckValidity();
         }
 
         public DbBusinessProfile(Business? business) {
