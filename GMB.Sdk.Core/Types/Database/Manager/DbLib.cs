@@ -396,7 +396,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_PROFILE (PLACE_ID, ID_ETAB, FIRST_GUID, NAME, CATEGORY, ADRESS, PLUS_CODE, TEL, WEBSITE, GEOLOC, STATUS, PROCESSING, URL_PICTURE, A_ADDRESS, A_POSTCODE, A_CITY, A_CITY_CODE, A_LAT, A_LON, A_BAN_ID, A_ADDRESS_TYPE, A_NUMBER, A_SCORE, A_COUNTRY, URL_PLACE, TEL_INT, LOACTED_IN, HAS_OPENING_HOURS) VALUES (@PlaceId, @IdEtab, @FirstGuid, @Name, @Category, @GoogleAddress, @PlusCode, @Tel, @Website, @Geoloc, @Status, @Processing, @UrlPicture, @Address, @PostCode, @City, @CityCode, @Lat, @Lon, @IdBan, @AddressType, @StreetNumber, @AddressScore, @Country, @UrlPlace, @TelInt, @LocatedIn, @HasOpeningHours)";
+                string insertCommand = "INSERT INTO BUSINESS_PROFILE (PLACE_ID, ID_ETAB, FIRST_GUID, NAME, CATEGORY, ADRESS, PLUS_CODE, TEL, WEBSITE, GEOLOC, STATUS, PROCESSING, URL_PICTURE, A_ADDRESS, A_POSTCODE, A_CITY, A_CITY_CODE, A_LAT, A_LON, A_BAN_ID, A_ADDRESS_TYPE, A_NUMBER, A_SCORE, A_COUNTRY, URL_PLACE, TEL_INT, LOCATED_IN, HAS_OPENING_HOURS) VALUES (@PlaceId, @IdEtab, @FirstGuid, @Name, @Category, @GoogleAddress, @PlusCode, @Tel, @Website, @Geoloc, @Status, @Processing, @UrlPicture, @Address, @PostCode, @City, @CityCode, @Lat, @Lon, @IdBan, @AddressType, @StreetNumber, @AddressScore, @Country, @UrlPlace, @TelInt, @LocatedIn, @HasOpeningHours)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
