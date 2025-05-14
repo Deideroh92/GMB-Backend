@@ -245,11 +245,11 @@ namespace GMB.Scanner.Agent
                                         if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
                                             db.UpdateBusinessReviewReply(review);
 
-                                        if (!review.Equals(dbBusinessReview))
-                                        {
+                                        /*if (!review.Equals(dbBusinessReview))
+                                        {*/
                                             db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || (dbBusinessReview.ReviewText != review.ReviewText) || (dbBusinessReview.ReviewReplied != review.ReviewReplied) || (dbBusinessReview.VisitDate != review.VisitDate));
                                             continue;
-                                        }
+                                        //}
                                     }
                                     catch (Exception e)
                                     {
