@@ -161,6 +161,7 @@
                    Status == other.Status &&
                    Country == other.Country &&
                    PictureUrl == other.PictureUrl &&
+                   HasBusinessHours == other.HasBusinessHours &&
                    LocatedIn == other.LocatedIn;
         }
 
