@@ -290,7 +290,10 @@ namespace GMB.Scanner.Agent
 
                     // Update Business State when finished
                     if (request.UpdateProcessingState)
-                        db.UpdateBusinessProfileProcessingState(profile.IdEtab, 0);
+                    {
+                        if (business.Processing == 8) db.UpdateBusinessProfileProcessingState(profile.IdEtab, 9);
+                        else db.UpdateBusinessProfileProcessingState(profile.IdEtab, 0);
+                    }
 
                 } catch (Exception e)
                 {

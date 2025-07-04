@@ -751,7 +751,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["WEBSITE"] != DBNull.Value) ? reader["WEBSITE"].ToString() : null,
                         (reader["PLUS_CODE"] != DBNull.Value) ? reader["PLUS_CODE"].ToString() : null,
                         (reader["DATE_UPDATE"] != DBNull.Value) ? DateTime.Parse(reader["DATE_UPDATE"].ToString()!) : null,
-                        (BusinessStatus)Enum.Parse(typeof(BusinessStatus), reader["STATUS"].ToString()!),
+                        Enum.TryParse<BusinessStatus>(reader["STATUS"].ToString(), out var status) ? status : BusinessStatus.OPERATIONAL,
                         (reader["URL_PICTURE"] != DBNull.Value) ? reader["URL_PICTURE"].ToString() : null,
                         (reader["A_COUNTRY"] != DBNull.Value) ? reader["A_COUNTRY"].ToString() : null,
                         (reader["URL_PLACE"] != DBNull.Value) ? reader["URL_PLACE"].ToString() : null,
