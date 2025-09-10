@@ -96,7 +96,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 8);
+                db.UpdateBusinessProfileProcessingState(idEtab, 10);
             }
         }        /// <summary>
         /// Exporting Hotels info.
@@ -195,7 +195,7 @@ namespace GMB.Tests
         {
             AuthorizationPolicyService policy = new();
             ScannerController scannerController = new();
-            BusinessScannerRequest request = new(10000, 8, Operation.PROCESSING_STATE, true, DateTime.UtcNow.AddMonths(-25), false, false, null, null, null, UrlState.NEW, true, false, false);
+            BusinessScannerRequest request = new(3500, 11, Operation.PROCESSING_STATE, false, DateTime.UtcNow.AddMonths(-12), false, false, null, null, null, UrlState.NEW, true, false, true);
 
             Task.Run(() => scannerController.StartBusinessScannerAsync(request)).Wait();
             return;

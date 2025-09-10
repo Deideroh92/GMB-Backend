@@ -10,6 +10,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
 {
     public class DbLib : IDisposable
     {
+
         private const string connectionString = @"Data Source=vasano.database.windows.net;Initial Catalog=GMS;User ID=vs-sa;Password=Eu6pkR2J4";
         private const string connectionStringStickers = @"Data Source=vasano.database.windows.net;Initial Catalog=STICKERS_DEV;User ID=vs-sa;Password=Eu6pkR2J4";
         private readonly SqlConnection Connection;
@@ -1799,7 +1800,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "UPDATE BUSINESS_REVIEWS SET REVIEW_ANSWERED = @Replied, REVIEW_ANSWERED_DATE = @Today WHERE REVIEW_ID = @IdReview";
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET REVIEW_ANSWERED = @Replied, REVIEW_ANSWERED_DATE = @Today, DATE_UPDATE = @Today WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Replied", replied);
                 cmd.Parameters.AddWithValue("@Today", DateTime.UtcNow);

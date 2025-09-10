@@ -49,4 +49,13 @@ namespace GMB.Sdk.Core.Types.Database.Models
         }
         #endregion
     }
+
+    public class ReviewData
+    {
+        public string ReviewId { get; set; }
+        public string ReviewGoogleDateUpdate { get; set; }
+        public DateTime DateInsert { get; set; }
+        public DateTime NewDate { get; set; }
+        public DateTime ReviewDate { get; set; }
+    }
 }

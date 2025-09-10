@@ -430,6 +430,37 @@ namespace GMB.Sdk.Core
             return DateTime.UtcNow;
         }
 
+        public static DateTime ComputeDateFromGoogleDateTemp(DateTime initialDate, string? googleDate)
+        {
+            if (googleDate == null)
+                return initialDate;
+
+            string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Files", "GoogleDate.json");
+
+            string json = File.ReadAllText(filePath);
+            Dictionary<string, string>? mapper = JsonConvert.DeserializeObject<Dictionary<string, string>>(json);
+
+            if (mapper.TryGetValue(googleDate, out string? value) && int.TryParse(value, out int jsonValue))
+            {
+                if (googleDate.Contains("moi"))
+                {
+                    return initialDate.AddMonths(-jsonValue);
+                }
+                if (googleDate.Contains("an"))
+                {
+                    return initialDate.AddYears(-jsonValue);
+                }
+                if (googleDate.Contains("semaine"))
+                    return initialDate.AddDays(-jsonValue);
+                if (googleDate.Contains("jour"))
+                    return initialDate.AddDays(-jsonValue);
+                if (googleDate.Contains("heure"))
+                    return initialDate.AddHours(-jsonValue);
+            }
+
+            return initialDate;
+        }
+
         /// <summary>
         /// Transform Place class to Business Profile Class
         /// </summary>

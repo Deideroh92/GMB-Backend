@@ -5,6 +5,8 @@ using GMB.Sdk.Core.Types.Database.Manager;
 using GMB.Sdk.Core.Types.Database.Models;
 using GMB.Sdk.Core.Types.Models;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.ComponentModel;
+using OfficeOpenXml;
 
 namespace GMB.Tests
 {
@@ -26,6 +28,100 @@ namespace GMB.Tests
             (DbBusinessProfile? profile, DbBusinessScore? score) = await ScannerFunctions.GetBusinessProfileAndScoreFromGooglePageAsync(driver, new(url), null);
             driver.Dispose();
             return;
+        }
+
+        private static DateTime ParseSafeDate(string text)
+        {
+            if (string.IsNullOrWhiteSpace(text))
+                return DateTime.MinValue;
+
+            if (DateTime.TryParse(text, out DateTime result))
+                return result;
+
+            Console.WriteLine($"Impossible de parser la date : '{text}'");
+            return DateTime.MinValue;
+        }
+
+
+        [TestMethod]
+        public async Task ReviewFix()
+        {
+            var reviews = new List<ReviewData>();
+
+            string desktopPath = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            string fileName = "data_to_treat.xlsx";
+            string fullPath = Path.Combine(desktopPath, fileName);
+
+            
+
+            try
+            {
+                ExcelPackage.License.SetNonCommercialPersonal("Max Dav");
+
+                using (var package = new ExcelPackage(new FileInfo(fullPath)))
+                {
+                    var worksheet = package.Workbook.Worksheets[0]; // première feuille
+                    var rowCount = worksheet.Dimension.Rows;
+                    var colCount = worksheet.Dimension.Columns;
+
+                    // Trouver les index des colonnes par leur nom
+                    int reviewIdCol = -1;
+                    int googleDateCol = -1;
+                    int dateInsertCol = -1;
+                    int reviewDateCol = -1;
+
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        var header = worksheet.Cells[1, col].Text.Trim();
+                        if (header == "REVIEW_ID")
+                            reviewIdCol = col;
+                        if (header == "REVIEW_GOOGLE_DATE_UPDATE")
+                            googleDateCol = col;
+                        if (header == "DATE_INSERT")
+                            dateInsertCol = col;
+                        if (header == "REVIEW_DATE")
+                            reviewDateCol = col;
+                    }
+
+                    if (reviewIdCol == -1 || googleDateCol == -1 || dateInsertCol == -1 || reviewDateCol == -1)
+                    {
+                        throw new Exception("Une ou plusieurs colonnes sont manquantes dans le fichier Excel.");
+                    }
+
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        var review = new ReviewData
+                        {
+                            ReviewId = worksheet.Cells[row, reviewIdCol].Text.Trim(),
+                            ReviewGoogleDateUpdate = worksheet.Cells[row, googleDateCol].Text.Trim(),
+                            DateInsert = ParseSafeDate(worksheet.Cells[row, dateInsertCol].Text.Trim()),
+                            ReviewDate = ParseSafeDate(worksheet.Cells[row, reviewDateCol].Text.Trim())
+                        };
+                        reviews.Add(review);
+                    }
+                }
+
+                foreach (ReviewData review in reviews)
+                {
+                    try
+                    {
+                        review.NewDate = ToolBox.ComputeDateFromGoogleDateTemp(review.DateInsert, review.ReviewGoogleDateUpdate);
+                    } catch (ArgumentOutOfRangeException ex)
+                    {
+                        Console.WriteLine($"Erreur sur review {review.ReviewId}: {ex.Message}");
+                        // tu peux logguer ici si besoin, et passer à la suite
+                    }
+                }
+                DbLib db = new();
+                foreach (ReviewData review in reviews)
+                { 
+                    db.UpdateReviewTemp(review);
+                }
+                db.DisconnectFromDB();
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
 
         [TestMethod]

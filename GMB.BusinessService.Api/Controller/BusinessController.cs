@@ -50,10 +50,7 @@ namespace GMB.BusinessService.Api.Controller
                     return GenericResponse.Exception("Business Profile (PLACE ID) already exists in DB.");
 
                 if (db.CheckBusinessProfileExistByIdEtab(business.IdEtab))
-                    return GenericResponse.Exception("Business Profile (ID ETAB) already exists in DD.");
-
-                if (business.Address != null && db.CheckBusinessProfileExistByNameAndAdress(business.Name, business.Address))
-                    return GenericResponse.Exception("Business Profile (ID ETAB) already exists in DD.");
+                    return GenericResponse.Exception("Business Profile (ID ETAB) already exists in DB.");
 
                 string guid = Guid.NewGuid().ToString("N");
                 db.CreateBusinessUrl(new DbBusinessUrl(guid, business.PlaceUrl, "platform"));
