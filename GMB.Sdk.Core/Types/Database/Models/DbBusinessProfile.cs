@@ -43,6 +43,7 @@
         public string? PictureUrl { get; set; }
         public string? PlaceUrl { get; set; }
         public BusinessStatus Status { get; set; }
+        public bool IsVerified { get; set; }
 
         #region Local
         /// <summary>
@@ -72,7 +73,8 @@
         /// <param name="country"></param>
         /// <param name="locatedIn"></param>
         /// <param name="hasBusinessHours"></param>
-        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null, string? locatedIn = null, bool? hasBusinessHours = null)
+        /// <param name="isVerified"></param>
+        public DbBusinessProfile(string? placeId, string idEtab, string firstGuid, string? name, string? category, string? googleAddress, string? address, string? postCode, string? city, string? cityCode, double? lat, double? lon, string? idBan, string? addressType, string? streetNumber, double? addressScore, string? tel, string? website, string? plusCode, DateTime? dateUpdate, BusinessStatus status, string? pictureUrl, string? country, string? placeUrl, string? geoloc = null, int processing = 0, DateTime? dateInsert = null, string? telInt = null, string? locatedIn = null, bool? hasBusinessHours = null, bool isVerified = true)
         {
             Id = -500;
             IdEtab = idEtab;
@@ -106,6 +108,7 @@
             LocatedIn = locatedIn;
             HasBusinessHours = hasBusinessHours;
             CheckValidity();
+            IsVerified = isVerified;
         }
 
         public DbBusinessProfile(Business? business) {
@@ -162,7 +165,8 @@
                    Country == other.Country &&
                    PictureUrl == other.PictureUrl &&
                    HasBusinessHours == other.HasBusinessHours &&
-                   LocatedIn == other.LocatedIn;
+                   LocatedIn == other.LocatedIn &&
+                   IsVerified == other.IsVerified;
         }
 
         public bool AdressEquals(DbBusinessProfile? other)

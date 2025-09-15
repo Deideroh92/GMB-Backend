@@ -48,6 +48,8 @@ namespace GMB.Scanner.Agent.Core
 
             WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
 
+            bool isVerified = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.isVerified) == null;
+
             try
             {
                 // Business Name

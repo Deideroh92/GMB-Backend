@@ -397,7 +397,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_PROFILE (PLACE_ID, ID_ETAB, FIRST_GUID, NAME, CATEGORY, ADRESS, PLUS_CODE, TEL, WEBSITE, GEOLOC, STATUS, PROCESSING, URL_PICTURE, A_ADDRESS, A_POSTCODE, A_CITY, A_CITY_CODE, A_LAT, A_LON, A_BAN_ID, A_ADDRESS_TYPE, A_NUMBER, A_SCORE, A_COUNTRY, URL_PLACE, TEL_INT, LOCATED_IN, HAS_OPENING_HOURS) VALUES (@PlaceId, @IdEtab, @FirstGuid, @Name, @Category, @GoogleAddress, @PlusCode, @Tel, @Website, @Geoloc, @Status, @Processing, @UrlPicture, @Address, @PostCode, @City, @CityCode, @Lat, @Lon, @IdBan, @AddressType, @StreetNumber, @AddressScore, @Country, @UrlPlace, @TelInt, @LocatedIn, @HasOpeningHours)";
+                string insertCommand = "INSERT INTO BUSINESS_PROFILE (PLACE_ID, ID_ETAB, FIRST_GUID, NAME, CATEGORY, ADRESS, PLUS_CODE, TEL, WEBSITE, GEOLOC, STATUS, PROCESSING, URL_PICTURE, A_ADDRESS, A_POSTCODE, A_CITY, A_CITY_CODE, A_LAT, A_LON, A_BAN_ID, A_ADDRESS_TYPE, A_NUMBER, A_SCORE, A_COUNTRY, URL_PLACE, TEL_INT, LOCATED_IN, HAS_OPENING_HOURS, IS_VERIFIED) VALUES (@PlaceId, @IdEtab, @FirstGuid, @Name, @Category, @GoogleAddress, @PlusCode, @Tel, @Website, @Geoloc, @Status, @Processing, @UrlPicture, @Address, @PostCode, @City, @CityCode, @Lat, @Lon, @IdBan, @AddressType, @StreetNumber, @AddressScore, @Country, @UrlPlace, @TelInt, @LocatedIn, @HasOpeningHours, @IsVerified)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
@@ -427,6 +427,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@TelInt", GetValueOrDefault(businessProfile.TelInt));
                 cmd.Parameters.AddWithValue("@LocatedIn", GetValueOrDefault(businessProfile.LocatedIn));
                 cmd.Parameters.AddWithValue("@HasOpeningHours", GetValueOrDefault(businessProfile.HasBusinessHours));
+                cmd.Parameters.AddWithValue("@IsVerified", GetValueOrDefault(businessProfile.IsVerified));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
@@ -586,7 +587,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
-                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null
+                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
                     );
                     businessList.Add(businessProfile);
                 }
@@ -702,7 +704,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
-                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null
+                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
+                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : true
                         );
 
                     bpList.Add(businessProfile);
@@ -761,7 +764,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
-                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null
+                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
                         );
                     return businessProfile;
                 }
@@ -819,7 +823,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
-                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null
+                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
                         );
                     return businessProfile;
                 }
@@ -879,7 +884,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
-                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null
+                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
                         );
                     bpList.Add(businessProfile);
                     
@@ -937,7 +943,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
-                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null
+                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
                         );
                     return businessProfile;
                 }
@@ -997,7 +1004,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["DATE_INSERT"] != DBNull.Value) ? DateTime.Parse(reader["DATE_INSERT"].ToString()!) : null,
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
-                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null
+                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
                         );
                     return businessProfile;
                 }
@@ -1085,7 +1093,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country, LOCATED_IN = @LocatedIn, HAS_OPENING_HOURS = @HasOpeningHours WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, A_ADDRESS = @Address, A_POSTCODE = @PostCode, A_CITY = @City, A_CITY_CODE = @CityCode, A_LON = @Lon, A_LAT = @Lat, A_BAN_ID = @IdBan, A_ADDRESS_TYPE = @AddressType, A_NUMBER = @StreetNumber, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_SCORE = @AddressScore, A_COUNTRY = @Country, LOCATED_IN = @LocatedIn, HAS_OPENING_HOURS = @HasOpeningHours, IS_VERIFIED = @IsVerified WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
@@ -1112,6 +1120,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
                 cmd.Parameters.AddWithValue("@LocatedIn", GetValueOrDefault(businessProfile.LocatedIn));
                 cmd.Parameters.AddWithValue("@HasOpeningHours", GetValueOrDefault(businessProfile.HasBusinessHours));
+                cmd.Parameters.AddWithValue("@IsVerified", GetValueOrDefault(businessProfile.IsVerified));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
@@ -1126,7 +1135,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_COUNTRY = @Country, LOCATED_IN = @LocatedIn, HAS_OPENING_HOURS = @HasOpeningHours WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_COUNTRY = @Country, LOCATED_IN = @LocatedIn, HAS_OPENING_HOURS = @HasOpeningHours, IS_VERIFIED = @IsVerified WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
@@ -1143,6 +1152,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
                 cmd.Parameters.AddWithValue("@LocatedIn", GetValueOrDefault(businessProfile.LocatedIn));
                 cmd.Parameters.AddWithValue("@HasOpeningHours", GetValueOrDefault(businessProfile.HasBusinessHours));
+                cmd.Parameters.AddWithValue("@IsVerified", GetValueOrDefault(businessProfile.IsVerified));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {

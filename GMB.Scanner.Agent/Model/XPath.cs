@@ -31,6 +31,7 @@ namespace GMB.Sdk.Core.Types.Models
         public static readonly List<By> plusCode = [By.XPath("//button[contains(@aria-label, 'Plus\u00A0code:')]"), By.XPath("//a[contains(@aria-label, 'Plus\u00A0code:')]")];
         public static readonly List<By> locatedIn = [By.XPath("//button[@data-item-id='locatedin']")];
         public static readonly List<By> hasOpeningHours = [By.XPath("//button[contains(@jsaction, 'pane.openhours')]"), By.XPath("//span[@aria-label='Horaires']")];
+        public static readonly List<By> isVerified = [By.XPath("//div[text() = 'Revendiquer cet établissement']")];
 
         // Plus Code
         public static readonly List<By> expand = [By.XPath("//div[contains(@class, 'expand sprite-bg')]")];

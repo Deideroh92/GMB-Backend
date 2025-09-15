@@ -113,10 +113,10 @@ namespace GMB.Tests
                     }
                 }
                 DbLib db = new();
-                foreach (ReviewData review in reviews)
+                /*foreach (ReviewData review in reviews)
                 { 
                     db.UpdateReviewTemp(review);
-                }
+                }*/
                 db.DisconnectFromDB();
             } catch (Exception ex)
             {
