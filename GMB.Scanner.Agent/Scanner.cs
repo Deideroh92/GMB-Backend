@@ -37,6 +37,20 @@ namespace GMB.Scanner.Agent
 
             DateTime time = DateTime.UtcNow;
 
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Sdk.Core\Files\ExceptionForAdressUpdate.txt";
+
+            List<string> exceptionList = [];
+
+            using (StreamReader reader = new(filePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string? line = reader.ReadLine();
+                    if (line != null)
+                        exceptionList.Add(line);
+                }
+            }
+
             foreach (BusinessAgent businessAgent in request.BusinessList)
             {
                 try
@@ -96,13 +110,15 @@ namespace GMB.Scanner.Agent
 
                     if (business == null)
                         db.CreateBusinessProfile(profile);
+
                     if (business != null && !profile.Equals(business))
                     {
-                        if (business.GoogleAddress != profile.GoogleAddress)
+                        //exception PAUL
+                        if ((business.GoogleAddress != profile.GoogleAddress) && !exceptionList.Contains(business.IdEtab))
                             db.UpdateBusinessProfile(profile);
                         else
                             db.UpdateBusinessProfileWithoutAddress(profile);
-                    } 
+                    }
 
                     // Insert Business Score if have one.
                     if (score?.Score != null)

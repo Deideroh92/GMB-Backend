@@ -1135,12 +1135,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, ADRESS = @GoogleAddress, GEOLOC = @Geoloc, PLUS_CODE = @PlusCode, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, A_COUNTRY = @Country, LOCATED_IN = @LocatedIn, HAS_OPENING_HOURS = @HasOpeningHours, IS_VERIFIED = @IsVerified WHERE ID_ETAB = @IdEtab";
+                string insertCommand = "UPDATE BUSINESS_PROFILE SET PLACE_ID = @PlaceId, NAME = @Name, PLUS_CODE = @PlusCode, CATEGORY = @Category, TEL = @Tel, WEBSITE = @Website, UPDATE_COUNT = UPDATE_COUNT + 1, DATE_UPDATE = @DateUpdate, STATUS = @Status, URL_PICTURE = @UrlPicture, LOCATED_IN = @LocatedIn, HAS_OPENING_HOURS = @HasOpeningHours, IS_VERIFIED = @IsVerified WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessProfile.IdEtab);
                 cmd.Parameters.AddWithValue("@PlaceId", GetValueOrDefault(businessProfile.PlaceId));
                 cmd.Parameters.AddWithValue("@Name", businessProfile.Name);
-                cmd.Parameters.AddWithValue("@GoogleAddress", GetValueOrDefault(businessProfile.GoogleAddress));
                 cmd.Parameters.AddWithValue("@PlusCode", GetValueOrDefault(businessProfile.PlusCode));
                 cmd.Parameters.AddWithValue("@Category", GetValueOrDefault(businessProfile.Category));
                 cmd.Parameters.AddWithValue("@Tel", GetValueOrDefault(businessProfile.Tel));
@@ -1148,15 +1147,13 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@UrlPicture", GetValueOrDefault(businessProfile.PictureUrl));
                 cmd.Parameters.AddWithValue("@DateUpdate", DateTime.UtcNow);
                 cmd.Parameters.AddWithValue("@Status", businessProfile.Status.ToString());
-                cmd.Parameters.AddWithValue("@Geoloc", GetValueOrDefault(businessProfile.Geoloc));
-                cmd.Parameters.AddWithValue("@Country", GetValueOrDefault(businessProfile.Country));
                 cmd.Parameters.AddWithValue("@LocatedIn", GetValueOrDefault(businessProfile.LocatedIn));
                 cmd.Parameters.AddWithValue("@HasOpeningHours", GetValueOrDefault(businessProfile.HasBusinessHours));
                 cmd.Parameters.AddWithValue("@IsVerified", GetValueOrDefault(businessProfile.IsVerified));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
-                throw new Exception($"Error updating BP with id etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
+                throw new Exception($"Error updating BP without address with id etab = [{businessProfile.IdEtab}] and guid = [{businessProfile.FirstGuid}]", e);
             }
         }
         /// <summary>
