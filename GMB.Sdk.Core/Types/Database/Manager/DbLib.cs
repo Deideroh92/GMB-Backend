@@ -588,7 +588,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
                         (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
-                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : null
                     );
                     businessList.Add(businessProfile);
                 }
@@ -705,7 +705,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
                         (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
-                        (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : true
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : null
                         );
 
                     bpList.Add(businessProfile);
@@ -765,7 +765,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
                         (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
-                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : null
                         );
                     return businessProfile;
                 }
@@ -824,7 +824,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
                         (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
-                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : null
                         );
                     return businessProfile;
                 }
@@ -885,7 +885,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
                         (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
-                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : null
                         );
                     bpList.Add(businessProfile);
                     
@@ -944,7 +944,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
                         (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
-                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : null
                         );
                     return businessProfile;
                 }
@@ -1005,7 +1005,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         (reader["TEL_INT"] != DBNull.Value) ? reader["TEL_INT"].ToString() : null,
                         (reader["LOCATED_IN"] != DBNull.Value) ? reader["LOCATED_IN"].ToString() : null,
                         (reader["HAS_OPENING_HOURS"] != DBNull.Value) ? Convert.ToBoolean(reader["HAS_OPENING_HOURS"]) : null,
-                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : true
+                        (reader["IS_VERIFIED"] != DBNull.Value) ? Convert.ToBoolean(reader["IS_VERIFIED"]) : null
                         );
                     return businessProfile;
                 }
