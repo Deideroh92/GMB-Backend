@@ -37,19 +37,26 @@ namespace GMB.Scanner.Agent
 
             DateTime time = DateTime.UtcNow;
 
-            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Sdk.Core\Files\ExceptionForAdressUpdate.txt";
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()) + @"\GMB.Sdk.Core\Files\ExceptionForAdressUpdate.txt";
 
             List<string> exceptionList = [];
 
-            using (StreamReader reader = new(filePath))
+            try
             {
-                while (!reader.EndOfStream)
+                using (StreamReader reader = new(filePath))
                 {
-                    string? line = reader.ReadLine();
-                    if (line != null)
-                        exceptionList.Add(line);
+                    while (!reader.EndOfStream)
+                    {
+                        string? line = reader.ReadLine();
+                        if (line != null)
+                            exceptionList.Add(line);
+                    }
                 }
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
             }
+
 
             foreach (BusinessAgent businessAgent in request.BusinessList)
             {
