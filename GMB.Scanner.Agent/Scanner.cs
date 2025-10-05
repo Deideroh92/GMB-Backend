@@ -121,7 +121,7 @@ namespace GMB.Scanner.Agent
                     if (business != null && !profile.Equals(business))
                     {
                         //exception PAUL
-                        if ((business.GoogleAddress != profile.GoogleAddress) && !exceptionList.Contains(business.IdEtab))
+                        if ((business.GoogleAddress != profile.GoogleAddress) && !business.Address.Contains("99999"))
                             db.UpdateBusinessProfile(profile);
                         else
                             db.UpdateBusinessProfileWithoutAddress(profile);
