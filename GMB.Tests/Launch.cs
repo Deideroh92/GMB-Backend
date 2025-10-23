@@ -96,7 +96,7 @@ namespace GMB.Tests
 
             foreach (string idEtab in values)
             {
-                db.UpdateBusinessProfileProcessingState(idEtab, 9);
+                db.UpdateBusinessProfileProcessingState(idEtab, 10);
             }
         }        /// <summary>
         /// Exporting Hotels info.

@@ -1505,6 +1505,24 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception("Error while creating Business Photo", e);
             }
         }
+
+        /// <summary>
+        /// Delete Business Photo.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        public void DeleteBusinessPhoto(string idEtab)
+        {
+            try
+            {
+                string insertCommand = "DELETE FROM BUSINESS_PHOTO WHERE ID_ETAB = @IdEtab";
+                using SqlCommand cmd = new(insertCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", GetValueOrDefault(idEtab));
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception("Error while deleting Business Photo", e);
+            }
+        }
         #endregion
 
         #region Business Review
