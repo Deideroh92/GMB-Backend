@@ -555,6 +555,7 @@ namespace GMB.BusinessService.Api.Controller
                 }
                 db.DeleteBusinessReviews(idEtab);
                 db.DeleteBusinessScore(idEtab);
+                db.DeleteBusinessPhoto(idEtab);
                 db.DeleteBusinessProfile(idEtab);
                 db.DeleteBusinessUrlByGuid(bp.FirstGuid);
 
