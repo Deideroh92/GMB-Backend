@@ -45,6 +45,7 @@ namespace GMB.Scanner.Agent.Core
             BusinessStatus status = BusinessStatus.OPERATIONAL;
 
             driver.GetToPage(request.Url);
+            driver.GetToPage(request.Url);
 
             WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
 

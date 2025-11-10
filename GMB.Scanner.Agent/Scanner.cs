@@ -81,6 +81,9 @@ namespace GMB.Scanner.Agent
                         continue;
                     }
 
+                    if (profile.PlaceId == null && business.PlaceId != null)
+                        profile.PlaceId = business.PlaceId;
+
                     business ??= db.GetBusinessByIdEtab(profile.IdEtab);
 
                     if (business == null && profile.PlaceId != null)
