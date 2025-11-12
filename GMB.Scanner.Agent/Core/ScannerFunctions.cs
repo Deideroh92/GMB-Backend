@@ -748,7 +748,7 @@ namespace GMB.Scanner.Agent.Core
             // Single page
             if (businessList == null && ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.name)?.GetAttribute("aria-label")?.Trim() != null)
             {
-                urls.Add(driver.WebDriver.Url);
+                urls.Add(driver.WebDriver.Url.Replace("search", "place"));
                 return urls;
             }
 
