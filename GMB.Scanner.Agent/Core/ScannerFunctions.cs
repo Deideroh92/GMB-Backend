@@ -96,7 +96,6 @@ namespace GMB.Scanner.Agent.Core
 
                 if (ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score) != null)
                 {
-                    string? test = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label");
                     string? scoreString = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.score).GetAttribute("aria-label")?.Replace("étoiles", "")?.Trim();
 
                     if (scoreString != null)

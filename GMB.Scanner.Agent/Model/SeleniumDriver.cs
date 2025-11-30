@@ -34,10 +34,18 @@ namespace GMB.Sdk.Core.Types.Models
                 chromeOptions.AddArguments("--ignore-certificate-errors");
                 chromeOptions.AddArguments("--disable-extensions");
                 chromeOptions.AddArguments("--disable-dev-shm-usage");
+                chromeOptions.AddExcludedArgument("enable-automation");
+                chromeOptions.AddAdditionalOption("useAutomationExtension", false);
+                chromeOptions.AddArgument("--disable-blink-features=AutomationControlled");
+                chromeOptions.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                                    "AppleWebKit/537.36 (KHTML, like Gecko) " +
+                                    "Chrome/127.0.0.1 Safari/537.36");
                 chromeOptions.AddArgument("scriptpid-" + Id);
 
                 new DriverManager().SetUpDriver(new ChromeConfig());
                 WebDriver = new ChromeDriver(chromeOptions);
+                var js = (IJavaScriptExecutor)WebDriver;
+                js.ExecuteScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
 
             } catch (Exception)
             {
