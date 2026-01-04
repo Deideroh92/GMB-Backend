@@ -103,7 +103,7 @@ namespace GMB.Scanner.Agent
                     if (business != null && !profile.Equals(business))
                     {
                         //exception PAUL
-                        if ((business.GoogleAddress != profile.GoogleAddress) && !business.GoogleAddress.Contains("99999"))
+                        if (business.GoogleAddress == null || ((business.GoogleAddress != profile.GoogleAddress) && !business.GoogleAddress.Contains("99999")))
                             db.UpdateBusinessProfile(profile);
                         else
                             db.UpdateBusinessProfileWithoutAddress(profile);
