@@ -292,8 +292,16 @@ namespace GMB.Scanner.Agent.Core
 
             Thread.Sleep(2000);
 
+            ReadOnlyCollection<IWebElement>? reviews = null;
+
             // Getting reviews.
-            ReadOnlyCollection<IWebElement>? reviews = GetWebElements(driver.WebDriver, dateLimit, nbLimit);
+            try
+            {
+                reviews = GetWebElements(driver.WebDriver, dateLimit, nbLimit);
+            } catch (Exception e)
+            {
+                return null;
+            }
 
             if (reviews == null || reviews.Count == 0)
                 return null;
