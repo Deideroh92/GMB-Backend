@@ -1562,6 +1562,38 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception("Error while creating BR", e);
             }
         }
+
+        public void InsertThemeMatches(string reviewId, HashSet<int> themeIds)
+        {
+            if (themeIds.Count == 0)
+                return;
+
+            using var tx = Connection.BeginTransaction();
+
+            var delete = new SqlCommand(
+                "DELETE FROM REVIEW_THEME_MATCH WHERE REVIEW_ID = @rid",
+                Connection, tx);
+            delete.Parameters.AddWithValue("@rid", reviewId);
+            delete.ExecuteNonQuery();
+
+            var insert = new SqlCommand(
+                "INSERT INTO REVIEW_THEME_MATCH (REVIEW_ID, THEME_ID) VALUES (@rid, @tid)",
+                Connection, tx);
+
+            insert.Parameters.Add("@rid", SqlDbType.NVarChar);
+            insert.Parameters.Add("@tid", SqlDbType.Int);
+
+            foreach (var themeId in themeIds)
+            {
+                insert.Parameters["@rid"].Value = reviewId;
+                insert.Parameters["@tid"].Value = themeId;
+                insert.ExecuteNonQuery();
+            }
+
+            tx.Commit();
+        }
+
+
         #endregion
 
         #region Get
@@ -1654,6 +1686,48 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error getting BR list with id etab = [{idEtab}]", e);
             }
         }
+
+        public List<DbBusinessReview> GetBusinessReviewsListByProcessing(int processing)
+        {
+            try
+            {
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED, ID_ETAB FROM vBUSINESS_REVIEWS WHERE PROCESSING = @Processing";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Processing", processing);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<DbBusinessReview> brList = [];
+
+                while (reader.Read())
+                {
+                    brList.Add(new DbBusinessReview(reader.GetString(16),
+                        reader.GetString(9),
+                        reader.GetString(6),
+                        new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0),
+                            reader.IsDBNull(3) ? null : reader.GetInt32(3),
+                            !reader.IsDBNull(1) && reader.GetBoolean(1)),
+                        reader.GetInt32(2),
+                        reader.IsDBNull(4) ? null : reader.GetString(4),
+                        reader.IsDBNull(11) ? null : reader.GetString(11),
+                        reader.IsDBNull(12) ? null : reader.GetDateTime(12),
+                        reader.GetBoolean(5),
+                        reader.IsDBNull(13) ? null : reader.GetDateTime(13),
+                        reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                        reader.IsDBNull(7) ? null : reader.GetString(7),
+                        reader.IsDBNull(10) ? null : reader.GetString(10),
+                        null,
+                        reader.IsDBNull(14) ? null : reader.GetDateTime(14),
+                        !reader.IsDBNull(15) && reader.GetBoolean(15)
+                        ));
+                }
+                return brList;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting BR list with processing = [{processing}]", e);
+            }
+        }
+
         /// <summary>
         /// Get list of Business Reviews.
         /// </summary>
@@ -1700,6 +1774,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error getting BR list with id etab = [{idEtab}]", e);
             }
         }
+
         /// <summary>
         /// Get Business Review total.
         /// </summary>
@@ -1740,6 +1815,37 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error getting business reviews feelings total", e);
             }
         }
+
+        public Dictionary<string, List<int>> GetKeywordThemeMap()
+        {
+            var map = new Dictionary<string, List<int>>();
+
+            string sql = @"
+        SELECT k.KEYWORD, k.THEME_ID
+        FROM REVIEW_THEME_KEYWORD k
+        JOIN REVIEW_THEME t ON t.THEME_ID = k.THEME_ID
+        WHERE k.IS_ACTIVE = 1 AND t.IS_ACTIVE = 1";
+
+            using var cmd = new SqlCommand(sql, Connection);
+            using var reader = cmd.ExecuteReader();
+
+            while (reader.Read())
+            {
+                var keyword = ToolBox.Normalize(reader.GetString(0));
+                var themeId = reader.GetInt32(1);
+
+                if (!map.TryGetValue(keyword, out var list))
+                {
+                    list = [];
+                    map[keyword] = list;
+                }
+
+                list.Add(themeId);
+            }
+
+            return map;
+        }
+
         #endregion Get
 
         #region Update
@@ -1797,6 +1903,25 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error updating BR with id review = [{reviewId}]", e);
             }
         }
+        /// <summary>       
+        /// Update Business Review.     
+        /// </summary>     
+        /// <param name="reviewId"></param>      
+        /// <param name="processing"></param>
+        public void UpdateBusinessReviewProcessing(string reviewId, int processing)
+        {
+            try
+            {
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET PROCESSING = @Processing WHERE REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@Processing", GetValueOrDefault(processing));
+                cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(reviewId));
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error updating BR with id review = [{reviewId}]", e);
+            }
+        }
         /// <summary>
         /// Update Business Review.
         /// </summary>
@@ -1838,11 +1963,11 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         }
         #endregion
 
-                #region Delete
-                /// <summary>
-                /// Delete Business Reviews.
-                /// </summary>
-                /// <param name="idEtab"></param>
+        #region Delete
+        /// <summary>
+        /// Delete Business Reviews.
+        /// </summary>
+        /// <param name="idEtab"></param>
         public void DeleteBusinessReviews(string idEtab)
         {
             try
