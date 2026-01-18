@@ -759,25 +759,16 @@ namespace GMB.Sdk.Core
 
         public static string Normalize(string input)
         {
+            // Garder uniquement la normalisation des majuscules
             var lower = input.ToLowerInvariant();
 
-            // Normaliser tirets/ponctuation en espaces (utile pour "rendez-vous", "laisser-aller")
-            lower = lower.Replace('-', ' ').Replace('’', '\'');
+            // Ne plus toucher aux accents
+            // Ne plus supprimer les espaces ni les normaliser
+            // Ne plus faire de FormD / suppression des diacritiques
+            // Ne plus collapse les espaces
 
-            var formD = lower.Normalize(NormalizationForm.FormD);
-            var sb = new StringBuilder(formD.Length);
-
-            foreach (var ch in formD)
-                if (CharUnicodeInfo.GetUnicodeCategory(ch) != UnicodeCategory.NonSpacingMark)
-                    sb.Append(ch);
-
-            // Collapser les espaces multiples
-            var noAccents = sb.ToString();
-            noAccents = Regex.Replace(noAccents, @"\s+", " ").Trim();
-
-            return noAccents;
+            return lower;
         }
-
 
         public static List<string> Tokenize(string text)
         {
