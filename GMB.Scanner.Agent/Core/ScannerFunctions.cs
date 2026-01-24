@@ -549,189 +549,194 @@ namespace GMB.Scanner.Agent.Core
             ScannerFunctions scanner = new();
             DateTime reviewLimit = DateTime.UtcNow.AddDays(-15);
 
-            #region Mairie de Paris
-            GetBusinessProfileRequest request = new("https://www.google.fr/maps/place/Mairie+de+Paris/@48.8660828,2.3108754,13z/data=!4m10!1m2!2m1!1smairie+de+paris!3m6!1s0x47e66e23b4333db3:0xbc314dec89c4971!8m2!3d48.8641075!4d2.3421539!15sCg9tYWlyaWUgZGUgcGFyaXNaESIPbWFpcmllIGRlIHBhcmlzkgEJY2l0eV9oYWxsmgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVVEyYzA5MWNrbFJFQUXgAQA!16s%2Fg%2F11c6pn36ph?hl=fr&entry=ttu");
-            (DbBusinessProfile? profile, DbBusinessScore? score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Hôtel de Ville" ||
-                (profile.GoogleAddress != "29 Rue de Rivoli, 75004 Paris" && profile.GoogleAddress != "29 Rue de Rivoli, 75004 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75104" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "29" ||
-                profile.Category != "Hôtel de ville" ||
-                profile.Website != "https://www.paris.fr/" ||
-                profile.PictureUrl == null ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PlusCode != "8FW4V942+JR" ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Mairie de Paris - Business Profile error !");
-            
-            driver.GetToPage(request.Url);
-            List<DbBusinessReview>? reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
-
-            if (reviews == null)
-                return new(false, "Mairie de Paris - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
+            try
             {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Mairie de Paris - Review loop error !");
+                #region Mairie de Paris
+                GetBusinessProfileRequest request = new("https://www.google.fr/maps/place/Mairie+de+Paris/@48.8660828,2.3108754,13z/data=!4m10!1m2!2m1!1smairie+de+paris!3m6!1s0x47e66e23b4333db3:0xbc314dec89c4971!8m2!3d48.8641075!4d2.3421539!15sCg9tYWlyaWUgZGUgcGFyaXNaESIPbWFpcmllIGRlIHBhcmlzkgEJY2l0eV9oYWxsmgEjQ2haRFNVaE5NRzluUzBWSlEwRm5TVVEyYzA5MWNrbFJFQUXgAQA!16s%2Fg%2F11c6pn36ph?hl=fr&entry=ttu");
+                (DbBusinessProfile? profile, DbBusinessScore? score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+                if (profile.Name != "Hôtel de Ville" ||
+                    (profile.GoogleAddress != "29 Rue de Rivoli, 75004 Paris" && profile.GoogleAddress != "29 Rue de Rivoli, 75004 Paris, France") ||
+                    profile.City != "Paris" ||
+                    profile.CityCode != "75104" ||
+                    profile.Country != "France" ||
+                    profile.StreetNumber != "29" ||
+                    profile.Category != "Hôtel de ville" ||
+                    profile.Website != "https://www.paris.fr/" ||
+                    profile.PictureUrl == null ||
+                    profile.Status != BusinessStatus.OPERATIONAL ||
+                    profile.PlusCode != "8FW4V942+JR" ||
+                    score.NbReviews == null ||
+                    score.Score <= 1 ||
+                    score.Score >= 5 ||
+                    score.Score == null)
+                    return new(false, "Mairie de Paris - Business Profile error !");
+
+                driver.GetToPage(request.Url);
+                List<DbBusinessReview>? reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
+
+                if (reviews == null)
+                    return new(false, "Mairie de Paris - Reviews empty !");
+
+                foreach (DbBusinessReview review in reviews)
+                {
+                    if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                        return new(false, "Mairie de Paris - Review loop error !");
+                }
+
+                if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
+                    return new(false, "Mairie de Paris - Review global error !");
+                #endregion
+
+                #region Louvre
+                request = new("https://www.google.fr/maps/place/Mus%C3%A9e+du+Louvre/@48.8606111,2.337644,17z/data=!3m1!4b1!4m6!3m5!1s0x47e671d877937b0f:0xb975fcfa192f84d4!8m2!3d48.8606111!4d2.337644!16zL20vMDRnZHI?hl=fr&entry=ttu");
+                (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+                if (profile.Name != "Musée du Louvre" ||
+                    (profile.GoogleAddress != "75001 Paris" && profile.GoogleAddress != "75001 Paris, France") ||
+                    profile.City != "Paris" ||
+                    profile.CityCode != "75101" ||
+                    profile.Country != "France" ||
+                    profile.Category != "Musée d'art" ||
+                    profile.Website != "https://www.louvre.fr/" ||
+                    profile.Status != BusinessStatus.OPERATIONAL ||
+                    profile.PictureUrl == null ||
+                    profile.PlusCode != "8FW4V86Q+63" ||
+                    (profile.Tel != "01 40 20 53 17" && profile.Tel != "+33 1 40 20 53 17") ||
+                    score.NbReviews == null ||
+                    score.Score <= 1 ||
+                    score.Score >= 5 ||
+                    score.Score == null)
+                    return new(false, "Louvre - Business Profile error !");
+
+                driver.GetToPage(request.Url);
+                reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
+
+                if (reviews == null)
+                    return new(false, "Louvre - Reviews empty !");
+
+                foreach (DbBusinessReview review in reviews)
+                {
+                    if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                        return new(false, "Louvre - Review loop error !");
+                }
+
+                if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
+                    return new(false, "Louvre - Reviews global error !");
+                #endregion
+
+                #region Hôpital Necker
+                request = new("https://www.google.fr/maps/place/H%C3%B4pital+Necker+AP-HP/@48.8452199,2.3157461,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6703221308f89:0x57a7e5b303e7d9!8m2!3d48.8452199!4d2.3157461!16s%2Fm%2F03gzggj?hl=fr&entry=ttu");
+                (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+                if (profile.Name != "Hôpital Necker Enfants malades - AP-HP" ||
+                    (profile.GoogleAddress != "149 Rue de Sèvres, 75015 Paris" && profile.GoogleAddress != "149 Rue de Sèvres, 75015 Paris, France") ||
+                    profile.City != "Paris" ||
+                    profile.CityCode != "75115" ||
+                    profile.Country != "France" ||
+                    profile.Category != "Hôpital pour enfants" ||
+                    profile.StreetNumber != "149" ||
+                    profile.Website != "http://www.hopital-necker.aphp.fr/" ||
+                    profile.Status != BusinessStatus.OPERATIONAL ||
+                    profile.PictureUrl == null ||
+                    profile.PlusCode != "8FW4R8W8+H9" ||
+                    (profile.Tel != "01 44 49 40 00" && profile.Tel != "+33 1 44 49 40 00") ||
+                    score.NbReviews == null ||
+                    score.Score <= 1 ||
+                    score.Score >= 5 ||
+                    score.Score == null)
+                    return new(false, "Hôpital Necker - Business Profile error !");
+
+                driver.GetToPage(request.Url);
+                reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
+
+                if (reviews == null)
+                    return new(false, "Hôpital Necker - Reviews empty !");
+
+                foreach (DbBusinessReview review in reviews)
+                {
+                    if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                        return new(false, "Hôpital Necker - Review loop error !");
+                }
+
+                if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
+                    return new(false, "Hôpital Necker - Reviews global error !");
+                #endregion
+
+                #region Maxim's
+                request = new("https://www.google.fr/maps/place/Maxim's/@48.8674428,2.3032712,15z/data=!4m10!1m2!2m1!1smaxim's!3m6!1s0x47e66fcd4e473877:0xcf18f93e84c578c5!8m2!3d48.8674428!4d2.3223256!15sCgdtYXhpbSdzWgkiB21heGltJ3OSAQpyZXN0YXVyYW504AEA!16zL20vMDl6a3Ix?hl=fr&entry=ttu");
+                (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+                if (profile.Name != "Maxim's" ||
+                    (profile.GoogleAddress != "3 Rue Royale, 75008 Paris" && profile.GoogleAddress != "3 Rue Royale, 75008 Paris, France") ||
+                    profile.City != "Paris" ||
+                    profile.CityCode != "75108" ||
+                    profile.Country != "France" ||
+                    profile.StreetNumber != "3" ||
+                    profile.Category != "Restaurant français" ||
+                    profile.Website != "https://restaurant-maxims.com/" ||
+                    profile.Status != BusinessStatus.OPERATIONAL ||
+                    profile.PictureUrl == null ||
+                    profile.PlusCode != "8FW4V88C+WV" ||
+                    (profile.Tel != "01 42 65 27 94" && profile.Tel != "+33 1 42 65 27 94") ||
+                    score.NbReviews == null ||
+                    score.Score <= 1 ||
+                    score.Score >= 5 ||
+                    score.Score == null)
+                    return new(false, "Maxim's - Business Profile error !");
+
+                driver.GetToPage(request.Url);
+                reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
+
+                if (reviews == null)
+                    return new(false, "Maxim's - Reviews empty !");
+
+                foreach (DbBusinessReview review in reviews)
+                {
+                    if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                        return new(false, "Maxim's - Review loop error !");
+                }
+
+                if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
+                    return new(false, "Maxim's - Reviews global error !");
+                #endregion
+
+                #region Lasserre
+                request = new("https://www.google.com/maps/place/Lasserre/@48.8697972,2.2942567,15z/data=!3m1!5s0x47e66fdac6120255:0xb3e6ad148f54b824!4m13!1m5!2m4!1srestaurant+gestronomique+paris!5m2!5m1!1s2024-02-22!3m6!1s0x47e66fdac63417f3:0xcf3ba46dec23641b!8m2!3d48.8663494!4d2.3099175!15sCh5yZXN0YXVyYW50IGdhc3Ryb25vbWlxdWUgcGFyaXMiA6ABAVogIh5yZXN0YXVyYW50IGdhc3Ryb25vbWlxdWUgcGFyaXOSARZmaW5lX2RpbmluZ19yZXN0YXVyYW50mgEkQ2hkRFNVaE5NRzluUzBWSlEwRm5TVU5HYlMxNWVGOW5SUkFC4AEA!16s%2Fg%2F1227jzq5?entry=ttu");
+                (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
+                if (profile.Name != "Lasserre" ||
+                    (profile.GoogleAddress != "17 Av. Franklin Delano Roosevelt, 75008 Paris" && profile.GoogleAddress != "17 Av. Franklin Delano Roosevelt, 75008 Paris, France") ||
+                    profile.City != "Paris" ||
+                    profile.CityCode != "75108" ||
+                    profile.Country != "France" ||
+                    profile.StreetNumber != "17" ||
+                    profile.Category != "Restaurant gastronomique" ||
+                    profile.Website != "http://www.restaurant-lasserre.com/" ||
+                    profile.Status != BusinessStatus.OPERATIONAL ||
+                    profile.PictureUrl == null ||
+                    profile.PlusCode != "8FW4V885+GX" ||
+                    (profile.Tel != "01 43 59 02 13" && profile.Tel != "+33 1 43 59 02 13") ||
+                    score.NbReviews == null ||
+                    score.Score <= 1 ||
+                    score.Score >= 5 ||
+                    score.Score == null)
+                    return new(false, "Lasserre - Business Profile error !");
+
+                driver.GetToPage(request.Url);
+                reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
+
+                if (reviews == null)
+                    return new(false, "Lasserre - Reviews empty !");
+
+                foreach (DbBusinessReview review in reviews)
+                {
+                    if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
+                        return new(false, "Lasserre - Review loop error !");
+                }
+
+                if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
+                    return new(false, "Lasserre - Reviews global error !");
+                #endregion
+
+            } catch (Exception e) {
+                return new(false, "Test error.");
             }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
-                return new(false, "Mairie de Paris - Review global error !");
-            #endregion
-
-            #region Louvre
-            request = new("https://www.google.fr/maps/place/Mus%C3%A9e+du+Louvre/@48.8606111,2.337644,17z/data=!3m1!4b1!4m6!3m5!1s0x47e671d877937b0f:0xb975fcfa192f84d4!8m2!3d48.8606111!4d2.337644!16zL20vMDRnZHI?hl=fr&entry=ttu");
-            (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Musée du Louvre" ||
-                (profile.GoogleAddress != "75001 Paris" && profile.GoogleAddress != "75001 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75101" ||
-                profile.Country != "France" ||
-                profile.Category != "Musée d'art" ||
-                profile.Website != "https://www.louvre.fr/" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4V86Q+63" ||
-                (profile.Tel != "01 40 20 53 17" && profile.Tel != "+33 1 40 20 53 17") ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Louvre - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
-
-            if (reviews == null)
-                return new(false, "Louvre - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Louvre - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
-                return new(false, "Louvre - Reviews global error !");
-            #endregion
-
-            #region Hôpital Necker
-            request = new("https://www.google.fr/maps/place/H%C3%B4pital+Necker+AP-HP/@48.8452199,2.3157461,17z/data=!3m1!4b1!4m6!3m5!1s0x47e6703221308f89:0x57a7e5b303e7d9!8m2!3d48.8452199!4d2.3157461!16s%2Fm%2F03gzggj?hl=fr&entry=ttu");
-            (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Hôpital Necker Enfants malades - AP-HP" ||
-                (profile.GoogleAddress != "149 Rue de Sèvres, 75015 Paris" && profile.GoogleAddress != "149 Rue de Sèvres, 75015 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75115" ||
-                profile.Country != "France" ||
-                profile.Category != "Hôpital pour enfants" ||
-                profile.StreetNumber != "149" ||
-                profile.Website != "http://www.hopital-necker.aphp.fr/" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4R8W8+H9" ||
-                (profile.Tel != "01 44 49 40 00" && profile.Tel != "+33 1 44 49 40 00") ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Hôpital Necker - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
-
-            if (reviews == null)
-                return new(false, "Hôpital Necker - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Hôpital Necker - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
-                return new(false, "Hôpital Necker - Reviews global error !");
-            #endregion
-
-            #region Maxim's
-            request = new("https://www.google.fr/maps/place/Maxim's/@48.8674428,2.3032712,15z/data=!4m10!1m2!2m1!1smaxim's!3m6!1s0x47e66fcd4e473877:0xcf18f93e84c578c5!8m2!3d48.8674428!4d2.3223256!15sCgdtYXhpbSdzWgkiB21heGltJ3OSAQpyZXN0YXVyYW504AEA!16zL20vMDl6a3Ix?hl=fr&entry=ttu");
-            (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Maxim's" ||
-                (profile.GoogleAddress != "3 Rue Royale, 75008 Paris" && profile.GoogleAddress != "3 Rue Royale, 75008 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75108" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "3" ||
-                profile.Category != "Restaurant français" ||
-                profile.Website != "https://restaurant-maxims.com/" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4V88C+XW" ||
-                (profile.Tel != "01 42 65 27 94" && profile.Tel != "+33 1 42 65 27 94") ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Maxim's - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
-
-            if (reviews == null)
-                return new(false, "Maxim's - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Maxim's - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
-                return new(false, "Maxim's - Reviews global error !");
-            #endregion
-
-            #region Lasserre
-            request = new("https://www.google.com/maps/place/Lasserre/@48.8697972,2.2942567,15z/data=!3m1!5s0x47e66fdac6120255:0xb3e6ad148f54b824!4m13!1m5!2m4!1srestaurant+gestronomique+paris!5m2!5m1!1s2024-02-22!3m6!1s0x47e66fdac63417f3:0xcf3ba46dec23641b!8m2!3d48.8663494!4d2.3099175!15sCh5yZXN0YXVyYW50IGdhc3Ryb25vbWlxdWUgcGFyaXMiA6ABAVogIh5yZXN0YXVyYW50IGdhc3Ryb25vbWlxdWUgcGFyaXOSARZmaW5lX2RpbmluZ19yZXN0YXVyYW50mgEkQ2hkRFNVaE5NRzluUzBWSlEwRm5TVU5HYlMxNWVGOW5SUkFC4AEA!16s%2Fg%2F1227jzq5?entry=ttu");
-            (profile, score) = await GetBusinessProfileAndScoreFromGooglePageAsync(driver, request, null);
-            if (profile.Name != "Lasserre" ||
-                (profile.GoogleAddress != "17 Av. Franklin Delano Roosevelt, 75008 Paris" && profile.GoogleAddress != "17 Av. Franklin Delano Roosevelt, 75008 Paris, France") ||
-                profile.City != "Paris" ||
-                profile.CityCode != "75108" ||
-                profile.Country != "France" ||
-                profile.StreetNumber != "17" ||
-                profile.Category != "Restaurant gastronomique" ||
-                profile.Website != "http://www.restaurant-lasserre.com/" ||
-                profile.Status != BusinessStatus.OPERATIONAL ||
-                profile.PictureUrl == null ||
-                profile.PlusCode != "8FW4V885+GX" ||
-                (profile.Tel != "01 43 59 02 13" && profile.Tel != "+33 1 43 59 02 13") ||
-                score.NbReviews == null ||
-                score.Score <= 1 ||
-                score.Score >= 5 ||
-                score.Score == null)
-                return new(false, "Lasserre - Business Profile error !");
-
-            driver.GetToPage(request.Url);
-            reviews = GetReviews(profile.IdEtab, reviewLimit, driver, false, 30);
-
-            if (reviews == null)
-                return new(false, "Lasserre - Reviews empty !");
-
-            foreach (DbBusinessReview review in reviews)
-            {
-                if (review.IdReview == null || review.Score < 1 || review.Score > 5 || review.ReviewGoogleDate == null)
-                    return new(false, "Lasserre - Review loop error !");
-            }
-
-            if (!reviews.Any(review => review != null && review.User.LocalGuide) || !reviews.Any(review => review != null && review.User.Name != null) || !reviews.Any(review => review != null && review.User.NbReviews > 1) || reviews.Any(review => review != null && review.ReviewReply != null) || !reviews.Any(review => review.VisitDate != null))
-                return new(false, "Lasserre - Reviews global error !");
-            #endregion
-
 
             return new(true, "Test executed successfully.");
         }
