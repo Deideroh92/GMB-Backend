@@ -17,6 +17,7 @@ using Serilog;
 using System.Drawing.Text;
 using AngleSharp.Io;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace GMB.Sdk.Core
 {
@@ -755,6 +756,74 @@ namespace GMB.Sdk.Core
                 Console.WriteLine($"Error: {ex.Message}");
             }
         }
+
+        public static string Normalize(string input)
+        {
+            // Garder uniquement la normalisation des majuscules
+            var lower = input.ToLowerInvariant();
+
+            // Ne plus toucher aux accents
+            // Ne plus supprimer les espaces ni les normaliser
+            // Ne plus faire de FormD / suppression des diacritiques
+            // Ne plus collapse les espaces
+
+            return lower;
+        }
+
+        public static List<string> Tokenize(string text)
+        {
+            return Regex.Matches(text, @"\p{L}+")
+                        .Select(m => m.Value)
+                        .ToList();
+        }
+
+        public static HashSet<int> DetectThemes(string reviewText, Dictionary<string, List<int>> keywordThemeMap)
+        {
+            var result = new HashSet<int>();
+            var text = Normalize(reviewText);
+
+            // 1) Expressions / phrases : on check sur le texte complet
+            // Trick simple pour frontières : on pad avec des espaces
+            var padded = " " + text + " ";
+
+            foreach (var kv in keywordThemeMap)
+            {
+                var kw = kv.Key;
+
+                // Si keyword contient un espace => phrase
+                if (kw.Contains(' '))
+                {
+                    // match " mot mot " (simple, efficace)
+                    if (padded.Contains(" " + kw + " "))
+                    {
+                        foreach (var themeId in kv.Value)
+                            result.Add(themeId);
+                    }
+                }
+            }
+
+            // 2) Tokens / stems : tokenization puis recherche par préfixe (min 4)
+            var tokens = Regex.Matches(text, @"\p{L}+")
+                              .Select(m => m.Value)
+                              .ToList();
+
+            foreach (var token in tokens)
+            {
+                for (int i = token.Length; i >= 4; i--)
+                {
+                    var stem = token.Substring(0, i);
+
+                    if (keywordThemeMap.TryGetValue(stem, out var themeIds))
+                        foreach (var id in themeIds)
+                            result.Add(id);
+                }
+            }
+
+            return result;
+        }
+
+
+
         #endregion
     }
 }

@@ -30,6 +30,45 @@ namespace GMB.Tests
             return;
         }
 
+        [TestMethod]
+        public void LaunchReviewsThemes()
+        {
+            int processing = 1;
+
+            // 1️⃣ Chargement des avis (mono-thread)
+            DbLib db = new();
+            List<DbBusinessReview> reviews = db.GetBusinessReviewsListByProcessing(processing);
+
+            // 2️⃣ Chargement du dictionnaire (mono-thread, shared)
+            Dictionary<string, List<int>> themes = db.GetKeywordThemeMap();
+
+            // 3️⃣ Traitement parallèle
+            Parallel.ForEach(
+                reviews,
+                new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = Math.Min(4, Environment.ProcessorCount)
+                },
+                review =>
+                {
+                    // ⚠️ DbLib par thread
+                    using DbLib localDb = new();
+
+                    if (!string.IsNullOrWhiteSpace(review.ReviewText))
+                    {
+                        HashSet<int> themesFound =
+                            ToolBox.DetectThemes(review.ReviewText, themes);
+
+                        if (themesFound.Count > 0)
+                            localDb.InsertThemeMatches(review.IdReview, themesFound);
+                    }
+
+                    localDb.UpdateBusinessReviewProcessing(review.IdReview, 0);
+                }
+            );
+        }
+
+
         private static DateTime ParseSafeDate(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
