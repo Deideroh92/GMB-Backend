@@ -688,17 +688,28 @@ namespace GMB.Sdk.Core
         /// </summary>
         public static void BreakingHours()
         {
-            DateTime actualTime = DateTime.UtcNow;
+            // Get the current UTC time
+            DateTime actualTimeUtc = DateTime.UtcNow;
 
-            // Breaking hours
-            TimeSpan heureDebut = new(1, 0, 0); // 1AM
-            TimeSpan heureFin = new(3, 0, 0); // 3AM
+            // Define the time zone for Paris (UTC+1 or UTC+2 depending on daylight savings)
+            TimeZoneInfo parisTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Europe/Paris");
 
-            while (actualTime.TimeOfDay >= heureDebut && actualTime.TimeOfDay < heureFin)
+            // Convert the current UTC time to Paris time
+            DateTime actualTimeParis = TimeZoneInfo.ConvertTimeFromUtc(actualTimeUtc, parisTimeZone);
+
+            // Define the breaking hours in Paris time (Midnight to 3 AM)
+            TimeSpan heureDebut = new(0, 0, 0);  // Midnight
+            TimeSpan heureFin = new(3, 0, 0);    // 3 AM
+
+            // Check if current time in Paris is within the range of 00:00 to 03:00
+            while (actualTimeParis.TimeOfDay >= heureDebut && actualTimeParis.TimeOfDay < heureFin)
             {
                 // Pausing program for 1 hour
-                Thread.Sleep(3600000);
-                actualTime = DateTime.UtcNow;
+                Thread.Sleep(3600000); // 1 hour in milliseconds
+
+                // Update actual time in Paris
+                actualTimeUtc = DateTime.UtcNow;
+                actualTimeParis = TimeZoneInfo.ConvertTimeFromUtc(actualTimeUtc, parisTimeZone);
             }
         }
 

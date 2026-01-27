@@ -31,12 +31,12 @@ namespace GMB.ScannerService.Api.Controller
             List<BusinessAgent> businessList = [];
             List<Task> tasks = [];
             using DbLib db = new();
-            SeleniumDriver driver = new();
+            /*SeleniumDriver driver = new();
             var testResult = await ScannerFunctions.ScannerTest(driver);
             driver.Dispose();
 
             if (!testResult.Success)
-                return GenericResponse.Exception($"XPATH was modified, can't scan anything !");
+                return GenericResponse.Exception($"XPATH was modified, can't scan anything !");*/
 
             switch (request.OperationType)
             {
@@ -70,24 +70,23 @@ namespace GMB.ScannerService.Api.Controller
                     }
                     await Task.WhenAll(tasks);
                     ToolBox.KillAllChromeProcesses();
-                
+
+                    if (!request.UpdateProcessingState)
+                        break;
+                    switch (request.OperationType)
+                    {
+                        case Operation.PROCESSING_STATE:
+                            GetBusinessListRequest businessListRequest = new(request.Entries, request.Processing, request.Brand, request.Category, request.CategoryFamily, request.IsNetwork, request.IsIndependant);
+                            businessList = db.GetBusinessAgentList(businessListRequest);
+                            break;
+                        case Operation.URL_STATE:
+                            businessList = db.GetBusinessAgentListByUrlState(request.UrlState, request.Entries, request.Processing);
+                            break;
+                    }
                 } catch (Exception e)
                 {
                     Log.Error(e, $"An exception occurred while launching scanner.");
                     return GenericResponse.Exception($"An exception occurred while launching scanner. : {e.Message}");
-                }
-
-                if (!request.UpdateProcessingState)
-                    break;
-                switch (request.OperationType)
-                {
-                    case Operation.PROCESSING_STATE:
-                        GetBusinessListRequest businessListRequest = new(request.Entries, request.Processing, request.Brand, request.Category, request.CategoryFamily, request.IsNetwork, request.IsIndependant);
-                        businessList = db.GetBusinessAgentList(businessListRequest);
-                        break;
-                    case Operation.URL_STATE:
-                        businessList = db.GetBusinessAgentListByUrlState(request.UrlState, request.Entries, request.Processing);
-                        break;
                 }
             }
             return new GenericResponse(1, "Finish");
