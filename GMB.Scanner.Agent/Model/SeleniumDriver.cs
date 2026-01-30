@@ -26,23 +26,30 @@ namespace GMB.Sdk.Core.Types.Models
             {
                 Id = Guid.NewGuid().ToString("N");
                 ChromeOptions chromeOptions = new();
-                chromeOptions.AddArguments("--headless=new");
-                chromeOptions.AddArguments("--lang=fr");
-                chromeOptions.AddArguments("--window-size=1920,1200");
-                chromeOptions.AddArguments("--disable-gpu");
-                chromeOptions.AddArguments("--no-sandbox");
-                chromeOptions.AddArguments("--ignore-certificate-errors");
-                chromeOptions.AddArguments("--disable-extensions");
-                chromeOptions.AddArguments("--disable-dev-shm-usage");
-                chromeOptions.AddExcludedArgument("enable-automation");
-                chromeOptions.AddAdditionalOption("useAutomationExtension", false);
-                chromeOptions.AddArgument("--disable-blink-features=AutomationControlled");
-                chromeOptions.AddArgument("--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
-                                    "AppleWebKit/537.36 (KHTML, like Gecko) " +
-                                    "Chrome/127.0.0.1 Safari/537.36");
-                chromeOptions.AddArgument("scriptpid-" + Id);
+                chromeOptions.AddArguments(
+                    "--headless=new",
+                    "--lang=fr",
+                    "--window-size=1920,1200",
 
-                new DriverManager().SetUpDriver(new ChromeConfig());
+                    // Performance
+                    "--disable-background-networking",
+                    "--disable-background-timer-throttling",
+                    "--disable-renderer-backgrounding",
+                    "--disable-backgrounding-occluded-windows",
+                    "--disable-features=Translate,BackForwardCache",
+                    "--disable-sync",
+                    "--metrics-recording-only",
+                    "--mute-audio",
+                    "--no-first-run",
+                    "--no-default-browser-check",
+                    "--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                                    "AppleWebKit/537.36 (KHTML, like Gecko) " +
+                                    "Chrome/127.0.0.1 Safari/537.36",
+
+                    // Required by you
+                    "scriptpid-" + Id
+                );
+
                 WebDriver = new ChromeDriver(chromeOptions);
                 var js = (IJavaScriptExecutor)WebDriver;
                 js.ExecuteScript("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})");
