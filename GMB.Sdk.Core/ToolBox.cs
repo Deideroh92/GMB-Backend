@@ -63,7 +63,7 @@ namespace GMB.Sdk.Core
             {
                 Port = smtpPort,
                 UseDefaultCredentials = false,
-                Credentials = new NetworkCredential(fromEmail, "iigz pyyn ngsp wjqq"), // Replace with your email password
+                Credentials = new NetworkCredential(fromEmail, "ywex irtb kwre kwwu"), // Replace with your email password
                 EnableSsl = true // Enable SSL if your SMTP server requires it
             };
 
