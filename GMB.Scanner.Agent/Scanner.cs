@@ -272,7 +272,7 @@ namespace GMB.Scanner.Agent
 
                             if (request.CheckReviewStatus)
                             {
-                                reviewList = db.GetBusinessReviewsListWithDate(profile.IdEtab, request.DateLimit);
+                                reviewList = db.GetBusinessReviewsListWithDate(profile.IdEtab, request.DateLimit?.AddMonths(2));
 
                                 foreach (DbBusinessReview review in reviewList)
                                 {
