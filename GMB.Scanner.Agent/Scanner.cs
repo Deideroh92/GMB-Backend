@@ -31,7 +31,8 @@ namespace GMB.Scanner.Agent
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
             .CreateLogger();
 
-            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Sdk.Core\Files\CustomTheme.txt";
+            string basePath = AppContext.BaseDirectory; // ou AppDomain.CurrentDomain.BaseDirectory
+            string filePath = Path.Combine(basePath, "Files", "CustomTheme.txt");
 
             List<string> idEtabForTheme = [];
 
