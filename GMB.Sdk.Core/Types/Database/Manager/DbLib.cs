@@ -1536,7 +1536,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_GOOGLE_DATE_UPDATE, REVIEW_DATE, REVIEW_DATE_UPDATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewGoogleDateUpdate, @ReviewDate, @ReviewDateUpdate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId, @ReviewReplyGoogleDate, @ReviewReplyDate, @VisitDate)";
+                string insertCommand = "INSERT INTO BUSINESS_REVIEWS (ID_ETAB, REVIEW_ID, USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_GOOGLE_DATE, REVIEW_GOOGLE_DATE_UPDATE, REVIEW_DATE, REVIEW_DATE_UPDATE, REVIEW_ANSWERED, DATE_UPDATE, PROCESSING, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE, LAST_SEEN_AT) VALUES (@IdEtab, @IdReview, @UserName, @UserStatus, @Score, @UserNbReviews, @Review, @ReviewGoogleDate, @ReviewGoogleDateUpdate, @ReviewDate, @ReviewDateUpdate, @ReviewReplied, @DateUpdate, @Processing, @GoogleReviewId, @ReviewReplyGoogleDate, @ReviewReplyDate, @VisitDate, @LastSeenAt)";
                 using SqlCommand cmd = new(insertCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", businessReview.IdEtab);
                 cmd.Parameters.AddWithValue("@IdReview", businessReview.IdReview);
@@ -1556,6 +1556,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 cmd.Parameters.AddWithValue("@ReviewReplyGoogleDate", GetValueOrDefault(businessReview.ReviewReplyGoogleDate));
                 cmd.Parameters.AddWithValue("@ReviewReplyDate", GetValueOrDefault(businessReview.ReviewReplyDate));
                 cmd.Parameters.AddWithValue("@VisitDate", GetValueOrDefault(businessReview.VisitDate));
+                cmd.Parameters.AddWithValue("@LastSeenAt", GetValueOrDefault(businessReview.LastSeenAt));
                 cmd.ExecuteNonQuery();
             } catch (Exception e)
             {
@@ -1606,7 +1607,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE, REVIEW_DATE, REVIEW_GOOGLE_DATE, ID_ETAB, DELETED FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, VISIT_DATE, REVIEW_DATE, REVIEW_GOOGLE_DATE, ID_ETAB, DELETED, LAST_SEEN_AT FROM vBUSINESS_REVIEWS WHERE REVIEW_ID = @IdReview";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdReview", idReview);
                 using SqlDataReader reader = cmd.ExecuteReader();
@@ -1631,7 +1632,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.IsDBNull(9) ? null : reader.GetString(9),
                         null,
                         null,
-                        !reader.IsDBNull(13) && reader.GetBoolean(13));  
+                        !reader.IsDBNull(13) && reader.GetBoolean(13),
+                        reader.IsDBNull(14) ? null : reader.GetDateTime(14));
 
                 } else
                     return null;
@@ -1650,7 +1652,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED, LAST_SEEN_AT FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.CommandTimeout = 10000;
@@ -1677,7 +1679,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.IsDBNull(10) ? null : reader.GetString(10),
                         null,
                         reader.IsDBNull(14) ? null : reader.GetDateTime(14),
-                        !reader.IsDBNull(15) && reader.GetBoolean(15)
+                        !reader.IsDBNull(15) && reader.GetBoolean(15),
+                        reader.IsDBNull(16) ? null : reader.GetDateTime(16)
                         ));
                 }
                 return brList;
@@ -1691,7 +1694,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED, ID_ETAB FROM vBUSINESS_REVIEWS WHERE PROCESSING = @Processing";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED, ID_ETAB, LAST_SEEN_AT FROM vBUSINESS_REVIEWS WHERE PROCESSING = @Processing";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@Processing", processing);
                 cmd.CommandTimeout = 10000;
@@ -1718,7 +1721,8 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.IsDBNull(10) ? null : reader.GetString(10),
                         null,
                         reader.IsDBNull(14) ? null : reader.GetDateTime(14),
-                        !reader.IsDBNull(15) && reader.GetBoolean(15)
+                        !reader.IsDBNull(15) && reader.GetBoolean(15),
+                        reader.IsDBNull(16) ? null : reader.GetDateTime(16)
                         ));
                 }
                 return brList;
@@ -1737,7 +1741,7 @@ namespace GMB.Sdk.Core.Types.Database.Manager
         {
             try
             {
-                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_DATE >= @DateLimit";
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED, LAST_SEEN_AT FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_DATE >= @DateLimit";
                 using SqlCommand cmd = new(selectCommand, Connection);
                 cmd.Parameters.AddWithValue("@IdEtab", idEtab);
                 cmd.Parameters.AddWithValue("@DateLimit", dateLimit);
@@ -1765,7 +1769,57 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                         reader.IsDBNull(10) ? null : reader.GetString(10),
                         null,
                         reader.IsDBNull(14) ? null : reader.GetDateTime(14),
-                        !reader.IsDBNull(15) && reader.GetBoolean(15)
+                        !reader.IsDBNull(15) && reader.GetBoolean(15),
+                        reader.IsDBNull(16) ? null : reader.GetDateTime(16)
+                        ));
+                }
+                return brList;
+            } catch (Exception e)
+            {
+                throw new Exception($"Error getting BR list with id etab = [{idEtab}]", e);
+            }
+        }
+
+        /// <summary>
+        /// Get list of Business Reviews.
+        /// </summary>
+        /// <param name="idEtab"></param>
+        /// <returns>Business Reviews list or Null (doesn't exist)</returns>
+        public List<DbBusinessReview> GetBusinessReviewsNotSeenSinceInPeriod(string idEtab, DateTime? dateLimit, DateTime? scanStart)
+        {
+            try
+            {
+                string selectCommand = "SELECT USER_NAME, USER_STATUS, SCORE, USER_NB_REVIEWS, REVIEW, REVIEW_ANSWERED, GOOGLE_REVIEW_ID, REVIEW_ANSWERED_GOOGLE_DATE, REVIEW_ANSWERED_DATE, REVIEW_ID, VISIT_DATE, REVIEW_GOOGLE_DATE, REVIEW_DATE, DATE_UPDATE, DATE_INSERT, DELETED, LAST_SEEN_AT FROM vBUSINESS_REVIEWS WHERE ID_ETAB = @IdEtab AND REVIEW_DATE >= @DateLimit AND LAST_SEEN_AT < @ScanStart AND DELETED = '0'";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdEtab", idEtab);
+                cmd.Parameters.AddWithValue("@DateLimit", dateLimit);
+                cmd.Parameters.AddWithValue("@ScanStart", scanStart);
+                cmd.CommandTimeout = 10000;
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                List<DbBusinessReview> brList = [];
+
+                while (reader.Read())
+                {
+                    brList.Add(new DbBusinessReview(idEtab,
+                        reader.GetString(9),
+                        reader.GetString(6),
+                        new GoogleUser(reader.IsDBNull(0) ? null : reader.GetString(0),
+                            reader.IsDBNull(3) ? null : reader.GetInt32(3),
+                            !reader.IsDBNull(1) && reader.GetBoolean(1)),
+                        reader.GetInt32(2),
+                        reader.IsDBNull(4) ? null : reader.GetString(4),
+                        reader.IsDBNull(11) ? null : reader.GetString(11),
+                        reader.IsDBNull(12) ? null : reader.GetDateTime(12),
+                        reader.GetBoolean(5),
+                        reader.IsDBNull(13) ? null : reader.GetDateTime(13),
+                        reader.IsDBNull(8) ? null : reader.GetDateTime(8),
+                        reader.IsDBNull(7) ? null : reader.GetString(7),
+                        reader.IsDBNull(10) ? null : reader.GetString(10),
+                        null,
+                        reader.IsDBNull(14) ? null : reader.GetDateTime(14),
+                        !reader.IsDBNull(15) && reader.GetBoolean(15),
+                        reader.IsDBNull(16) ? null : reader.GetDateTime(16)
                         ));
                 }
                 return brList;
@@ -1922,6 +1976,25 @@ namespace GMB.Sdk.Core.Types.Database.Manager
                 throw new Exception($"Error updating BR with id review = [{reviewId}]", e);
             }
         }
+        /// <summary>       
+        /// Update Business Review Last Seen.     
+        /// </summary>     
+        /// <param name="reviewId"></param>      
+        /// <param name="lastSeenAt"></param>
+        public void UpdateBusinessReviewLastSeen(string reviewId, DateTime? lastSeenAt)
+        {
+            try
+            {
+                string selectCommand = "UPDATE BUSINESS_REVIEWS SET LAST_SEEN_AT = @LastSeenAt WHERE REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@LastSeenAt", GetValueOrDefault(lastSeenAt));
+                cmd.Parameters.AddWithValue("@IdReview", GetValueOrDefault(reviewId));
+                cmd.ExecuteNonQuery();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error updating BR with id review = [{reviewId}]", e);
+            }
+        }
         /// <summary>
         /// Update Business Review.
         /// </summary>
@@ -2038,6 +2111,26 @@ namespace GMB.Sdk.Core.Types.Database.Manager
             } catch (Exception e)
             {
                 throw new Exception($"Error while checking if BR exists with id etab = [{idEtab}] and id review = [{idReview}]", e);
+            }
+        }
+        /// <summary>
+        /// Check if a review theme match exist on a Review.
+        /// </summary>
+        /// <param name="idReview"></param>
+        /// <returns>True (exist) or False (doesn't exist)</returns>
+        public bool CheckBusinessReviewThemeMatchExist(string idReview)
+        {
+            try
+            {
+                string selectCommand = "SELECT 1 FROM REVIEW_THEME_MATCH WHERE REVIEW_ID = @IdReview";
+                using SqlCommand cmd = new(selectCommand, Connection);
+                cmd.Parameters.AddWithValue("@IdReview", idReview);
+                using SqlDataReader reader = cmd.ExecuteReader();
+
+                return reader.Read();
+            } catch (Exception e)
+            {
+                throw new Exception($"Error while checking if BR exists with id review = [{idReview}]", e);
             }
         }
         #endregion

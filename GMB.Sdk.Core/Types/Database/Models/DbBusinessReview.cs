@@ -17,7 +17,7 @@ namespace GMB.Sdk.Core.Types.Database.Models
     /// <param name="dateUpdate"></param>
     /// <param name="reviewReply"></param>
     /// <param name="visitDate"></param>
-    public class DbBusinessReview(string idEtab, string idReview, string googleReviewId, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DateTime? reviewReplyDate, string? reviewReplyGoogleDate, string? visitDate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null, bool deleted = false)
+    public class DbBusinessReview(string idEtab, string idReview, string googleReviewId, GoogleUser user, int score, string? reviewText, string? reviewGoogleDate, DateTime? reviewDate, bool reviewReplied, DateTime? dateUpdate, DateTime? reviewReplyDate, string? reviewReplyGoogleDate, string? visitDate, DbBusinessReviewReply? reviewReply = null, DateTime? dateInsert = null, bool deleted = false, DateTime? lastSeenAt = null)
     {
         public long Id { get; set; }
         public string IdEtab { get; set; } = idEtab;
@@ -36,6 +36,8 @@ namespace GMB.Sdk.Core.Types.Database.Models
         public DbBusinessReviewReply? ReviewReply { get; set; } = reviewReply;
         public string? VisitDate { get; set; } = visitDate;
         public bool? Deleted { get; set; } = deleted;
+
+        public DateTime? LastSeenAt { get; set; } = lastSeenAt;
 
         #region Local
 

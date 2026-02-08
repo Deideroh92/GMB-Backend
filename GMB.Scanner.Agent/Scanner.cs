@@ -15,6 +15,7 @@ using System.Linq;
 using iText.Layout.Element;
 using System.Collections.ObjectModel;
 using System.Linq.Expressions;
+using OpenQA.Selenium.DevTools.V118.Network;
 
 namespace GMB.Scanner.Agent
 {
@@ -30,12 +31,28 @@ namespace GMB.Scanner.Agent
             .WriteTo.File(logsPath, rollingInterval: RollingInterval.Day, outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss} {Message:lj}{NewLine}{Exception}", retainedFileCountLimit: 7, fileSizeLimitBytes: 5242880)
             .CreateLogger();
 
+            string filePath = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.Parent.FullName + @"\GMB.Sdk.Core\Files\CustomTheme.txt";
+
+            List<string> idEtabForTheme = [];
+
+            using (StreamReader reader = new(filePath))
+            {
+                while (!reader.EndOfStream)
+                {
+                    string? line = reader.ReadLine();
+                    if (line != null)
+                        idEtabForTheme.Add(line);
+                }
+            }
+
             using DbLib db = new();
             SeleniumDriver driver = new();
 
             int count = 0;
 
             DateTime time = DateTime.UtcNow;
+
+            Dictionary<string, List<int>> themes = db.GetKeywordThemeMap();
 
             foreach (BusinessAgent businessAgent in request.BusinessList)
             {
@@ -243,17 +260,35 @@ namespace GMB.Scanner.Agent
 
                                         if (dbBusinessReview == null)
                                         {
+                                            review.LastSeenAt = time;
                                             db.CreateBusinessReview(review);
                                             continue;
+                                        } else
+                                        {
+                                            if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
+                                                db.UpdateBusinessReviewReply(review);
+
+                                            if (!review.Equals(dbBusinessReview))
+                                            {
+                                                db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || (dbBusinessReview.ReviewText != review.ReviewText));
+                                            }
+
+                                            db.UpdateBusinessReviewLastSeen(review.IdReview, time);
+
+                                            if (dbBusinessReview.Deleted == true)
+                                            {
+                                                db.UpdateBusinessReviewDeleted(review.IdReview, false);
+                                            }
                                         }
 
-                                        if ((dbBusinessReview.ReviewReplyGoogleDate == null || dbBusinessReview.ReviewReplyDate == null) && review.ReviewReplied)
-                                            db.UpdateBusinessReviewReply(review);
 
-                                        if (!review.Equals(dbBusinessReview))
+                                        if (!string.IsNullOrWhiteSpace(review.ReviewText) && !idEtabForTheme.Contains(business?.IdEtab ?? profile.IdEtab))
                                         {
-                                            db.UpdateBusinessReview(review, (dbBusinessReview.Score != review.Score) || (dbBusinessReview.ReviewText != review.ReviewText));
-                                            continue;
+                                            HashSet<int> themesFound =
+                                                ToolBox.DetectThemes(review.ReviewText, themes);
+
+                                            if (themesFound.Count > 0 && !db.CheckBusinessReviewThemeMatchExist(review.IdReview))
+                                                db.InsertThemeMatches(review.IdReview, themesFound);
                                         }
                                     }
                                     catch (Exception e)
@@ -270,16 +305,21 @@ namespace GMB.Scanner.Agent
                                 }
                             }
 
-                            if (request.CheckReviewStatus)
+                            if (request.CheckReviewStatus && request.DateLimit.HasValue)
                             {
-                                reviewList = db.GetBusinessReviewsListWithDate(profile.IdEtab, request.DateLimit?.AddMonths(2));
+                                // DateLimit = "il y a 2 mois" dans ton cas mensuel
+                                DateTime dateLimit = request.DateLimit.Value;
 
-                                foreach (DbBusinessReview review in reviewList)
+                                // On récupère tous les avis du business dans la période (>= dateLimit)
+                                // qui n'ont PAS été vus pendant ce run (LastSeenAt < scanStart)
+                                List<DbBusinessReview> deletedCandidates =
+                                    db.GetBusinessReviewsNotSeenSinceInPeriod(profile.IdEtab, dateLimit, time);
+
+                                foreach (DbBusinessReview review in deletedCandidates)
                                 {
-                                    if (reviews.Find((x) => x.IdReview == review.IdReview) == null)
-                                        db.UpdateBusinessReviewDeleted(review.IdReview, true);
+                                    db.UpdateBusinessReviewDeleted(review.IdReview, true);
                                 }
-                            } 
+                            }
 
                         } catch (Exception e)
                         {
