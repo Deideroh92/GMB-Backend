@@ -282,7 +282,7 @@ namespace GMB.Scanner.Agent
                                         }
 
 
-                                        if (!string.IsNullOrWhiteSpace(review.ReviewText) && !idEtabForTheme.Contains(business?.IdEtab ?? profile.IdEtab))
+                                        if (!string.IsNullOrWhiteSpace(review.ReviewText) && idEtabForTheme.Contains(business?.IdEtab ?? profile.IdEtab))
                                         {
                                             HashSet<int> themesFound =
                                                 ToolBox.DetectThemes(review.ReviewText, themes);
