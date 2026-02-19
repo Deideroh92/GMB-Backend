@@ -28,7 +28,7 @@ namespace GMB.Sdk.Core.Types.Models
                 ChromeOptions chromeOptions = new();
 
                 chromeOptions.AddArguments(
-                    //"--headless=new",
+                    "--headless=new",
                     "--lang=fr",
                     "--accept-lang=fr-FR,fr",
                     "--window-size=1920,1200",
