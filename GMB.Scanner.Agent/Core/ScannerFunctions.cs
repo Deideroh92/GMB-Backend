@@ -45,6 +45,9 @@ namespace GMB.Scanner.Agent.Core
             BusinessStatus status = BusinessStatus.OPERATIONAL;
 
             driver.GetToPage(request.Url);
+            Thread.Sleep(3000);
+            string currentUrl = driver.WebDriver.Url + "&hl=fr";
+            driver.GetToPage(currentUrl);
 
             WebDriverWait wait = new(driver.WebDriver, TimeSpan.FromSeconds(10));
 
@@ -146,7 +149,7 @@ namespace GMB.Scanner.Agent.Core
 
                 if (business == null || !dbBusinessProfile.AdressEquals(business) || !business.Equals(dbBusinessProfile) || business.Country == null)
                 {
-                    #region PlusCode
+                    /*#region PlusCode
                     if (getPlusCode)
                     {
                         string? plusCode = ToolBox.FindElementSafe(driver.WebDriver, XPathProfile.plusCode)?.GetAttribute("aria-label")?.Replace("Plus\u00A0code:", "").Trim();
@@ -154,7 +157,7 @@ namespace GMB.Scanner.Agent.Core
                         if (plusCode != null)
                             (dbBusinessProfile.PlusCode, dbBusinessProfile.Geoloc, dbBusinessProfile.Country) = GetCoordinatesFromPlusCode(driver, plusCode);
                     }
-                    #endregion
+                    #endregion*/
 
                     #region Address details
                     if (dbBusinessProfile.GoogleAddress != null)

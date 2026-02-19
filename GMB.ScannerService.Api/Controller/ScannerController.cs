@@ -53,7 +53,7 @@ namespace GMB.ScannerService.Api.Controller
             {
                 try
                 {
-                    int nbThreads = 5;
+                    int nbThreads = 3;
 
                     if (businessList.Count < 10)
                         nbThreads = 1;

@@ -55,6 +55,8 @@ namespace GMB.Scanner.Agent
 
             Dictionary<string, List<int>> themes = db.GetKeywordThemeMap();
 
+           
+
             foreach (BusinessAgent businessAgent in request.BusinessList)
             {
                 try
@@ -118,18 +120,21 @@ namespace GMB.Scanner.Agent
                     if (business == null)
                         db.CreateBusinessProfile(profile);
 
-                    if (business != null && !profile.Equals(business))
+                    /*if (business != null && !profile.Equals(business))
                     {
                         //exception PAUL
                         if (business.GoogleAddress == null || ((business.GoogleAddress != profile.GoogleAddress) && !business.GoogleAddress.Contains("99999")))
                             db.UpdateBusinessProfile(profile);
                         else
                             db.UpdateBusinessProfileWithoutAddress(profile);
-                    }
+                    }*/
 
                     // Insert Business Score if have one.
                     if (score?.Score != null)
                         db.CreateBusinessScore(score);
+
+                    if (score?.Score == null)
+                        continue;
 
                     if (request.GetPhotos)
                     {
@@ -248,7 +253,6 @@ namespace GMB.Scanner.Agent
                     {
                         try
                         {
-                            driver.GetToPage(BPRequest.Url);
                             List<DbBusinessReview>? reviews = ScannerFunctions.GetReviews(business?.IdEtab ?? profile.IdEtab, request.DateLimit, driver);
 
                             if (reviews != null)
