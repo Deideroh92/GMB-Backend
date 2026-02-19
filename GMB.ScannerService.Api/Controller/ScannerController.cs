@@ -53,20 +53,24 @@ namespace GMB.ScannerService.Api.Controller
             {
                 try
                 {
-                    int nbThreads = 8;
+                    int nbThreads = 5;
 
                     if (businessList.Count < 10)
                         nbThreads = 1;
+
+                    int count = 1;
 
                     foreach (var chunk in businessList.Chunk(businessList.Count / nbThreads))
                     {
                         Task newThread = Task.Run(async () =>
                         {
-                            ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState, request.CheckDeletedStatus, request.CheckPhotos);
+                            ScannerBusinessParameters scannerRequest = new(request.OperationType, request.GetReviews, new List<BusinessAgent>(chunk), request.ReviewsDate, request.UpdateProcessingState, request.CheckDeletedStatus, request.CheckPhotos, count);
                             await Scanner.Agent.Scanner.BusinessScanner(scannerRequest).ConfigureAwait(false);
                         });
+                        
                         tasks.Add(newThread);
                         Thread.Sleep(15000);
+                        count++;
                     }
                     await Task.WhenAll(tasks);
                     ToolBox.KillAllChromeProcesses();

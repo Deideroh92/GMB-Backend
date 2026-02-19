@@ -55,7 +55,7 @@ namespace GMB.Sdk.Core.Types.ScannerService
     /// <param name="dateLimit"></param>
     /// <param name="updateProcessingState"></param>
     /// <param name="getPhotos"></param>
-    public class ScannerBusinessParameters(Operation operation, bool getReviews, List<BusinessAgent>? businessList, DateTime? dateLimit = null, bool updateProcessingState = true, bool checkReviewStatus = false, bool getPhotos = false)
+    public class ScannerBusinessParameters(Operation operation, bool getReviews, List<BusinessAgent>? businessList, DateTime? dateLimit = null, bool updateProcessingState = true, bool checkReviewStatus = false, bool getPhotos = false, int? number = null)
     {
         public List<BusinessAgent>? BusinessList { get; set; } = businessList;
         public bool GetReviews { get; set; } = getReviews;
@@ -64,6 +64,7 @@ namespace GMB.Sdk.Core.Types.ScannerService
         public Operation Operation { get; set; } = operation;
         public bool CheckReviewStatus { get; set; } = checkReviewStatus;
         public bool GetPhotos { get; set; } = getPhotos;
+        public int? Number { get; set; } = number;
     }
     /// <summary>
     /// Constructor.

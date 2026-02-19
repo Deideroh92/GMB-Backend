@@ -47,7 +47,7 @@ namespace GMB.Scanner.Agent
             }
 
             using DbLib db = new();
-            SeleniumDriver driver = new();
+            SeleniumDriver driver = new(request.Number);
 
             int count = 0;
 
@@ -73,7 +73,7 @@ namespace GMB.Scanner.Agent
                     if (!driver.IsDriverAlive() || count == 300)
                     {
                         driver.Dispose();
-                        driver = new();
+                        driver = new(request.Number);
                         count = 1;
                     }
 
@@ -301,7 +301,7 @@ namespace GMB.Scanner.Agent
                                 if (reviews.Count > 300)
                                 {
                                     driver.Dispose();
-                                    driver = new();
+                                    driver = new(request.Number);
                                     count = 1;
                                 }
                             }
@@ -326,7 +326,7 @@ namespace GMB.Scanner.Agent
                         {
                             Log.Error(e, $"An exception occurred when getting reviews from id etab = [{businessAgent.IdEtab}], guid = [{businessAgent.Guid}], url = [{businessAgent.Url}] : {e.Message}");
                             driver.Dispose();
-                            driver = new();
+                            driver = new(request.Number);
                         }
                     }
 

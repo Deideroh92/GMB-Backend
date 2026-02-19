@@ -20,15 +20,17 @@ namespace GMB.Sdk.Core.Types.Models
         /// <summary>
         /// Create an instance of Selenium Driver.
         /// </summary>
-        public SeleniumDriver()
+        public SeleniumDriver(int? number = null)
         {
             try
             {
                 Id = Guid.NewGuid().ToString("N");
                 ChromeOptions chromeOptions = new();
+
                 chromeOptions.AddArguments(
-                    "--headless=new",
+                    //"--headless=new",
                     "--lang=fr",
+                    "--accept-lang=fr-FR,fr",
                     "--window-size=1920,1200",
 
                     // Performance
@@ -49,6 +51,11 @@ namespace GMB.Sdk.Core.Types.Models
                     // Required by you
                     "scriptpid-" + Id
                 );
+
+                if (number != null)
+                {
+                    chromeOptions.AddArgument(@"--user-data-dir=C:\ChromeProfiles\Profile" + number);
+                }
 
                 WebDriver = new ChromeDriver(chromeOptions);
                 var js = (IJavaScriptExecutor)WebDriver;
